@@ -20,6 +20,23 @@ app = Flask(__name__, static_folder='.')
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 CORS(app, supports_credentials=True)  # Enable CORS with credentials for sessions
 
+from datetime import timedelta
+
+# Make sessions permanent so they persist
+app.permanent_session_lifetime = timedelta(days=1)  # Sessions last 1 day
+
+# Configure session cookie settings for persistence
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # This helps with cross-tab persistence
+
+# Before each request, mark session as permanent if it has any data
+@app.before_request
+def make_session_permanent():
+    if 'user_email' in session or 'guest' in session:
+        session.permanent = True
+
 @app.route('/')
 def index():
     """Serve the main matching page (requires visitor login)."""
@@ -80,14 +97,15 @@ def signup():
             return jsonify({"error": "Email, password, and name are required"}), 400
         
         if create_user(email, password, name):
-            # Auto-login after signup
+    # Auto-login after signup
             session['user_email'] = email
+            session.permanent = True  # Make session persist for 1 day
             user = get_user(email)
             return jsonify({
-                "success": True,
-                "message": "Account created successfully",
-                "user": user
-            }), 200
+            "success": True,
+            "message": "Account created successfully",
+            "user": user
+        }), 200
         else:
             return jsonify({"error": "Email already exists"}), 400
             
@@ -116,31 +134,7 @@ def login():
         
         if user:
             session['user_email'] = email
-            return jsonify({
-                "success": True,
-                "message": "Login successful",
-                "user": user
-            }), 200
-        else:
-            return jsonify({"error": "Invalid email or password"}), 401
-            
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
-
-@app.route('/api/auth/logout', methods=['POST'])
-def logout():
-    """Logout the current user."""
-    session.clear()
-    return jsonify({"success": True, "message": "Logged out successfully"}), 200
-
-@app.route('/api/auth/guest', methods=['POST'])
-def guest_login():
-    """Allow user to continue as a guest."""
-    session['guest'] = True
-    session['user_type'] = 'visitor'  # Guests are treated as visitors
+            session.permanent = True
     return jsonify({
         "success": True,
         "message": "Continuing as guest",
@@ -736,11 +730,14 @@ def get_keyword_based_recommendations(user_interests: str, events: list, max_rec
 def get_event_recommendations():
     """
     Get AI-powered event recommendations based on user interests.
-    Uses Nova Act to orchestrate Dedalus queries and Claude AI filtering.
+    Uses Nova Act to orchestrate AI filtering with events loaded directly from file.
     """
     try:
         from nova_act import NovaAct
+        from dedalus_events import load_events
         import asyncio
+        import os
+        import json
         
         data = request.get_json()
         if not data:
@@ -780,7 +777,7 @@ def get_event_recommendations():
         if date_to:
             events = [e for e in events if e.get("date", "") <= date_to]
         if free_only:
-            events = [e for e in events if (e.get("cost", 0) == 0 or e.get("cost", 0) == 0.0 or e.get("cost") is None or e.get("cost") == "0" or e.get("cost") == "0.0")]
+            events = [e for e in events if e.get("cost", 0) == 0.0]
         
         # Use Nova Act for AI recommendations
         nova_act = NovaAct()
@@ -819,7 +816,7 @@ def get_event_recommendations():
         }), 500
 
 @app.route('/api/events/<int:event_id>', methods=['GET'])
-def get_event_by_id(event_id):
+def get_event(event_id):
     """Get a specific event by ID from Dedalus."""
     try:
         from nova_act import NovaAct

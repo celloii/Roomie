@@ -26,7 +26,8 @@ async def run_matching_agent(visitor_query: str, date_needed: str) -> str:
     if not DEDALUS_AVAILABLE:
         # Fallback: simple matching without AI
         import json
-        hosts = find_available_hosts(visitor_date_range=[date_needed])
+        hosts_json = find_available_hosts(visitor_date_range=date_needed)
+        hosts = json.loads(hosts_json) if isinstance(hosts_json, str) else hosts_json
         # Simple scoring based on keyword matching
         matches = []
         query_lower = visitor_query.lower()
