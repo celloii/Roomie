@@ -776,7 +776,7 @@ def get_combined_match():
 
 if __name__ == '__main__':
     import os
-    port = int(os.environ.get('PORT', 5001))  # Using 5001 to avoid AirPlay conflict on 5000
+    port = int(os.environ.get('PORT', 5000))
     print("🚀 Starting Dorm Matching API Server...")
     print(f"📡 API available at: http://localhost:{port}")
     print(f"🌐 Frontend: http://localhost:{port}")

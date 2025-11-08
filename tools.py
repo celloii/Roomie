@@ -184,9 +184,13 @@ def delete_listing(listing_id: int) -> bool:
 def find_available_hosts(visitor_date_range: str, min_capacity: int = 1) -> str:
     """
     Queries the listings database to find available hosts based on date and capacity.
+    Supports both single dates and date ranges (comma-separated or dash-separated).
     
     Args:
-        visitor_date_range: The dates the visitor needs accommodation (e.g., '2025-11-08').
+        visitor_date_range: The dates the visitor needs accommodation. Can be:
+            - Single date: '2025-11-08'
+            - Date range: '2025-11-08,2025-11-10' or '2025-11-08-2025-11-10'
+            - Comma-separated dates: '2025-11-08,2025-11-09,2025-11-10'
         min_capacity: The minimum capacity required.
 
     Returns:
@@ -194,9 +198,38 @@ def find_available_hosts(visitor_date_range: str, min_capacity: int = 1) -> str:
     """
     listings = load_listings()
     
-    available_hosts = [
-        host for host in listings 
-        if visitor_date_range in host.get("available_dates", []) and host.get("capacity", 0) >= min_capacity
-    ]
+    # Parse date range - support multiple formats
+    needed_dates = []
+    if ',' in visitor_date_range:
+        # Comma-separated dates
+        needed_dates = [d.strip() for d in visitor_date_range.split(',')]
+    elif '-' in visitor_date_range and len(visitor_date_range.split('-')) == 3:
+        # Check if it's a date range (start-end) or just a date with dashes
+        parts = visitor_date_range.split('-')
+        if len(parts) == 5:  # YYYY-MM-DD-YYYY-MM-DD format
+            start_date = f"{parts[0]}-{parts[1]}-{parts[2]}"
+            end_date = f"{parts[3]}-{parts[4]}-{parts[5] if len(parts) > 5 else parts[4]}"
+            # Generate date range
+            from datetime import datetime, timedelta
+            start = datetime.strptime(start_date, '%Y-%m-%d')
+            end = datetime.strptime(end_date, '%Y-%m-%d')
+            current = start
+            while current <= end:
+                needed_dates.append(current.strftime('%Y-%m-%d'))
+                current += timedelta(days=1)
+        else:
+            # Single date
+            needed_dates = [visitor_date_range]
+    else:
+        # Single date
+        needed_dates = [visitor_date_range]
+    
+    # Find hosts that have ALL needed dates available
+    available_hosts = []
+    for host in listings:
+        host_dates = set(host.get("available_dates", []))
+        # Check if host has all needed dates available
+        if all(date in host_dates for date in needed_dates) and host.get("capacity", 0) >= min_capacity:
+            available_hosts.append(host)
     
     return json.dumps(available_hosts)

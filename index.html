@@ -299,12 +299,25 @@
                 
                 <div class="form-group">
                     <label for="dateNeeded">When do you need accommodation?</label>
-                    <input 
-                        type="date" 
-                        id="dateNeeded" 
-                        name="date_needed" 
-                        required
-                    >
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input 
+                            type="date" 
+                            id="dateNeeded" 
+                            name="date_needed" 
+                            required
+                            style="flex: 1;"
+                        >
+                        <span style="color: #666;">to</span>
+                        <input 
+                            type="date" 
+                            id="dateNeededEnd" 
+                            name="date_needed_end" 
+                            style="flex: 1;"
+                        >
+                    </div>
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Leave end date empty for single day, or select both for a date range
+                    </small>
                 </div>
                 
                 <button type="submit" class="submit-btn" id="submitBtn">
@@ -406,13 +419,31 @@
             submitBtn.disabled = true;
             matchesContainer.innerHTML = '';
             
+            const startDate = document.getElementById('dateNeeded').value;
+            const endDate = document.getElementById('dateNeededEnd').value;
+            
+            // Build date range string
+            let dateNeeded = startDate;
+            if (endDate && endDate !== startDate) {
+                // Create comma-separated date range
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const dates = [];
+                const current = new Date(start);
+                while (current <= end) {
+                    dates.push(current.toISOString().split('T')[0]);
+                    current.setDate(current.getDate() + 1);
+                }
+                dateNeeded = dates.join(',');
+            }
+            
             const formData = {
                 visitor_query: document.getElementById('visitorQuery').value,
-                date_needed: document.getElementById('dateNeeded').value
+                date_needed: dateNeeded
             };
             
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/match', {
+                const response = await fetch('/api/match', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
