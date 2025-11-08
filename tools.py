@@ -170,6 +170,17 @@ def get_average_rating(listing_id: int) -> float:
     total_rating = sum(review.get("rating", 0) for review in reviews)
     return round(total_rating / len(reviews), 1)
 
+def delete_listing(listing_id: int) -> bool:
+    """Delete a listing by ID."""
+    listings = load_listings()
+    original_length = len(listings)
+    listings = [listing for listing in listings if listing.get("id") != listing_id]
+    
+    if len(listings) < original_length:
+        save_listings(listings)
+        return True
+    return False
+
 def find_available_hosts(visitor_date_range: str, min_capacity: int = 1) -> str:
     """
     Queries the listings database to find available hosts based on date and capacity.
