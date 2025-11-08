@@ -50,6 +50,11 @@ def dashboard():
     """Serve the unified dashboard page."""
     return send_from_directory('.', 'dashboard.html')
 
+@app.route('/events')
+def events_page():
+    """Serve the events page."""
+    return send_from_directory('.', 'events.html')
+
 
 @app.route('/api/auth/signup', methods=['POST'])
 def signup():
@@ -124,6 +129,17 @@ def logout():
     session.clear()
     return jsonify({"success": True, "message": "Logged out successfully"}), 200
 
+@app.route('/api/auth/guest', methods=['POST'])
+def guest_login():
+    """Allow user to continue as a guest."""
+    session['guest'] = True
+    session['user_type'] = 'visitor'  # Guests are treated as visitors
+    return jsonify({
+        "success": True,
+        "message": "Continuing as guest",
+        "guest": True
+    }), 200
+
 @app.route('/api/auth/check', methods=['GET'])
 def check_auth():
     """Check if user is authenticated."""
@@ -135,22 +151,37 @@ def check_auth():
                 "user": user
             }), 200
     
-    return jsonify({"authenticated": False}), 200
+    if 'guest' in session and session.get('guest'):
+        return jsonify({
+            "authenticated": False,
+            "guest": True
+        }), 200
+    
+    return jsonify({"authenticated": False, "guest": False}), 200
 
 @app.route('/api/match', methods=['POST'])
 def match_visitor():
     """
     API endpoint that uses the existing Dedalus Labs agent to match visitors with hosts.
-    Requires authentication (user can be visitor or both).
+    Allows both authenticated users and guests.
     """
-    # Check authentication
-    if 'user_email' not in session:
-        return jsonify({"error": "Authentication required. Please login."}), 401
+    # Check authentication - allow guests or authenticated users
+    is_guest = session.get('guest', False)
+    is_authenticated = 'user_email' in session
     
-    user = get_user(session['user_email'])
-    if not user or 'visitor' not in user.get('roles', []):
-        # Add visitor role if they don't have it
-        add_role_to_user(session['user_email'], 'visitor')
+    if not is_guest and not is_authenticated:
+        return jsonify({"error": "Authentication required. Please login or continue as guest."}), 401
+    
+    # If authenticated, check/update roles (skip for guests)
+    if is_authenticated:
+        user = get_user(session['user_email'])
+        if user and 'visitor' not in user.get('roles', []):
+            # Add visitor role if they don't have it
+            try:
+                from auth import add_role_to_user
+                add_role_to_user(session['user_email'], 'visitor')
+            except:
+                pass  # If add_role_to_user doesn't exist, continue anyway
     
     try:
         data = request.get_json()
@@ -501,6 +532,124 @@ def uploaded_file(filename):
 def health_check():
     """Health check endpoint."""
     return jsonify({"status": "healthy", "service": "Dorm Matching API"}), 200
+
+# ===== Events API Endpoints (Nova Act Integration) =====
+
+@app.route('/api/events', methods=['GET'])
+def get_events():
+    """
+    Get events using Nova Act orchestration.
+    Queries Dedalus and optionally applies AI filtering.
+    """
+    try:
+        from nova_act import NovaAct
+        import asyncio
+        
+        category = request.args.get('category')
+        date_from = request.args.get('date_from')
+        date_to = request.args.get('date_to')
+        free_only = request.args.get('free_only', 'false').lower() == 'true'
+        tags = request.args.get('tags')
+        
+        nova_act = NovaAct()
+        result = asyncio.run(nova_act.get_filtered_events(
+            category=category,
+            date_from=date_from,
+            date_to=date_to,
+            free_only=free_only,
+            tags=tags,
+            use_ai=False  # Don't use AI for basic listing
+        ))
+        
+        return jsonify({
+            "success": True,
+            "events": result.get("events", []),
+            "total_count": result.get("total_count", 0)
+        }), 200
+        
+    except Exception as e:
+        import traceback
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "details": traceback.format_exc()
+        }), 500
+
+@app.route('/api/events/recommendations', methods=['POST'])
+def get_event_recommendations():
+    """
+    Get AI-powered event recommendations based on user interests.
+    Uses Nova Act to orchestrate Dedalus queries and Claude AI filtering.
+    """
+    try:
+        from nova_act import NovaAct
+        import asyncio
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        user_interests = data.get('interests', '').strip()
+        if not user_interests:
+            return jsonify({"error": "interests field is required"}), 400
+        
+        category = data.get('category')
+        date_from = data.get('date_from')
+        date_to = data.get('date_to')
+        free_only = data.get('free_only', False)
+        max_results = data.get('max_results', 10)
+        
+        nova_act = NovaAct()
+        result = asyncio.run(nova_act.get_filtered_events(
+            user_interests=user_interests,
+            category=category,
+            date_from=date_from,
+            date_to=date_to,
+            free_only=free_only,
+            use_ai=True,  # Enable AI recommendations
+            max_results=max_results
+        ))
+        
+        return jsonify({
+            "success": True,
+            "events": result.get("events", []),
+            "recommendations": result.get("recommendations"),
+            "total_count": result.get("total_count", 0)
+        }), 200
+        
+    except Exception as e:
+        import traceback
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "details": traceback.format_exc()
+        }), 500
+
+@app.route('/api/events/<int:event_id>', methods=['GET'])
+def get_event(event_id):
+    """Get a specific event by ID from Dedalus."""
+    try:
+        from nova_act import NovaAct
+        import asyncio
+        
+        nova_act = NovaAct()
+        events = asyncio.run(nova_act.get_events_from_dedalus())
+        
+        event = next((e for e in events if e.get("id") == event_id), None)
+        
+        if not event:
+            return jsonify({"error": "Event not found"}), 404
+        
+        return jsonify({
+            "success": True,
+            "event": event
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 if __name__ == '__main__':
     print("🚀 Starting Dorm Matching API Server...")

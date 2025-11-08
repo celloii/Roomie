@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - Campus Events Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .nav {
+            background: #f8f9fa;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .nav a:hover {
+            background: #e0e7ff;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .filters {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .filters h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .filter-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-item label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .filter-item input,
+        .filter-item select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .filter-item input:focus,
+        .filter-item select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .ai-section {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .ai-section h3 {
+            margin-bottom: 15px;
+            color: #4338ca;
+        }
+
+        .ai-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .ai-input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .ai-input-group button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .ai-input-group button:hover {
+            background: #5568d3;
+        }
+
+        .ai-input-group button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .ai-recommendations {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .ai-recommendations.show {
+            display: block;
+        }
+
+        .ai-recommendations .summary {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .event-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .event-card.recommended {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        }
+
+        .event-card.recommended::before {
+            content: "⭐ Recommended";
+            display: block;
+            font-size: 0.8em;
+            color: #92400e;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .event-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .event-category {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .event-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .event-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .event-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .event-detail-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+        }
+
+        .event-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .event-tag {
+            padding: 4px 10px;
+            background: #e0e7ff;
+            color: #4338ca;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .event-tag.free {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .event-reasoning {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #555;
+            font-style: italic;
+        }
+
+        .event-highlights {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .event-highlight {
+            padding: 3px 8px;
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading::after {
+            content: "...";
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: "."; }
+            40% { content: ".."; }
+            60%, 100% { content: "..."; }
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .map-container {
+            margin-top: 30px;
+            height: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+        }
+
+        #eventsMap {
+            width: 100%;
+            height: 100%;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-group {
+                grid-template-columns: 1fr;
+            }
+
+            .ai-input-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Campus Events</h1>
+            <p>Discover events happening around campus, powered by AI recommendations</p>
+        </div>
+
+        <div class="nav">
+            <div>
+                <a href="/">Home</a>
+                <a href="/dashboard">Dashboard</a>
+                <a href="/events" style="background: #e0e7ff;">Events</a>
+            </div>
+            <div id="userInfo"></div>
+        </div>
+
+        <div class="content">
+            <div class="filters">
+                <h3>🔍 Filter Events</h3>
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label>Category</label>
+                        <select id="categoryFilter">
+                            <option value="">All Categories</option>
+                            <option value="academic">Academic</option>
+                            <option value="social">Social</option>
+                            <option value="sports">Sports</option>
+                            <option value="arts">Arts</option>
+                            <option value="food">Food</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>From Date</label>
+                        <input type="date" id="dateFromFilter">
+                    </div>
+                    <div class="filter-item">
+                        <label>To Date</label>
+                        <input type="date" id="dateToFilter">
+                    </div>
+                    <div class="filter-item">
+                        <label>
+                            <input type="checkbox" id="freeOnlyFilter" style="width: auto; margin-right: 5px;">
+                            Free Events Only
+                        </label>
+                    </div>
+                </div>
+                <button onclick="loadEvents()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    Apply Filters
+                </button>
+            </div>
+
+            <div class="ai-section">
+                <h3>🤖 AI-Powered Recommendations</h3>
+                <p style="margin-bottom: 15px; color: #666;">Tell us your interests and we'll recommend the best events for you!</p>
+                <div class="ai-input-group">
+                    <input type="text" id="userInterests" placeholder="e.g., I love technology, free events, and social gatherings">
+                    <button onclick="getAIRecommendations()" id="aiButton">Get Recommendations</button>
+                </div>
+                <div class="ai-recommendations" id="aiRecommendations"></div>
+            </div>
+
+            <div id="errorMessage"></div>
+            <div id="loadingMessage" class="loading" style="display: none;">Loading events</div>
+            <div id="eventsContainer"></div>
+            <div class="map-container" id="mapContainer" style="display: none;">
+                <div id="eventsMap"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Google Maps API - Replace with your API key or remove if not needed
+        // To use maps, uncomment the line below and add your Google Maps API key
+        // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+        
+        let map = null;
+        let markers = [];
+        let allEvents = [];
+        let recommendedEventIds = new Set();
+        let mapsAvailable = typeof google !== 'undefined' && typeof google.maps !== 'undefined';
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+                if (data.authenticated) {
+                    document.getElementById('userInfo').innerHTML = `
+                        <span>Welcome, ${data.user.name}</span>
+                        <a href="/dashboard" style="margin-left: 15px;">Dashboard</a>
+                    `;
+                } else {
+                    document.getElementById('userInfo').innerHTML = `
+                        <a href="/login">Login</a>
+                        <a href="/signup" style="margin-left: 10px;">Sign Up</a>
+                    `;
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+            }
+        }
+
+        // Load events from Nova Act endpoint
+        async function loadEvents() {
+            const category = document.getElementById('categoryFilter').value;
+            const dateFrom = document.getElementById('dateFromFilter').value;
+            const dateTo = document.getElementById('dateToFilter').value;
+            const freeOnly = document.getElementById('freeOnlyFilter').checked;
+
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('eventsContainer').innerHTML = '';
+            document.getElementById('errorMessage').innerHTML = '';
+
+            try {
+                const params = new URLSearchParams();
+                if (category) params.append('category', category);
+                if (dateFrom) params.append('date_from', dateFrom);
+                if (dateTo) params.append('date_to', dateTo);
+                if (freeOnly) params.append('free_only', 'true');
+
+                const response = await fetch(`/api/events?${params.toString()}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    allEvents = data.events || [];
+                    recommendedEventIds.clear();
+                    displayEvents(allEvents);
+                    updateMap(allEvents);
+                } else {
+                    throw new Error(data.error || 'Failed to load events');
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            } finally {
+                document.getElementById('loadingMessage').style.display = 'none';
+            }
+        }
+
+        // Get AI recommendations
+        async function getAIRecommendations() {
+            const interests = document.getElementById('userInterests').value.trim();
+            if (!interests) {
+                alert('Please enter your interests to get recommendations!');
+                return;
+            }
+
+            const button = document.getElementById('aiButton');
+            button.disabled = true;
+            button.textContent = 'Getting Recommendations...';
+
+            const aiSection = document.getElementById('aiRecommendations');
+            aiSection.innerHTML = '<div class="loading">Analyzing events</div>';
+            aiSection.classList.add('show');
+
+            try {
+                const response = await fetch('/api/events/recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        interests: interests,
+                        category: document.getElementById('categoryFilter').value,
+                        date_from: document.getElementById('dateFromFilter').value,
+                        date_to: document.getElementById('dateToFilter').value,
+                        free_only: document.getElementById('freeOnlyFilter').checked
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.recommendations) {
+                    const recs = data.recommendations.recommendations || [];
+                    recommendedEventIds = new Set(recs.map(r => r.event.id));
+
+                    let html = '';
+                    if (data.recommendations.summary) {
+                        html += `<div class="summary">${data.recommendations.summary}</div>`;
+                    }
+
+                    if (recs.length > 0) {
+                        html += '<div style="margin-top: 15px;"><strong>Recommended Events:</strong></div>';
+                        recs.forEach(rec => {
+                            html += `
+                                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 8px;">
+                                    <strong>${rec.event.title}</strong>
+                                    ${rec.reasoning ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${rec.reasoning}</div>` : ''}
+                                    ${rec.highlights && rec.highlights.length > 0 ? 
+                                        `<div style="margin-top: 5px;">
+                                            ${rec.highlights.map(h => `<span class="event-highlight">${h}</span>`).join('')}
+                                        </div>` : ''}
+                                </div>
+                            `;
+                        });
+                    }
+
+                    aiSection.innerHTML = html;
+                    
+                    // Reload events to show recommendations
+                    await loadEvents();
+                } else {
+                    aiSection.innerHTML = '<div class="error">No recommendations available. Try adjusting your interests.</div>';
+                }
+            } catch (error) {
+                aiSection.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Get Recommendations';
+            }
+        }
+
+        // Display events
+        function displayEvents(events) {
+            const container = document.getElementById('eventsContainer');
+            
+            if (events.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No events found</h3>
+                        <p>Try adjusting your filters or check back later!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '<div class="events-grid">' + events.map(event => {
+                const isRecommended = recommendedEventIds.has(event.id);
+                const isFree = event.cost === 0 || event.cost === 0.0;
+                
+                return `
+                    <div class="event-card ${isRecommended ? 'recommended' : ''}" onclick="showEventDetails(${event.id})">
+                        <div class="event-header">
+                            <div>
+                                <div class="event-title">${event.title}</div>
+                                <span class="event-category">${event.category}</span>
+                            </div>
+                        </div>
+                        <div class="event-description">${event.description}</div>
+                        <div class="event-details">
+                            <div class="event-detail">
+                                <span>📅</span>
+                                <span>${event.date} at ${event.time}</span>
+                            </div>
+                            <div class="event-detail">
+                                <span>📍</span>
+                                <span>${event.location}</span>
+                            </div>
+                            <div class="event-detail">
+                                <span>💰</span>
+                                <span>${isFree ? 'Free' : `$${event.cost.toFixed(2)}`}</span>
+                            </div>
+                            <div class="event-detail">
+                                <span>👤</span>
+                                <span>${event.organizer}</span>
+                            </div>
+                        </div>
+                        ${event.tags && event.tags.length > 0 ? `
+                            <div class="event-tags">
+                                ${event.tags.map(tag => `<span class="event-tag ${tag.toLowerCase() === 'free' ? 'free' : ''}">${tag}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('') + '</div>';
+        }
+
+        // Initialize map
+        function initMap() {
+            if (!mapsAvailable) {
+                console.log('Google Maps not available');
+                return;
+            }
+            
+            // Default to Princeton University
+            const princeton = { lat: 40.3480, lng: -74.6514 };
+            
+            map = new google.maps.Map(document.getElementById('eventsMap'), {
+                zoom: 15,
+                center: princeton,
+                mapTypeId: 'roadmap'
+            });
+        }
+
+        // Update map with event markers
+        function updateMap(events) {
+            if (!mapsAvailable) {
+                document.getElementById('mapContainer').style.display = 'none';
+                return;
+            }
+            
+            if (!map) {
+                initMap();
+            }
+
+            // Clear existing markers
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+
+            if (events.length === 0) {
+                document.getElementById('mapContainer').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('mapContainer').style.display = 'block';
+
+            const bounds = new google.maps.LatLngBounds();
+
+            events.forEach(event => {
+                if (event.location_lat && event.location_lng && mapsAvailable) {
+                    const position = { lat: event.location_lat, lng: event.location_lng };
+                    const isRecommended = recommendedEventIds.has(event.id);
+
+                    const marker = new google.maps.Marker({
+                        position: position,
+                        map: map,
+                        title: event.title,
+                        icon: isRecommended ? {
+                            url: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
+                        } : undefined
+                    });
+
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <div style="padding: 10px;">
+                                <h3 style="margin: 0 0 10px 0;">${event.title}</h3>
+                                <p style="margin: 5px 0;"><strong>Date:</strong> ${event.date} at ${event.time}</p>
+                                <p style="margin: 5px 0;"><strong>Location:</strong> ${event.location}</p>
+                                <p style="margin: 5px 0;"><strong>Cost:</strong> ${event.cost === 0 ? 'Free' : `$${event.cost.toFixed(2)}`}</p>
+                            </div>
+                        `
+                    });
+
+                    marker.addListener('click', () => {
+                        infoWindow.open(map, marker);
+                    });
+
+                    markers.push(marker);
+                    bounds.extend(position);
+                }
+            });
+
+            if (markers.length > 0) {
+                map.fitBounds(bounds);
+            }
+        }
+
+        // Show event details (placeholder)
+        function showEventDetails(eventId) {
+            // Could navigate to a detail page or show a modal
+            console.log('Event details for:', eventId);
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadEvents();
+        });
+    </script>
+</body>
+</html>
+

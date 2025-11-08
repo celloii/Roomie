@@ -342,19 +342,30 @@
         // Check authentication on load
         async function checkAuth() {
             try {
-                const response = await fetch('http://localhost:5000/api/auth/check', {
+                const response = await fetch('http://127.0.0.1:5000/api/auth/check', {
                     credentials: 'include'
                 });
                 const data = await response.json();
                 
-                if (!data.authenticated) {
-                    // Not authenticated
+                if (data.authenticated || data.guest) {
+                    // Authenticated or guest - show main content
+                    mainContent.style.display = 'block';
+                    authRequired.style.display = 'none';
+                    
+                    // Show user info if authenticated (not guest)
+                    if (data.authenticated && data.user) {
+                        userName.textContent = `👤 ${data.user.name || data.user.email}`;
+                        userInfo.style.display = 'block';
+                    } else if (data.guest) {
+                        // Guest user - show guest indicator
+                        userName.textContent = '👤 Guest';
+                        userInfo.style.display = 'block';
+                    }
+                    return true;
+                } else {
+                    // Not authenticated and not guest
                     mainContent.style.display = 'none';
                     authRequired.style.display = 'block';
-                    return false;
-                } else {
-                    // Authenticated - redirect to unified dashboard
-                    window.location.href = '/dashboard';
                     return false;
                 }
             } catch (error) {
@@ -368,7 +379,7 @@
         // Logout handler
         logoutBtn.addEventListener('click', async () => {
             try {
-                await fetch('http://localhost:5000/api/auth/logout', {
+                await fetch('http://127.0.0.1:5000/api/auth/logout', {
                     method: 'POST',
                     credentials: 'include'
                 });
@@ -401,7 +412,7 @@
             };
             
             try {
-                const response = await fetch('http://localhost:5000/api/match', {
+                const response = await fetch('http://127.0.0.1:5000/api/match', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

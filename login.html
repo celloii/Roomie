@@ -128,6 +128,27 @@
         .links a:hover {
             text-decoration: underline;
         }
+
+        .guest-btn {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .guest-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -155,6 +176,17 @@
                     Login
                 </button>
             </form>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <div style="display: flex; align-items: center; margin: 20px 0;">
+                    <div style="flex: 1; height: 1px; background: #e0e0e0;"></div>
+                    <span style="padding: 0 15px; color: #999; font-size: 0.9em;">or</span>
+                    <div style="flex: 1; height: 1px; background: #e0e0e0;"></div>
+                </div>
+                <button type="button" class="guest-btn" id="guestBtn">
+                    Continue as a Guest
+                </button>
+            </div>
             
             <div class="links">
                 <p>Don't have an account? <a href="/signup">Sign up</a></p>
@@ -166,6 +198,7 @@
         const form = document.getElementById('loginForm');
         const errorDiv = document.getElementById('error');
         const submitBtn = document.getElementById('submitBtn');
+        const guestBtn = document.getElementById('guestBtn');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -178,7 +211,7 @@
             };
 
             try {
-                const response = await fetch('http://localhost:5000/api/auth/login', {
+                const response = await fetch('http://127.0.0.1:5000/api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -204,13 +237,48 @@
             }
         });
 
+        // Guest button handler
+        if (guestBtn) {
+            guestBtn.addEventListener('click', async () => {
+                try {
+                    errorDiv.classList.remove('active');
+                    guestBtn.disabled = true;
+                    const originalText = guestBtn.textContent;
+                    guestBtn.textContent = 'Loading...';
+                    
+                    const response = await fetch('http://127.0.0.1:5000/api/auth/guest', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include'
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        // Redirect to main page
+                        window.location.href = '/';
+                    } else {
+                        throw new Error(data.error || 'Failed to continue as guest');
+                    }
+                } catch (error) {
+                    console.error('Guest login error:', error);
+                    errorDiv.textContent = error.message;
+                    errorDiv.classList.add('active');
+                    guestBtn.disabled = false;
+                    guestBtn.textContent = 'Continue as a Guest';
+                }
+            });
+        }
+
         // Check if already logged in
-        fetch('http://localhost:5000/api/auth/check', {
+        fetch('http://127.0.0.1:5000/api/auth/check', {
             credentials: 'include'
         })
         .then(res => res.json())
         .then(data => {
-            if (data.authenticated) {
+            if (data.authenticated || data.guest) {
                 window.location.href = '/';
             }
         });
