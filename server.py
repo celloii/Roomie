@@ -545,12 +545,10 @@ def health_check():
 @app.route('/api/events', methods=['GET'])
 def get_events():
     """
-    Get events using Nova Act orchestration.
-    Queries Dedalus and optionally applies AI filtering.
+    Get events directly from Dedalus events module.
     """
     try:
-        from nova_act import NovaAct
-        import asyncio
+        from dedalus_events import load_events
         
         category = request.args.get('category')
         date_from = request.args.get('date_from')
@@ -558,20 +556,60 @@ def get_events():
         free_only = request.args.get('free_only', 'false').lower() == 'true'
         tags = request.args.get('tags')
         
-        nova_act = NovaAct()
-        result = asyncio.run(nova_act.get_filtered_events(
-            category=category,
-            date_from=date_from,
-            date_to=date_to,
-            free_only=free_only,
-            tags=tags,
-            use_ai=False  # Don't use AI for basic listing
-        ))
+        # Load events directly from file using absolute path
+        import os
+        import json
+        
+        # Get absolute path to events file
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        events_file = os.path.join(base_dir, 'events_data', 'events.json')
+        
+        events = []
+        # Try to load from file first
+        if os.path.exists(events_file):
+            try:
+                with open(events_file, 'r') as f:
+                    events = json.load(f)
+            except Exception as e:
+                print(f"Error reading events file: {e}")
+                events = []
+        
+        # If no events, get defaults and save them
+        if not events or len(events) == 0:
+            from dedalus_events import get_default_events
+            events = get_default_events()
+            # Save defaults
+            os.makedirs(os.path.dirname(events_file), exist_ok=True)
+            try:
+                with open(events_file, 'w') as f:
+                    json.dump(events, f, indent=2)
+            except Exception as e:
+                print(f"Error saving events: {e}")
+        
+        # Apply filters
+        if category:
+            events = [e for e in events if e.get("category", "").lower() == category.lower()]
+        
+        if date_from:
+            events = [e for e in events if e.get("date", "") >= date_from]
+        
+        if date_to:
+            events = [e for e in events if e.get("date", "") <= date_to]
+        
+        if free_only:
+            events = [e for e in events if e.get("cost", 0) == 0.0]
+        
+        if tags:
+            tag_list = [t.strip().lower() for t in tags.split(",")]
+            events = [e for e in events if any(tag in [t.lower() for t in e.get("tags", [])] for tag in tag_list)]
+        
+        # Sort by date
+        events.sort(key=lambda x: x.get("date", ""))
         
         return jsonify({
             "success": True,
-            "events": result.get("events", []),
-            "total_count": result.get("total_count", 0)
+            "events": events,
+            "total_count": len(events)
         }), 200
         
     except Exception as e:
@@ -705,9 +743,11 @@ def get_combined_match():
         }), 500
 
 if __name__ == '__main__':
+    import os
+    port = int(os.environ.get('PORT', 5001))
     print("🚀 Starting Dorm Matching API Server...")
-    print("📡 API available at: http://localhost:5000")
-    print("🌐 Frontend: http://localhost:5000")
-    print("🔗 API endpoint: http://localhost:5000/api/match")
-    app.run(debug=True, port=5000)
+    print(f"📡 API available at: http://localhost:{port}")
+    print(f"🌐 Frontend: http://localhost:{port}")
+    print(f"🔗 API endpoint: http://localhost:{port}/api/match")
+    app.run(debug=True, port=port, host='127.0.0.1')
 
