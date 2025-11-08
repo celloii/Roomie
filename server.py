@@ -20,6 +20,11 @@ app = Flask(__name__, static_folder='static')
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 CORS(app, supports_credentials=True)  # Enable CORS with credentials for sessions
 
+from datetime import timedelta
+
+# Make sessions permanent so they persist
+app.permanent_session_lifetime = timedelta(days=1)  # Sessions last 7 days
+
 @app.route('/')
 def index():
     """Serve the main matching page (requires visitor login)."""
@@ -116,6 +121,7 @@ def login():
         
         if user:
             session['user_email'] = email
+            session.permanent = True
             return jsonify({
                 "success": True,
                 "message": "Login successful",
@@ -141,6 +147,7 @@ def guest_login():
     """Allow user to continue as a guest."""
     session['guest'] = True
     session['user_type'] = 'visitor'  # Guests are treated as visitors
+    session.permanent = True
     return jsonify({
         "success": True,
         "message": "Continuing as guest",
