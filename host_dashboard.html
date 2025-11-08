@@ -1000,11 +1000,16 @@
 
         backToListBtn?.addEventListener('click', () => {
             createForm.style.display = 'none';
+            //
+            editForm.style.display = 'none';
+            authRequired.style.display = 'none';
             loadListings();
         });
 
         backToListBtnEdit?.addEventListener('click', () => {
             editForm.style.display = 'none';
+            //
+            authRequired.style.display = 'none';
             loadListings();
         });
 

@@ -169,5 +169,22 @@
       "/uploads/103_Screenshot_2025-08-31_at_9.07.00_AM.png"
     ],
     "reviews": []
+  },
+  {
+    "id": 104,
+    "email": "cchen0866@gmail.com",
+    "name": "Chloe Chen",
+    "description": "A quad room with 2 single rooms (each with a bunkbed) and a common room with a sofa",
+    "available_dates": [
+      "2025-11-12",
+      "2025-11-13",
+      "2025-11-14",
+      "2025-11-15"
+    ],
+    "capacity": 4,
+    "dorm_vibe": "Quiet space, large common room to do work",
+    "interests": "Can study in the common room",
+    "images": [],
+    "reviews": []
   }
 ]
