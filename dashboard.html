@@ -107,6 +107,7 @@
             transition: all 0.2s;
             border-bottom: 2px solid transparent;
             font-size: 14px;
+            display: block;
         }
 
         .tab:hover {
@@ -679,7 +680,7 @@
         </div>
         
         <div class="tabs">
-            <div class="tab active" data-tab="home" id="homeTab"> Events</div>
+            <div class="tab active" data-tab="home" id="homeTab">🏠 Home</div>
             <div class="tab" data-tab="visitor" id="visitorTab">🔍 Find Listings</div>
             <div class="tab" data-tab="host" id="hostTab">🏠 My Listings</div>
         </div>
@@ -895,9 +896,11 @@
                 currentUser = data.user;
                 userInfo.textContent = `👤 ${data.user.name}`;
                 
-                // Always show both tabs
-                visitorTab.style.display = 'block';
-                hostTab.style.display = 'block';
+                // Tabs are always visible - no need to set display
+                // Ensure all tabs are visible
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.style.display = 'block';
+                });
                 
                 loading.style.display = 'none';
                 return true;
@@ -1560,6 +1563,11 @@
         });
 
 
+        // Initialize - ensure tabs are visible
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.style.display = 'block';
+        });
+        
         // Initialize
         (async () => {
             const isAuth = await checkAuth();
