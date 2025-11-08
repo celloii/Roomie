@@ -13,63 +13,39 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f7f7f7;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 0;
+            padding: 20px;
         }
 
         .container {
-            max-width: 1760px;
+            max-width: 800px;
             margin: 0 auto;
             background: white;
-            min-height: 100vh;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
         }
 
         .header {
-            background: white;
-            color: #03045e;
-            padding: 20px 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
             text-align: center;
-            position: relative;
-            border-bottom: 1px solid #e0e0e0;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-        }
-
-        .home-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 8px 16px;
-            background: transparent;
-            color: #0077b6;
-            text-decoration: none;
-            border-radius: 22px;
-            font-weight: 600;
-            font-size: 14px;
-            transition: background 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .home-btn:hover {
-            background: #caf0f8;
         }
 
         .header h1 {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #03045e;
+            font-size: 2.5em;
+            margin-bottom: 10px;
         }
 
         .header p {
-            color: #717171;
-            font-size: 14px;
+            opacity: 0.9;
+            font-size: 1.1em;
         }
 
         .content {
-            padding: 40px 80px;
-            max-width: 800px;
-            margin: 0 auto;
+            padding: 40px;
         }
 
         .form-group {
@@ -86,12 +62,12 @@
 
         textarea, input[type="date"] {
             width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #b0b0b0;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 1em;
             font-family: inherit;
-            transition: all 0.2s;
+            transition: border-color 0.3s;
         }
 
         textarea {
@@ -101,26 +77,25 @@
 
         textarea:focus, input[type="date"]:focus {
             outline: none;
-            border-color: #0077b6;
-            box-shadow: 0 0 0 2px rgba(0,119,182,0.1);
+            border-color: #667eea;
         }
 
         .submit-btn {
             width: 100%;
-            padding: 14px 24px;
-            background: #0077b6;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .submit-btn:hover {
-            background: #005a8a;
-            box-shadow: 0 2px 8px rgba(0,119,182,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
         .submit-btn:active {
@@ -145,8 +120,8 @@
         }
 
         .spinner {
-            border: 3px solid #e0e0e0;
-            border-top: 3px solid #0077b6;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -175,18 +150,17 @@
         }
 
         .match-card {
-            background: white;
+            background: #f8f9fa;
             border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 16px;
-            border: 1px solid #e0e0e0;
-            transition: all 0.2s;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .match-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .match-header {
@@ -203,12 +177,11 @@
         }
 
         .match-score {
-            background: #00b4d8;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 4px 12px;
-            border-radius: 4px;
+            padding: 5px 15px;
+            border-radius: 20px;
             font-weight: 600;
-            font-size: 14px;
         }
 
         .match-score.high-score {
@@ -326,12 +299,25 @@
                 
                 <div class="form-group">
                     <label for="dateNeeded">When do you need accommodation?</label>
-                    <input 
-                        type="date" 
-                        id="dateNeeded" 
-                        name="date_needed" 
-                        required
-                    >
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input 
+                            type="date" 
+                            id="dateNeeded" 
+                            name="date_needed" 
+                            required
+                            style="flex: 1;"
+                        >
+                        <span style="color: #666;">to</span>
+                        <input 
+                            type="date" 
+                            id="dateNeededEnd" 
+                            name="date_needed_end" 
+                            style="flex: 1;"
+                        >
+                    </div>
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Leave end date empty for single day, or select both for a date range
+                    </small>
                 </div>
                 
                 <button type="submit" class="submit-btn" id="submitBtn">
@@ -369,7 +355,7 @@
         // Check authentication on load
         async function checkAuth() {
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/auth/check', {
+                const response = await fetch('/api/auth/check', {
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -406,7 +392,7 @@
         // Logout handler
         logoutBtn.addEventListener('click', async () => {
             try {
-                await fetch('http://127.0.0.1:5000/api/auth/logout', {
+                await fetch('/api/auth/logout', {
                     method: 'POST',
                     credentials: 'include'
                 });
@@ -433,13 +419,31 @@
             submitBtn.disabled = true;
             matchesContainer.innerHTML = '';
             
+            const startDate = document.getElementById('dateNeeded').value;
+            const endDate = document.getElementById('dateNeededEnd').value;
+            
+            // Build date range string
+            let dateNeeded = startDate;
+            if (endDate && endDate !== startDate) {
+                // Create comma-separated date range
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const dates = [];
+                const current = new Date(start);
+                while (current <= end) {
+                    dates.push(current.toISOString().split('T')[0]);
+                    current.setDate(current.getDate() + 1);
+                }
+                dateNeeded = dates.join(',');
+            }
+            
             const formData = {
                 visitor_query: document.getElementById('visitorQuery').value,
-                date_needed: document.getElementById('dateNeeded').value
+                date_needed: dateNeeded
             };
             
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/match', {
+                const response = await fetch('/api/match', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

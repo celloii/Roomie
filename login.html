@@ -13,9 +13,9 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f7f7f7;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 0;
+            padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -25,45 +25,21 @@
             max-width: 450px;
             width: 100%;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             overflow: hidden;
-            border: 1px solid #e0e0e0;
         }
 
         .header {
-            background: white;
-            color: #03045e;
-            padding: 40px 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
             text-align: center;
-            position: relative;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .home-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 8px 16px;
-            background: transparent;
-            color: #0077b6;
-            text-decoration: none;
-            border-radius: 22px;
-            font-weight: 600;
-            font-size: 14px;
-            transition: background 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .home-btn:hover {
-            background: #caf0f8;
         }
 
         .header h1 {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #03045e;
+            font-size: 2em;
+            margin-bottom: 10px;
         }
 
         .content {
@@ -85,37 +61,36 @@
         input[type="email"],
         input[type="password"] {
             width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #b0b0b0;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 1em;
             font-family: inherit;
-            transition: all 0.2s;
+            transition: border-color 0.3s;
         }
 
         input:focus {
             outline: none;
-            border-color: #0077b6;
-            box-shadow: 0 0 0 2px rgba(0,119,182,0.1);
+            border-color: #667eea;
         }
 
         .submit-btn {
             width: 100%;
-            padding: 14px 24px;
-            background: #0077b6;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
             margin-top: 10px;
         }
 
         .submit-btn:hover {
-            background: #005a8a;
-            box-shadow: 0 2px 8px rgba(0,119,182,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
         .submit-btn:disabled {
@@ -125,12 +100,12 @@
         }
 
         .error {
-            background: #fff5f5;
+            background: #fee;
             color: #c33;
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 20px;
-            border: 1px solid #fecaca;
+            border-left: 4px solid #c33;
             display: none;
         }
 
@@ -145,7 +120,7 @@
         }
 
         .links a {
-            color: #0077b6;
+            color: #667eea;
             text-decoration: none;
             font-weight: 600;
         }
@@ -236,7 +211,7 @@
             };
 
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/auth/login', {
+                const response = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -271,7 +246,7 @@
                     const originalText = guestBtn.textContent;
                     guestBtn.textContent = 'Loading...';
                     
-                    const response = await fetch('http://127.0.0.1:5000/api/auth/guest', {
+                    const response = await fetch('/api/auth/guest', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -298,7 +273,7 @@
         }
 
         // Check if already logged in
-        fetch('http://127.0.0.1:5000/api/auth/check', {
+        fetch('/api/auth/check', {
             credentials: 'include'
         })
         .then(res => res.json())

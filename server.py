@@ -16,14 +16,9 @@ from tools import (
     create_listing, update_listing_details, add_review, delete_listing
 )
 
-app = Flask(__name__, static_folder='static')
+app = Flask(__name__, static_folder='.')
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 CORS(app, supports_credentials=True)  # Enable CORS with credentials for sessions
-
-from datetime import timedelta
-
-# Make sessions permanent so they persist
-app.permanent_session_lifetime = timedelta(days=1)  # Sessions last 7 days
 
 @app.route('/')
 def index():
@@ -121,7 +116,6 @@ def login():
         
         if user:
             session['user_email'] = email
-            session.permanent = True
             return jsonify({
                 "success": True,
                 "message": "Login successful",
@@ -147,7 +141,6 @@ def guest_login():
     """Allow user to continue as a guest."""
     session['guest'] = True
     session['user_type'] = 'visitor'  # Guests are treated as visitors
-    session.permanent = True
     return jsonify({
         "success": True,
         "message": "Continuing as guest",
@@ -589,8 +582,6 @@ def get_events():
     Get events directly from Dedalus events module.
     """
     try:
-        from dedalus_events import load_events
-        
         category = request.args.get('category')
         date_from = request.args.get('date_from')
         date_to = request.args.get('date_to')
@@ -665,14 +656,11 @@ def get_events():
 def get_event_recommendations():
     """
     Get AI-powered event recommendations based on user interests.
-    Uses Nova Act to orchestrate AI filtering with events loaded directly from file.
+    Uses Nova Act to orchestrate Dedalus queries and Claude AI filtering.
     """
     try:
         from nova_act import NovaAct
-        from dedalus_events import load_events
         import asyncio
-        import os
-        import json
         
         data = request.get_json()
         if not data:
@@ -716,17 +704,21 @@ def get_event_recommendations():
         
         # Use Nova Act for AI recommendations
         nova_act = NovaAct()
-        recommendations = asyncio.run(nova_act.get_ai_recommendations(
+        result = asyncio.run(nova_act.get_filtered_events(
             user_interests=user_interests,
-            events=events,
-            max_recommendations=max_results
+            category=category,
+            date_from=date_from,
+            date_to=date_to,
+            free_only=free_only,
+            use_ai=True,  # Enable AI recommendations
+            max_results=max_results
         ))
         
         return jsonify({
             "success": True,
-            "events": events,
-            "recommendations": recommendations,
-            "total_count": len(events)
+            "events": result.get("events", []),
+            "recommendations": result.get("recommendations"),
+            "total_count": result.get("total_count", 0)
         }), 200
         
     except Exception as e:
@@ -738,7 +730,7 @@ def get_event_recommendations():
         }), 500
 
 @app.route('/api/events/<int:event_id>', methods=['GET'])
-def get_event(event_id):
+def get_event_by_id(event_id):
     """Get a specific event by ID from Dedalus."""
     try:
         from nova_act import NovaAct
