@@ -409,6 +409,57 @@
             color: #333;
         }
 
+        .tabs-container {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 0 40px;
+        }
+
+        .tab-button {
+            padding: 15px 30px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            background: transparent;
+        }
+
+        .tab-button:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .housing-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .housing-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
         @media (max-width: 768px) {
             .events-grid {
                 grid-template-columns: 1fr;
@@ -420,6 +471,15 @@
 
             .ai-input-group {
                 flex-direction: column;
+            }
+
+            .tabs-container {
+                padding: 0 20px;
+            }
+
+            .tab-button {
+                padding: 12px 20px;
+                font-size: 0.9em;
             }
         }
     </style>
@@ -435,12 +495,23 @@
             <div>
                 <a href="/">Home</a>
                 <a href="/dashboard">Dashboard</a>
-                <a href="/events" style="background: #e0e7ff;">Events</a>
             </div>
             <div id="userInfo"></div>
         </div>
 
+        <!-- Tab System for Events and Housing -->
+        <div class="tabs-container">
+            <div class="tab-button active" data-tab="events" id="eventsTab">
+                🎉 Events
+            </div>
+            <div class="tab-button" data-tab="housing" id="housingTab">
+                🏠 Housing
+            </div>
+        </div>
+
         <div class="content">
+            <!-- Events Tab Content -->
+            <div class="tab-content active" id="eventsContent">
             <div class="filters">
                 <h3>🔍 Filter Events</h3>
                 <div class="filter-group">
@@ -470,7 +541,7 @@
                         </label>
                     </div>
                 </div>
-                <button onclick="loadEvents()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                <button id="applyFiltersBtn" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
                     Apply Filters
                 </button>
             </div>
@@ -480,7 +551,7 @@
                 <p style="margin-bottom: 15px; color: #666;">Tell us your interests and we'll recommend the best events for you!</p>
                 <div class="ai-input-group">
                     <input type="text" id="userInterests" placeholder="e.g., I love technology, free events, and social gatherings">
-                    <button onclick="getAIRecommendations()" id="aiButton">Get Recommendations</button>
+                    <button id="aiButton">Get Recommendations</button>
                 </div>
                 <div class="ai-recommendations" id="aiRecommendations"></div>
             </div>
@@ -496,7 +567,7 @@
                 </div>
                 <div class="ai-input-group">
                     <input type="text" id="combinedPreferences" placeholder="e.g., I need a quiet place to stay and love tech events, free food, and networking">
-                    <button onclick="getCombinedMatch()" id="combinedButton">Find Best Match</button>
+                    <button id="combinedButton">Find Best Match</button>
                 </div>
                 <div class="ai-recommendations" id="combinedRecommendations" style="display: none;"></div>
             </div>
@@ -524,6 +595,36 @@
                 </div>
                 <div id="combinedMap"></div>
             </div>
+            </div>
+            <!-- End Events Tab Content -->
+
+            <!-- Housing Tab Content -->
+            <div class="tab-content" id="housingContent" style="display: none;">
+                <div class="filters">
+                    <h3>🔍 Find Housing</h3>
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label>Date Needed</label>
+                            <input type="date" id="housingDateFilter">
+                        </div>
+                        <div class="filter-item">
+                            <label>Capacity</label>
+                            <select id="housingCapacityFilter">
+                                <option value="">Any</option>
+                                <option value="1">1 person</option>
+                                <option value="2">2 people</option>
+                                <option value="3">3+ people</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="searchHousingBtn" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        Search Housing
+                    </button>
+                </div>
+
+                <div id="housingContainer"></div>
+            </div>
+            <!-- End Housing Tab Content -->
         </div>
     </div>
 
@@ -733,13 +834,16 @@
                 return;
             }
             
-            // Default to Princeton University
+            // Default to Princeton University campus center
             const princeton = { lat: 40.3480, lng: -74.6514 };
             
             map = new google.maps.Map(document.getElementById('eventsMap'), {
-                zoom: 15,
+                zoom: 14,
                 center: princeton,
-                mapTypeId: 'roadmap'
+                mapTypeId: 'roadmap',
+                mapTypeControl: true,
+                streetViewControl: true,
+                fullscreenControl: true
             });
         }
 
@@ -931,12 +1035,16 @@
                 return;
             }
             
+            // Princeton University campus center
             const princeton = { lat: 40.3480, lng: -74.6514 };
             
             combinedMap = new google.maps.Map(document.getElementById('combinedMap'), {
-                zoom: 15,
+                zoom: 14,
                 center: princeton,
-                mapTypeId: 'roadmap'
+                mapTypeId: 'roadmap',
+                mapTypeControl: true,
+                streetViewControl: true,
+                fullscreenControl: true
             });
         }
 
@@ -1063,9 +1171,120 @@
             }
         }
 
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+            const activeContent = document.getElementById(`${tabName}Content`);
+            activeContent.classList.add('active');
+            activeContent.style.display = 'block';
+
+            // Load data for the active tab
+            if (tabName === 'events') {
+                loadEvents();
+            } else if (tabName === 'housing') {
+                loadHousing();
+            }
+        }
+
+        // Load housing listings
+        async function loadHousing() {
+            const dateNeeded = document.getElementById('housingDateFilter').value;
+            const capacity = document.getElementById('housingCapacityFilter').value;
+
+            document.getElementById('housingContainer').innerHTML = '<div class="loading">Loading housing options</div>';
+
+            try {
+                const params = new URLSearchParams();
+                if (dateNeeded) params.append('date', dateNeeded);
+                if (capacity) params.append('capacity', capacity);
+
+                const response = await fetch(`/api/listings?${params.toString()}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const listings = data.listings || [];
+                    displayHousing(listings);
+                } else {
+                    throw new Error(data.error || 'Failed to load housing');
+                }
+            } catch (error) {
+                document.getElementById('housingContainer').innerHTML = `
+                    <div class="error">Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Display housing listings
+        function displayHousing(listings) {
+            const container = document.getElementById('housingContainer');
+            
+            if (listings.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No housing available</h3>
+                        <p>Try adjusting your search criteria or check back later!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = listings.map(listing => {
+                const rating = listing.average_rating || 0;
+                const reviewCount = listing.review_count || 0;
+                
+                return `
+                    <div class="housing-card" onclick="window.location.href='/listing/${listing.id}'">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                            <div>
+                                <h3 style="font-size: 1.3em; color: #333; margin-bottom: 5px;">${listing.name}</h3>
+                                ${rating > 0 ? `<div style="color: #f59e0b;">⭐ ${rating.toFixed(1)} (${reviewCount} reviews)</div>` : ''}
+                            </div>
+                            <span class="event-category">Host</span>
+                        </div>
+                        <div style="color: #666; margin-bottom: 15px; line-height: 1.6;">
+                            ${listing.description || 'No description available'}
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; font-size: 0.9em; color: #555;">
+                            <div><strong>Capacity:</strong> ${listing.capacity} ${listing.capacity === 1 ? 'person' : 'people'}</div>
+                            <div><strong>Available Dates:</strong> ${listing.available_dates?.length || 0} dates</div>
+                            ${listing.dorm_vibe ? `<div><strong>Vibe:</strong> ${listing.dorm_vibe}</div>` : ''}
+                            ${listing.interests ? `<div><strong>Interests:</strong> ${listing.interests}</div>` : ''}
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         // Initialize on page load
         window.addEventListener('DOMContentLoaded', () => {
             checkAuth();
+            
+            // Set up tab switching
+            document.getElementById('eventsTab').addEventListener('click', () => switchTab('events'));
+            document.getElementById('housingTab').addEventListener('click', () => switchTab('housing'));
+            
+            // Set up button event listeners
+            document.getElementById('applyFiltersBtn').addEventListener('click', loadEvents);
+            document.getElementById('aiButton').addEventListener('click', getAIRecommendations);
+            document.getElementById('combinedButton').addEventListener('click', getCombinedMatch);
+            document.getElementById('searchHousingBtn').addEventListener('click', loadHousing);
+            
+            // Load default tab (events)
             loadEvents();
         });
     </script>

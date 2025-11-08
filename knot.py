@@ -20,6 +20,10 @@ class Knot:
     CLAUDE_API_KEY = os.getenv("ANTHROPIC_API_KEY", os.getenv("CLAUDE_API_KEY", None))
     CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-3-5-sonnet-20241022")
     
+    # Eventbrite API configuration
+    EVENTBRITE_API_KEY = os.getenv("EVENTBRITE_API_KEY", None)
+    EVENTBRITE_BASE_URL = "https://www.eventbriteapi.com/v3"
+    
     # External event sources (if any)
     EXTERNAL_EVENTS_API_KEY = os.getenv("EXTERNAL_EVENTS_API_KEY", None)
     EXTERNAL_EVENTS_BASE_URL = os.getenv("EXTERNAL_EVENTS_BASE_URL", None)
@@ -43,6 +47,17 @@ class Knot:
         }
     
     @classmethod
+    def get_eventbrite_config(cls) -> Optional[Dict]:
+        """Get Eventbrite API configuration if available."""
+        if not cls.EVENTBRITE_API_KEY:
+            return None
+        
+        return {
+            "api_key": cls.EVENTBRITE_API_KEY,
+            "base_url": cls.EVENTBRITE_BASE_URL
+        }
+    
+    @classmethod
     def get_external_events_config(cls) -> Optional[Dict]:
         """Get external events API configuration if available."""
         if not cls.EXTERNAL_EVENTS_API_KEY or not cls.EXTERNAL_EVENTS_BASE_URL:
@@ -61,4 +76,5 @@ class Knot:
             "claude": bool(cls.CLAUDE_API_KEY),
             "external_events": bool(cls.EXTERNAL_EVENTS_API_KEY and cls.EXTERNAL_EVENTS_BASE_URL)
         }
+
 

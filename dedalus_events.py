@@ -1,6 +1,7 @@
 """
 Dedalus - FastAPI Backend Server for Events
 Stores and fetches event data, serving as the core API for events.
+Integrates with Eventbrite API to fetch real events.
 """
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +10,9 @@ from typing import List, Optional
 from datetime import datetime, date
 import json
 import os
+import httpx
 from typing import List, Dict
+from knot import Knot
 
 app = FastAPI(title="Dedalus Events API", version="1.0.0")
 
@@ -66,6 +69,102 @@ class EventUpdate(BaseModel):
     registration_url: Optional[str] = None
 
 # Helper functions
+async def fetch_eventbrite_events(location: str = "Princeton, NJ", max_results: int = 20) -> List[Dict]:
+    """Fetch events from Eventbrite API."""
+    eventbrite_config = Knot.get_eventbrite_config()
+    if not eventbrite_config:
+        return []
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            # Search for events near Princeton
+            response = await client.get(
+                f"{eventbrite_config['base_url']}/events/search/",
+                params={
+                    "q": "",
+                    "location.address": location,
+                    "location.within": "10mi",
+                    "expand": "venue",
+                    "status": "live",
+                    "order_by": "start_asc",
+                },
+                headers={
+                    "Authorization": f"Bearer {eventbrite_config['api_key']}"
+                }
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                events = data.get("events", [])
+                
+                # Convert Eventbrite format to our format
+                converted_events = []
+                for event in events[:max_results]:
+                    # Get event details
+                    event_id = event.get("id")
+                    if event_id:
+                        try:
+                            detail_response = await client.get(
+                                f"{eventbrite_config['base_url']}/events/{event_id}/",
+                                headers={
+                                    "Authorization": f"Bearer {eventbrite_config['api_key']}"
+                                }
+                            )
+                            if detail_response.status_code == 200:
+                                event_detail = detail_response.json()
+                                
+                                # Extract venue info
+                                venue = event_detail.get("venue", {})
+                                venue_name = venue.get("name", "TBA")
+                                address = venue.get("address", {})
+                                
+                                # Parse date
+                                start = event_detail.get("start", {})
+                                start_utc = start.get("utc", "")
+                                
+                                # Determine category
+                                category_id = event_detail.get("category_id", "")
+                                category_map = {
+                                    "103": "academic",
+                                    "105": "arts",
+                                    "108": "food",
+                                    "109": "sports",
+                                    "110": "social"
+                                }
+                                category = category_map.get(str(category_id), "social")
+                                
+                                # Check if free
+                                ticket_availability = event_detail.get("ticket_availability", {})
+                                is_free = ticket_availability.get("is_free", False)
+                                
+                                converted_event = {
+                                    "id": f"eb_{event_id}",
+                                    "title": event_detail.get("name", {}).get("text", "Untitled Event"),
+                                    "description": event_detail.get("description", {}).get("text", "")[:500],
+                                    "date": start_utc[:10] if start_utc else "",
+                                    "time": start_utc[11:16] if len(start_utc) > 16 else "",
+                                    "location": venue_name,
+                                    "location_lat": address.get("latitude"),
+                                    "location_lng": address.get("longitude"),
+                                    "category": category,
+                                    "cost": 0.0 if is_free else None,
+                                    "organizer": event_detail.get("organizer", {}).get("name", "Eventbrite"),
+                                    "capacity": ticket_availability.get("maximum_ticket_count"),
+                                    "tags": ["eventbrite"] + ([event_detail.get("format_id")] if event_detail.get("format_id") else []),
+                                    "image_url": event_detail.get("logo", {}).get("url") if event_detail.get("logo") else None,
+                                    "registration_url": event_detail.get("url")
+                                }
+                                converted_events.append(converted_event)
+                        except Exception as e:
+                            print(f"Error fetching event details: {e}")
+                            continue
+                
+                return converted_events
+    except Exception as e:
+        print(f"Error fetching from Eventbrite: {e}")
+    
+    return []
+
 def load_events() -> List[Dict]:
     """Load events from JSON file."""
     if os.path.exists(EVENTS_FILE):
@@ -239,10 +338,19 @@ async def get_events(
     date_from: Optional[str] = Query(None, description="Filter events from this date (YYYY-MM-DD)"),
     date_to: Optional[str] = Query(None, description="Filter events until this date (YYYY-MM-DD)"),
     free_only: Optional[bool] = Query(False, description="Show only free events"),
-    tags: Optional[str] = Query(None, description="Comma-separated tags to filter by")
+    tags: Optional[str] = Query(None, description="Comma-separated tags to filter by"),
+    include_eventbrite: Optional[bool] = Query(True, description="Include Eventbrite events")
 ):
-    """Get all events with optional filters."""
+    """Get all events with optional filters. Fetches from local storage and Eventbrite."""
     events = load_events()
+    
+    # Fetch from Eventbrite if enabled
+    if include_eventbrite:
+        try:
+            eventbrite_events = await fetch_eventbrite_events(location="Princeton, NJ", max_results=20)
+            events.extend(eventbrite_events)
+        except Exception as e:
+            print(f"Error fetching Eventbrite events: {e}")
     
     # Apply filters
     if category:
@@ -260,6 +368,9 @@ async def get_events(
     if tags:
         tag_list = [t.strip().lower() for t in tags.split(",")]
         events = [e for e in events if any(tag in [t.lower() for t in e.get("tags", [])] for tag in tag_list)]
+    
+    # Sort by date
+    events.sort(key=lambda x: x.get("date", ""))
     
     return events
 
