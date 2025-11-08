@@ -14,10 +14,34 @@ def load_users() -> Dict:
     if os.path.exists(USERS_FILE):
         try:
             with open(USERS_FILE, 'r') as f:
-                return json.load(f)
+                data = json.load(f)
+                # Migrate old format to new format if needed
+                if "users" not in data:
+                    users = {}
+                    # Migrate from old format
+                    for email, user_data in data.get("hosts", {}).items():
+                        users[email] = {
+                            "email": email,
+                            "password_hash": user_data.get("password_hash"),
+                            "name": user_data.get("name"),
+                            "roles": ["host"]
+                        }
+                    for email, user_data in data.get("visitors", {}).items():
+                        if email in users:
+                            if "host" not in users[email]["roles"]:
+                                users[email]["roles"].append("visitor")
+                        else:
+                            users[email] = {
+                                "email": email,
+                                "password_hash": user_data.get("password_hash"),
+                                "name": user_data.get("name"),
+                                "roles": ["visitor"]
+                            }
+                    return {"users": users}
+                return data
         except (json.JSONDecodeError, IOError):
-            return {"hosts": {}, "visitors": {}}
-    return {"hosts": {}, "visitors": {}}
+            return {"users": {}}
+    return {"users": {}}
 
 def save_users(users: Dict):
     """Save users to JSON file."""
@@ -28,60 +52,76 @@ def hash_password(password: str) -> str:
     """Simple password hashing (for demo purposes)."""
     return hashlib.sha256(password.encode()).hexdigest()
 
-def create_user(email: str, password: str, name: str, user_type: str) -> bool:
+def create_user(email: str, password: str, name: str) -> bool:
     """
-    Create a new user.
-    user_type should be 'host' or 'visitor'
+    Create a new user. Users can have multiple roles (host, visitor, or both).
     """
-    users = load_users()
-    user_key = user_type + "s"  # 'hosts' or 'visitors'
+    users_data = load_users()
+    users = users_data.get("users", {})
     
-    if email in users[user_key]:
+    if email in users:
         return False  # User already exists
     
-    users[user_key][email] = {
+    users[email] = {
         "email": email,
         "password_hash": hash_password(password),
         "name": name,
-        "type": user_type
+        "roles": []  # Roles will be added as needed
     }
     
-    save_users(users)
+    users_data["users"] = users
+    save_users(users_data)
     return True
 
-def verify_user(email: str, password: str, user_type: str) -> Optional[Dict]:
-    """
-    Verify user credentials.
-    Returns user data if valid, None otherwise.
-    """
-    users = load_users()
-    user_key = user_type + "s"
+def add_role_to_user(email: str, role: str) -> bool:
+    """Add a role to an existing user."""
+    users_data = load_users()
+    users = users_data.get("users", {})
     
-    if email not in users[user_key]:
+    if email not in users:
+        return False
+    
+    if role not in users[email].get("roles", []):
+        if "roles" not in users[email]:
+            users[email]["roles"] = []
+        users[email]["roles"].append(role)
+        users_data["users"] = users
+        save_users(users_data)
+    return True
+
+def verify_user(email: str, password: str) -> Optional[Dict]:
+    """
+    Verify user credentials (no type required).
+    Returns user data with roles if valid, None otherwise.
+    """
+    users_data = load_users()
+    users = users_data.get("users", {})
+    
+    if email not in users:
         return None
     
-    user = users[user_key][email]
+    user = users[email]
     if user["password_hash"] == hash_password(password):
         # Return user data without password
         return {
             "email": user["email"],
             "name": user["name"],
-            "type": user["type"]
+            "roles": user.get("roles", [])
         }
     
     return None
 
-def get_user(email: str, user_type: str) -> Optional[Dict]:
+def get_user(email: str) -> Optional[Dict]:
     """Get user data by email."""
-    users = load_users()
-    user_key = user_type + "s"
+    users_data = load_users()
+    users = users_data.get("users", {})
     
-    if email in users[user_key]:
-        user = users[user_key][email]
+    if email in users:
+        user = users[email]
         return {
             "email": user["email"],
             "name": user["name"],
-            "type": user["type"]
+            "roles": user.get("roles", [])
         }
     return None
 

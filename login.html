@@ -46,29 +46,6 @@
             padding: 40px;
         }
 
-        .user-type-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .type-btn {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            font-size: 1em;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-
-        .type-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: transparent;
-        }
 
         .form-group {
             margin-bottom: 20px;
@@ -163,11 +140,6 @@
         <div class="content">
             <div class="error" id="error"></div>
             
-            <div class="user-type-selector">
-                <button class="type-btn active" data-type="visitor" id="visitorBtn">Visitor</button>
-                <button class="type-btn" data-type="host" id="hostBtn">Host</button>
-            </div>
-            
             <form id="loginForm">
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -191,24 +163,9 @@
     </div>
 
     <script>
-        let userType = 'visitor';
-        const visitorBtn = document.getElementById('visitorBtn');
-        const hostBtn = document.getElementById('hostBtn');
         const form = document.getElementById('loginForm');
         const errorDiv = document.getElementById('error');
         const submitBtn = document.getElementById('submitBtn');
-
-        visitorBtn.addEventListener('click', () => {
-            userType = 'visitor';
-            visitorBtn.classList.add('active');
-            hostBtn.classList.remove('active');
-        });
-
-        hostBtn.addEventListener('click', () => {
-            userType = 'host';
-            hostBtn.classList.add('active');
-            visitorBtn.classList.remove('active');
-        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -217,8 +174,7 @@
 
             const formData = {
                 email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                type: userType
+                password: document.getElementById('password').value
             };
 
             try {
@@ -238,13 +194,8 @@
                 }
 
                 if (data.success) {
-                    // Redirect based on user type
-                    if (userType === 'visitor') {
-                        window.location.href = '/';
-                    } else {
-                        // Hosts might have a different dashboard
-                        window.location.href = '/';
-                    }
+                    // Redirect to unified dashboard
+                    window.location.href = '/dashboard';
                 }
             } catch (error) {
                 errorDiv.textContent = error.message;

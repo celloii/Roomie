@@ -278,7 +278,10 @@
             <div style="text-align: center; padding: 40px;">
                 <h2 style="color: #333; margin-bottom: 20px;">Authentication Required</h2>
                 <p style="color: #666; margin-bottom: 30px;">Please log in as a visitor to find matches.</p>
-                <a href="/login" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600;">Go to Login</a>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <a href="/login" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600;">Go to Login</a>
+                    <a href="/host/dashboard" style="display: inline-block; background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 2px solid #667eea;">Are you a Host?</a>
+                </div>
             </div>
         </div>
         
@@ -344,18 +347,15 @@
                 });
                 const data = await response.json();
                 
-                if (!data.authenticated || data.user.type !== 'visitor') {
-                    // Not authenticated or not a visitor
+                if (!data.authenticated) {
+                    // Not authenticated
                     mainContent.style.display = 'none';
                     authRequired.style.display = 'block';
                     return false;
                 } else {
-                    // Authenticated as visitor
-                    mainContent.style.display = 'block';
-                    authRequired.style.display = 'none';
-                    userName.textContent = `👤 ${data.user.name}`;
-                    userInfo.style.display = 'block';
-                    return true;
+                    // Authenticated - redirect to unified dashboard
+                    window.location.href = '/dashboard';
+                    return false;
                 }
             } catch (error) {
                 console.error('Auth check failed:', error);
@@ -513,12 +513,12 @@
                         <div class="match-header">
                             <div class="match-name">
                                 <span class="rank-badge">#${index + 1}</span>
-                                ${escapeHtml(hostName)}
+                                <a href="/listing/${match.host_id || index + 1}" style="color: inherit; text-decoration: none;">${escapeHtml(hostName)}</a>
                             </div>
                             <div class="${scoreClass}">${scorePercent}% Match</div>
                         </div>
                         ${reasoning ? `<div class="match-reasoning">${escapeHtml(reasoning)}</div>` : ''}
-                        ${match.host_id ? `<div class="match-id">Host ID: ${match.host_id}</div>` : ''}
+                        ${match.host_id ? `<div class="match-id"><a href="/listing/${match.host_id}" style="color: #667eea; text-decoration: none; font-weight: 600;">View Listing →</a></div>` : ''}
                     `;
                     
                     matchesContainer.appendChild(card);
