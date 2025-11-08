@@ -1,6 +1,7 @@
 # tools.py
 import json
 import os
+from datetime import datetime, timedelta
 
 # --- Mock Database (JSON file approach) ---
 LISTINGS_FILE = 'listings.json'
@@ -143,13 +144,12 @@ def add_review(listing_id: int, reviewer_name: str, rating: int, comment: str) -
             if "reviews" not in listing:
                 listing["reviews"] = []
             
-            import datetime
             review = {
                 "id": len(listing["reviews"]) + 1,
                 "reviewer_name": reviewer_name,
                 "rating": rating,
                 "comment": comment,
-                "date": datetime.datetime.now().isoformat()
+                "date": datetime.now().isoformat()
             }
             
             listing["reviews"].append(review)
@@ -210,7 +210,6 @@ def find_available_hosts(visitor_date_range: str, min_capacity: int = 1) -> str:
             start_date = f"{parts[0]}-{parts[1]}-{parts[2]}"
             end_date = f"{parts[3]}-{parts[4]}-{parts[5] if len(parts) > 5 else parts[4]}"
             # Generate date range
-            from datetime import datetime, timedelta
             start = datetime.strptime(start_date, '%Y-%m-%d')
             end = datetime.strptime(end_date, '%Y-%m-%d')
             current = start

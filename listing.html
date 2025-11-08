@@ -406,7 +406,7 @@
         const backToSearchBtn = document.getElementById('backToSearchBtn');
         async function loadListing() {
             try {
-                const response = await fetch(`http://localhost:5000/api/listing/${listingId}`, {
+                const response = await fetch(`/api/listing/${listingId}`, {
                     credentials: 'include'
                 });
                 
@@ -453,7 +453,7 @@
                         const imageItem = document.createElement('div');
                         imageItem.className = 'image-item';
                         const img = document.createElement('img');
-                        img.src = `http://localhost:5000${imageUrl}`;
+                        img.src = imageUrl;
                         img.alt = 'Listing photo';
                         img.onerror = function() {
                             this.style.display = 'none';
@@ -543,7 +543,7 @@
             };
             
             try {
-                const response = await fetch(`http://localhost:5000/api/listing/${listingId}/review`, {
+                const response = await fetch(`/api/listing/${listingId}/review`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
