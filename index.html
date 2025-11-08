@@ -281,11 +281,21 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="dateNeeded">When do you need accommodation?</label>
+                    <label for="dateStart">Check-in date:</label>
                     <input 
                         type="date" 
-                        id="dateNeeded" 
-                        name="date_needed" 
+                        id="dateStart" 
+                        name="date_start" 
+                        required
+                    >
+                </div>
+                                
+                <div class="form-group">
+                    <label for="dateEnd">Check-out date:</label>
+                    <input 
+                        type="date" 
+                        id="dateEnd" 
+                        name="date_end" 
                         required
                     >
                 </div>
@@ -319,7 +329,8 @@
 
         // Set minimum date to today
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('dateNeeded').setAttribute('min', today);
+        document.getElementById('dateStart').setAttribute('min', today);
+        document.getElementById('dateEnd').setAttribute('min', today);
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -333,7 +344,8 @@
             
             const formData = {
                 visitor_query: document.getElementById('visitorQuery').value,
-                date_needed: document.getElementById('dateNeeded').value
+                date_start: document.getElementById('dateStart').value,
+                date_end: document.getElementById('dateEnd').value,
             };
             
             try {
