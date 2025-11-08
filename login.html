@@ -35,6 +35,24 @@
             color: white;
             padding: 40px;
             text-align: center;
+            position: relative;
+        }
+
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .header h1 {
@@ -154,6 +172,7 @@
 <body>
     <div class="container">
         <div class="header">
+            <a href="/events" class="home-btn">🏠 Home (Events & Housing)</a>
             <h1>🏠 DormMatch</h1>
             <p>Welcome Back!</p>
         </div>

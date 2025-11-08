@@ -34,6 +34,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+        }
+
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s;
+            z-index: 10;
+        }
+
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .header h1 {
@@ -273,6 +292,7 @@
 <body>
     <div class="container">
         <div class="header">
+            <a href="/events" class="home-btn">🏠 Home (Events & Housing)</a>
             <h1>🏠 Host Dashboard</h1>
             <div class="nav-btns">
                 <a href="/" class="nav-btn">Home</a>
