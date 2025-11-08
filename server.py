@@ -665,11 +665,14 @@ def get_events():
 def get_event_recommendations():
     """
     Get AI-powered event recommendations based on user interests.
-    Uses Nova Act to orchestrate Dedalus queries and Claude AI filtering.
+    Uses Nova Act to orchestrate AI filtering with events loaded directly from file.
     """
     try:
         from nova_act import NovaAct
+        from dedalus_events import load_events
         import asyncio
+        import os
+        import json
         
         data = request.get_json()
         if not data:
@@ -685,22 +688,45 @@ def get_event_recommendations():
         free_only = data.get('free_only', False)
         max_results = data.get('max_results', 10)
         
+        # Load events directly from file (same as /api/events endpoint)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        events_file = os.path.join(base_dir, 'events_data', 'events.json')
+        
+        events = []
+        if os.path.exists(events_file):
+            try:
+                with open(events_file, 'r') as f:
+                    events = json.load(f)
+            except:
+                from dedalus_events import get_default_events
+                events = get_default_events()
+        else:
+            from dedalus_events import get_default_events
+            events = get_default_events()
+        
+        # Apply basic filters first
+        if category:
+            events = [e for e in events if e.get("category", "").lower() == category.lower()]
+        if date_from:
+            events = [e for e in events if e.get("date", "") >= date_from]
+        if date_to:
+            events = [e for e in events if e.get("date", "") <= date_to]
+        if free_only:
+            events = [e for e in events if e.get("cost", 0) == 0.0]
+        
+        # Use Nova Act for AI recommendations
         nova_act = NovaAct()
-        result = asyncio.run(nova_act.get_filtered_events(
+        recommendations = asyncio.run(nova_act.get_ai_recommendations(
             user_interests=user_interests,
-            category=category,
-            date_from=date_from,
-            date_to=date_to,
-            free_only=free_only,
-            use_ai=True,  # Enable AI recommendations
-            max_results=max_results
+            events=events,
+            max_recommendations=max_results
         ))
         
         return jsonify({
             "success": True,
-            "events": result.get("events", []),
-            "recommendations": result.get("recommendations"),
-            "total_count": result.get("total_count", 0)
+            "events": events,
+            "recommendations": recommendations,
+            "total_count": len(events)
         }), 200
         
     except Exception as e:
