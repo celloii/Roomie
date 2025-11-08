@@ -144,6 +144,7 @@ def add_review(listing_id: int, reviewer_name: str, rating: int, comment: str) -
             if "reviews" not in listing:
                 listing["reviews"] = []
             
+<<<<<<< HEAD
             import datetime
             review = {
                 "id": len(listing["reviews"]) + 1,
@@ -151,6 +152,14 @@ def add_review(listing_id: int, reviewer_name: str, rating: int, comment: str) -
                 "rating": rating,
                 "comment": comment,
                 "date": datetime.datetime.now().isoformat()
+=======
+            from datetime import datetime
+            review = {
+                "reviewer_name": reviewer_name,
+                "rating": rating,
+                "comment": comment,
+                "date": datetime.now().isoformat()
+>>>>>>> 148c16744a6c2863083aaebb335525b2213e02d9
             }
             
             listing["reviews"].append(review)

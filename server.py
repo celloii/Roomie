@@ -654,6 +654,86 @@ def get_events():
             "details": traceback.format_exc()
         }), 500
 
+def get_keyword_based_recommendations(user_interests: str, events: list, max_recommendations: int = 5) -> dict:
+    """
+    Fallback keyword-based recommendation system when Claude AI is not available.
+    Matches events based on keywords in titles, descriptions, tags, and categories.
+    """
+    if not events or not user_interests:
+        return {
+            "recommendations": [],
+            "summary": "No events available for recommendations.",
+            "ai_enabled": False
+        }
+    
+    # Extract keywords from user interests (lowercase for matching)
+    interest_lower = user_interests.lower()
+    keywords = [word.strip() for word in interest_lower.split() if len(word.strip()) > 2]
+    
+    # Score each event based on keyword matches
+    scored_events = []
+    for event in events:
+        score = 0
+        matches = []
+        
+        # Check title
+        title = (event.get("title", "") or "").lower()
+        for keyword in keywords:
+            if keyword in title:
+                score += 3
+                matches.append(f"title: '{keyword}'")
+        
+        # Check description
+        description = (event.get("description", "") or "").lower()
+        for keyword in keywords:
+            if keyword in description:
+                score += 2
+                if f"description: '{keyword}'" not in matches:
+                    matches.append(f"description: '{keyword}'")
+        
+        # Check tags
+        tags = [tag.lower() if isinstance(tag, str) else str(tag).lower() for tag in (event.get("tags", []) or [])]
+        for keyword in keywords:
+            if keyword in tags:
+                score += 4  # Tags are more specific, so higher weight
+                if f"tag: '{keyword}'" not in matches:
+                    matches.append(f"tag: '{keyword}'")
+        
+        # Check category
+        category = (event.get("category", "") or "").lower()
+        for keyword in keywords:
+            if keyword in category:
+                score += 2
+                if f"category: '{keyword}'" not in matches:
+                    matches.append(f"category: '{keyword}'")
+        
+        if score > 0:
+            scored_events.append({
+                "event": event,
+                "relevance_score": min(score / 10.0, 1.0),  # Normalize to 0-1
+                "reasoning": f"Matches your interests: {', '.join(matches[:3])}" if matches else "Relevant to your interests",
+                "highlights": matches[:3]
+            })
+    
+    # Sort by score (highest first)
+    scored_events.sort(key=lambda x: x["relevance_score"], reverse=True)
+    
+    # Take top recommendations
+    top_recommendations = scored_events[:max_recommendations]
+    
+    # Generate summary
+    if top_recommendations:
+        event_titles = [rec["event"].get("title", "Event") for rec in top_recommendations[:3]]
+        summary = f"Found {len(top_recommendations)} event(s) matching '{user_interests}': {', '.join(event_titles)}"
+    else:
+        summary = f"No events found matching '{user_interests}'. Try different keywords or browse all events."
+    
+    return {
+        "recommendations": top_recommendations,
+        "summary": summary,
+        "ai_enabled": False
+    }
+
 @app.route('/api/events/recommendations', methods=['POST'])
 def get_event_recommendations():
     """
@@ -709,11 +789,24 @@ def get_event_recommendations():
         
         # Use Nova Act for AI recommendations
         nova_act = NovaAct()
-        recommendations = asyncio.run(nova_act.get_ai_recommendations(
-            user_interests=user_interests,
-            events=events,
-            max_recommendations=max_results
-        ))
+        
+        # Get AI recommendations using the events we already loaded
+        recommendations = None
+        if user_interests:
+            if nova_act.claude_client:
+                # Use Claude AI if available
+                recommendations = asyncio.run(nova_act.get_ai_recommendations(
+                    user_interests=user_interests,
+                    events=events,
+                    max_recommendations=max_results
+                ))
+            else:
+                # Fallback: simple keyword-based matching
+                recommendations = get_keyword_based_recommendations(
+                    user_interests=user_interests,
+                    events=events,
+                    max_recommendations=max_results
+                )
         
         return jsonify({
             "success": True,
