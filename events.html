@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - Campus Events Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .nav {
+            background: #f8f9fa;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .nav a:hover {
+            background: #e0e7ff;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .filters {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .filters h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .filter-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-item label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .filter-item input,
+        .filter-item select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .filter-item input:focus,
+        .filter-item select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .ai-section {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .ai-section h3 {
+            margin-bottom: 15px;
+            color: #4338ca;
+        }
+
+        .ai-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .ai-input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .ai-input-group button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .ai-input-group button:hover {
+            background: #5568d3;
+        }
+
+        .ai-input-group button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .ai-recommendations {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .ai-recommendations.show {
+            display: block;
+        }
+
+        .ai-recommendations .summary {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .event-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .event-card.recommended {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        }
+
+        .event-card.recommended::before {
+            content: "⭐ Recommended";
+            display: block;
+            font-size: 0.8em;
+            color: #92400e;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .event-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .event-category {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .event-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .event-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .event-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .event-detail-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+        }
+
+        .event-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .event-tag {
+            padding: 4px 10px;
+            background: #e0e7ff;
+            color: #4338ca;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .event-tag.free {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .event-reasoning {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #555;
+            font-style: italic;
+        }
+
+        .event-highlights {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .event-highlight {
+            padding: 3px 8px;
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading::after {
+            content: "...";
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: "."; }
+            40% { content: ".."; }
+            60%, 100% { content: "..."; }
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1000;
+            border: 2px solid #dc2626;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+        }
+
+        .map-container {
+            margin-top: 30px;
+            height: 500px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+            position: relative;
+        }
+
+        #eventsMap, #combinedMap {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-legend {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-size: 0.9em;
+        }
+
+        .map-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .legend-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .host-marker {
+            background: #667eea;
+        }
+
+        .event-marker {
+            background: #10b981;
+        }
+
+        .recommended-marker {
+            background: #f59e0b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .tabs-container {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 0 40px;
+        }
+
+        .tab-button {
+            padding: 15px 30px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            background: transparent;
+        }
+
+        .tab-button:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .housing-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .housing-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-group {
+                grid-template-columns: 1fr;
+            }
+
+            .ai-input-group {
+                flex-direction: column;
+            }
+
+            .tabs-container {
+                padding: 0 20px;
+            }
+
+            .tab-button {
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Campus Events</h1>
+            <p>Discover events happening around campus, powered by AI recommendations</p>
+        </div>
+
+        <div class="nav">
+            <div>
+                <a href="/">Home</a>
+                <a href="/dashboard">Dashboard</a>
+            </div>
+            <div id="userInfo"></div>
+        </div>
+
+        <!-- Tab System for Events and Housing -->
+        <div class="tabs-container">
+            <div class="tab-button active" data-tab="events" id="eventsTab">
+                🎉 Events
+            </div>
+            <div class="tab-button" data-tab="housing" id="housingTab">
+                🏠 Housing
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Events Tab Content -->
+            <div class="tab-content active" id="eventsContent">
+            <div class="filters">
+                <h3>🔍 Filter Events</h3>
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label>Category</label>
+                        <select id="categoryFilter">
+                            <option value="">All Categories</option>
+                            <option value="academic">Academic</option>
+                            <option value="social">Social</option>
+                            <option value="sports">Sports</option>
+                            <option value="arts">Arts</option>
+                            <option value="food">Food</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>From Date</label>
+                        <input type="date" id="dateFromFilter">
+                    </div>
+                    <div class="filter-item">
+                        <label>To Date</label>
+                        <input type="date" id="dateToFilter">
+                    </div>
+                    <div class="filter-item">
+                        <label>
+                            <input type="checkbox" id="freeOnlyFilter" style="width: auto; margin-right: 5px;">
+                            Free Events Only
+                        </label>
+                    </div>
+                </div>
+                <button id="applyFiltersBtn" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    Apply Filters
+                </button>
+            </div>
+
+            <div class="ai-section">
+                <h3>🤖 AI-Powered Recommendations</h3>
+                <p style="margin-bottom: 15px; color: #666;">Tell us your interests and we'll recommend the best events for you!</p>
+                <div class="ai-input-group">
+                    <input type="text" id="userInterests" placeholder="e.g., I love technology, free events, and social gatherings">
+                    <button id="aiButton">Get Recommendations</button>
+                </div>
+                <div class="ai-recommendations" id="aiRecommendations"></div>
+            </div>
+
+            <div class="ai-section" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                <h3>🗺️ Combined Map View - Hosts & Events</h3>
+                <p style="margin-bottom: 15px; color: #666;">Get AI-powered recommendations for both accommodation and events that match your preferences!</p>
+                <div class="filter-group" style="grid-template-columns: 1fr 1fr; margin-bottom: 15px;">
+                    <div class="filter-item">
+                        <label>Date Needed (Optional)</label>
+                        <input type="date" id="combinedDateNeeded">
+                    </div>
+                </div>
+                <div class="ai-input-group">
+                    <input type="text" id="combinedPreferences" placeholder="e.g., I need a quiet place to stay and love tech events, free food, and networking">
+                    <button id="combinedButton">Find Best Match</button>
+                </div>
+                <div class="ai-recommendations" id="combinedRecommendations" style="display: none;"></div>
+            </div>
+
+            <div id="errorMessage"></div>
+            <div id="loadingMessage" class="loading" style="display: none;">Loading events</div>
+            <div id="eventsContainer"></div>
+            <div class="map-container" id="mapContainer" style="display: none;">
+                <div id="eventsMap"></div>
+            </div>
+            <div class="map-container" id="combinedMapContainer" style="display: none;">
+                <div class="map-legend">
+                    <div class="map-legend-item">
+                        <div class="legend-icon host-marker"></div>
+                        <span>Hosts</span>
+                    </div>
+                    <div class="map-legend-item">
+                        <div class="legend-icon event-marker"></div>
+                        <span>Events</span>
+                    </div>
+                    <div class="map-legend-item">
+                        <div class="legend-icon recommended-marker"></div>
+                        <span>Recommended</span>
+                    </div>
+                </div>
+                <div id="combinedMap"></div>
+            </div>
+            </div>
+            <!-- End Events Tab Content -->
+
+            <!-- Housing Tab Content -->
+            <div class="tab-content" id="housingContent" style="display: none;">
+                <div class="filters">
+                    <h3>🔍 Find Housing</h3>
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label>Date Needed</label>
+                            <input type="date" id="housingDateFilter">
+                        </div>
+                        <div class="filter-item">
+                            <label>Capacity</label>
+                            <select id="housingCapacityFilter">
+                                <option value="">Any</option>
+                                <option value="1">1 person</option>
+                                <option value="2">2 people</option>
+                                <option value="3">3+ people</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="searchHousingBtn" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        Search Housing
+                    </button>
+                </div>
+
+                <div id="housingContainer"></div>
+            </div>
+            <!-- End Housing Tab Content -->
+        </div>
+    </div>
+
+    <script>
+        // Google Maps API - Replace with your API key or remove if not needed
+        // To use maps, add this script tag in the head section with your API key
+        
+        let map = null;
+        let markers = [];
+        let allEvents = [];
+        let recommendedEventIds = new Set();
+        let mapsAvailable = typeof google !== 'undefined' && typeof google.maps !== 'undefined';
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+                if (data.authenticated) {
+                    document.getElementById('userInfo').innerHTML = `
+                        <span>Welcome, ${data.user.name}</span>
+                        <a href="/dashboard" style="margin-left: 15px;">Dashboard</a>
+                    `;
+                } else {
+                    document.getElementById('userInfo').innerHTML = `
+                        <a href="/login">Login</a>
+                        <a href="/signup" style="margin-left: 10px;">Sign Up</a>
+                    `;
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+            }
+        }
+
+        // Load events from Nova Act endpoint
+        async function loadEvents() {
+            const category = document.getElementById('categoryFilter').value;
+            const dateFrom = document.getElementById('dateFromFilter').value;
+            const dateTo = document.getElementById('dateToFilter').value;
+            const freeOnly = document.getElementById('freeOnlyFilter').checked;
+
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('eventsContainer').innerHTML = '';
+            document.getElementById('errorMessage').innerHTML = '';
+
+            try {
+                const params = new URLSearchParams();
+                if (category) params.append('category', category);
+                if (dateFrom) params.append('date_from', dateFrom);
+                if (dateTo) params.append('date_to', dateTo);
+                if (freeOnly) params.append('free_only', 'true');
+
+                const response = await fetch(`/api/events?${params.toString()}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    allEvents = data.events || [];
+                    recommendedEventIds.clear();
+                    displayEvents(allEvents);
+                    updateMap(allEvents);
+                } else {
+                    throw new Error(data.error || 'Failed to load events');
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            } finally {
+                document.getElementById('loadingMessage').style.display = 'none';
+            }
+        }
+
+        // Get AI recommendations
+        async function getAIRecommendations() {
+            const interests = document.getElementById('userInterests').value.trim();
+            if (!interests) {
+                alert('Please enter your interests to get recommendations!');
+                return;
+            }
+
+            const button = document.getElementById('aiButton');
+            button.disabled = true;
+            button.textContent = 'Getting Recommendations...';
+
+            const aiSection = document.getElementById('aiRecommendations');
+            aiSection.innerHTML = '<div class="loading">Analyzing events</div>';
+            aiSection.classList.add('show');
+
+            try {
+                const response = await fetch('/api/events/recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        interests: interests,
+                        category: document.getElementById('categoryFilter').value,
+                        date_from: document.getElementById('dateFromFilter').value,
+                        date_to: document.getElementById('dateToFilter').value,
+                        free_only: document.getElementById('freeOnlyFilter').checked
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.recommendations) {
+                    const recs = data.recommendations.recommendations || [];
+                    recommendedEventIds = new Set(recs.map(r => r.event.id));
+
+                    let html = '';
+                    if (data.recommendations.summary) {
+                        html += `<div class="summary">${data.recommendations.summary}</div>`;
+                    }
+
+                    if (recs.length > 0) {
+                        html += '<div style="margin-top: 15px;"><strong>Recommended Events:</strong></div>';
+                        recs.forEach(rec => {
+                            html += `
+                                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 8px;">
+                                    <strong>${rec.event.title}</strong>
+                                    ${rec.reasoning ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${rec.reasoning}</div>` : ''}
+                                    ${rec.highlights && rec.highlights.length > 0 ? 
+                                        `<div style="margin-top: 5px;">
+                                            ${rec.highlights.map(h => `<span class="event-highlight">${h}</span>`).join('')}
+                                        </div>` : ''}
+                                </div>
+                            `;
+                        });
+                    }
+
+                    aiSection.innerHTML = html;
+                    
+                    // Reload events to show recommendations
+                    await loadEvents();
+                } else {
+                    aiSection.innerHTML = '<div class="error">No recommendations available. Try adjusting your interests.</div>';
+                }
+            } catch (error) {
+                aiSection.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Get Recommendations';
+            }
+        }
+
+        // Display events
+        function displayEvents(events) {
+            const container = document.getElementById('eventsContainer');
+            
+            if (events.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No events found</h3>
+                        <p>Try adjusting your filters or check back later!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '<div class="events-grid">' + events.map(event => {
+                const isRecommended = recommendedEventIds.has(event.id);
+                const isFree = event.cost === 0 || event.cost === 0.0;
+                
+                return `
+                    <div class="event-card ${isRecommended ? 'recommended' : ''}" onclick="showEventDetails(${event.id})">
+                        <div class="event-header">
+                            <div>
+                                <div class="event-title">${event.title}</div>
+                                <span class="event-category">${event.category}</span>
+                            </div>
+                        </div>
+                        <div class="event-description">${event.description}</div>
+                        <div class="event-details">
+                            <div class="event-detail">
+                                <span>📅</span>
+                                <span>${event.date} at ${event.time}</span>
+                            </div>
+                            <div class="event-detail">
+                                <span>📍</span>
+                                <span>${event.location}</span>
+                            </div>
+                            <div class="event-detail">
+                                <span>💰</span>
+                                <span>${isFree ? 'Free' : `$${event.cost.toFixed(2)}`}</span>
+                            </div>
+                            <div class="event-detail">
+                                <span>👤</span>
+                                <span>${event.organizer}</span>
+                            </div>
+                        </div>
+                        ${event.tags && event.tags.length > 0 ? `
+                            <div class="event-tags">
+                                ${event.tags.map(tag => `<span class="event-tag ${tag.toLowerCase() === 'free' ? 'free' : ''}">${tag}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        <div style="margin-top: 15px;">
+                            <button onclick="addToCalendar(${event.id}, this)" style="padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em;">
+                                📅 Add to Calendar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('') + '</div>';
+        }
+
+        // Initialize map
+        function initMap() {
+            if (!mapsAvailable) {
+                console.log('Google Maps not available');
+                return;
+            }
+            
+            // Default to Princeton University campus center
+            const princeton = { lat: 40.3480, lng: -74.6514 };
+            
+            map = new google.maps.Map(document.getElementById('eventsMap'), {
+                zoom: 14,
+                center: princeton,
+                mapTypeId: 'roadmap',
+                mapTypeControl: true,
+                streetViewControl: true,
+                fullscreenControl: true
+            });
+        }
+
+        // Update map with event markers
+        function updateMap(events) {
+            if (!mapsAvailable) {
+                document.getElementById('mapContainer').style.display = 'none';
+                return;
+            }
+            
+            if (!map) {
+                initMap();
+            }
+
+            // Clear existing markers
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+
+            if (events.length === 0) {
+                document.getElementById('mapContainer').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('mapContainer').style.display = 'block';
+
+            const bounds = new google.maps.LatLngBounds();
+
+            events.forEach(event => {
+                if (event.location_lat && event.location_lng && mapsAvailable) {
+                    const position = { lat: event.location_lat, lng: event.location_lng };
+                    const isRecommended = recommendedEventIds.has(event.id);
+
+                    const marker = new google.maps.Marker({
+                        position: position,
+                        map: map,
+                        title: event.title,
+                        icon: isRecommended ? {
+                            url: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
+                        } : undefined
+                    });
+
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <div style="padding: 10px;">
+                                <h3 style="margin: 0 0 10px 0;">${event.title}</h3>
+                                <p style="margin: 5px 0;"><strong>Date:</strong> ${event.date} at ${event.time}</p>
+                                <p style="margin: 5px 0;"><strong>Location:</strong> ${event.location}</p>
+                                <p style="margin: 5px 0;"><strong>Cost:</strong> ${event.cost === 0 ? 'Free' : `$${event.cost.toFixed(2)}`}</p>
+                            </div>
+                        `
+                    });
+
+                    marker.addListener('click', () => {
+                        infoWindow.open(map, marker);
+                    });
+
+                    markers.push(marker);
+                    bounds.extend(position);
+                }
+            });
+
+            if (markers.length > 0) {
+                map.fitBounds(bounds);
+            }
+        }
+
+        // Show event details (placeholder)
+        function showEventDetails(eventId) {
+            // Could navigate to a detail page or show a modal
+            console.log('Event details for:', eventId);
+        }
+
+        // Add event to calendar
+        function addToCalendar(eventId, buttonElement) {
+            const eventData = allEvents.find(e => e.id === eventId);
+            if (!eventData) {
+                alert('Event not found');
+                return;
+            }
+
+            // Parse date and time
+            const [year, month, day] = eventData.date.split('-').map(Number);
+            const [hours, minutes] = eventData.time.split(':').map(Number);
+            
+            // Create start datetime (assume 1 hour duration, or 24 hours for hackathon)
+            let duration = 60 * 60 * 1000; // 1 hour default
+            if (eventData.title.includes('TigerHacks') || eventData.title.includes('hackathon')) {
+                duration = 24 * 60 * 60 * 1000; // 24 hours for hackathons
+            }
+            
+            const startDate = new Date(year, month - 1, day, hours, minutes);
+            const endDate = new Date(startDate.getTime() + duration);
+            
+            // Format dates for iCal (YYYYMMDDTHHMMSS)
+            const formatDate = (date) => {
+                const pad = (n) => n.toString().padStart(2, '0');
+                return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}00`;
+            };
+            
+            const startStr = formatDate(startDate);
+            const endStr = formatDate(endDate);
+            const nowStr = formatDate(new Date());
+            
+            // Create iCal content (escape special characters)
+            const description = eventData.description.replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
+            const location = eventData.location.replace(/,/g, '\\,').replace(/;/g, '\\;');
+            const title = eventData.title.replace(/,/g, '\\,').replace(/;/g, '\\;');
+            
+            const icalContent = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Princeton Events//EN',
+                'BEGIN:VEVENT',
+                `UID:${eventId}@princeton-events`,
+                `DTSTAMP:${nowStr}`,
+                `DTSTART:${startStr}`,
+                `DTEND:${endStr}`,
+                `SUMMARY:${title}`,
+                `DESCRIPTION:${description}`,
+                `LOCATION:${location}`,
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].join('\r\n');
+            
+            // Create blob and download
+            const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${eventData.title.replace(/[^a-z0-9]/gi, '_')}.ics`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show success message
+            if (buttonElement) {
+                const originalText = buttonElement.innerHTML;
+                buttonElement.innerHTML = '✓ Added!';
+                buttonElement.style.background = '#10b981';
+                setTimeout(() => {
+                    buttonElement.innerHTML = originalText;
+                    buttonElement.style.background = '#10b981';
+                }, 2000);
+            }
+        }
+
+        // Combined map and matching
+        let combinedMap = null;
+        let combinedMarkers = [];
+        let recommendedHostIds = new Set();
+        let recommendedEventIdsCombined = new Set();
+
+        // Get combined AI recommendations
+        async function getCombinedMatch() {
+            const preferences = document.getElementById('combinedPreferences').value.trim();
+            const dateNeeded = document.getElementById('combinedDateNeeded').value;
+            
+            if (!preferences) {
+                alert('Please enter your preferences to find the best matches!');
+                return;
+            }
+
+            const button = document.getElementById('combinedButton');
+            button.disabled = true;
+            button.textContent = 'Finding Best Matches...';
+
+            const recommendationsDiv = document.getElementById('combinedRecommendations');
+            recommendationsDiv.innerHTML = '<div class="loading">Analyzing hosts and events</div>';
+            recommendationsDiv.style.display = 'block';
+
+            try {
+                const response = await fetch('/api/combined/match', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        preferences: preferences,
+                        date_needed: dateNeeded || null,
+                        max_hosts: 5,
+                        max_events: 5
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const hosts = data.hosts || [];
+                    const events = data.events || [];
+                    const insights = data.combined_insights || '';
+
+                    recommendedHostIds = new Set(hosts.map(h => h.host.id));
+                    recommendedEventIdsCombined = new Set(events.map(e => e.event.id));
+
+                    let html = '';
+                    if (insights) {
+                        html += `<div class="summary"><strong>AI Insights:</strong> ${insights}</div>`;
+                    }
+
+                    if (hosts.length > 0) {
+                        html += '<div style="margin-top: 15px;"><strong>Recommended Hosts:</strong></div>';
+                        hosts.forEach(rec => {
+                            const host = rec.host;
+                            html += `
+                                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 8px; border-left: 4px solid #667eea;">
+                                    <strong>${host.name}</strong>
+                                    ${rec.reasoning ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${rec.reasoning}</div>` : ''}
+                                    <div style="font-size: 0.85em; color: #555; margin-top: 5px;">
+                                        ${host.dorm_vibe ? `Vibe: ${host.dorm_vibe}<br>` : ''}
+                                        ${host.interests ? `Interests: ${host.interests}<br>` : ''}
+                                        Capacity: ${host.capacity}
+                                    </div>
+                                    ${rec.highlights && rec.highlights.length > 0 ? 
+                                        `<div style="margin-top: 5px;">
+                                            ${rec.highlights.map(h => `<span class="event-highlight">${h}</span>`).join('')}
+                                        </div>` : ''}
+                                </div>
+                            `;
+                        });
+                    }
+
+                    if (events.length > 0) {
+                        html += '<div style="margin-top: 15px;"><strong>Recommended Events:</strong></div>';
+                        events.forEach(rec => {
+                            const event = rec.event;
+                            html += `
+                                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 8px; border-left: 4px solid #10b981;">
+                                    <strong>${event.title}</strong>
+                                    ${rec.reasoning ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${rec.reasoning}</div>` : ''}
+                                    <div style="font-size: 0.85em; color: #555; margin-top: 5px;">
+                                        ${event.date} at ${event.time}<br>
+                                        ${event.location}<br>
+                                        ${event.cost === 0 ? 'Free' : `$${event.cost.toFixed(2)}`}
+                                    </div>
+                                    ${rec.highlights && rec.highlights.length > 0 ? 
+                                        `<div style="margin-top: 5px;">
+                                            ${rec.highlights.map(h => `<span class="event-highlight">${h}</span>`).join('')}
+                                        </div>` : ''}
+                                </div>
+                            `;
+                        });
+                    }
+
+                    recommendationsDiv.innerHTML = html;
+                    
+                    // Update combined map
+                    await updateCombinedMap(hosts, events);
+                } else {
+                    recommendationsDiv.innerHTML = `<div class="error">Error: ${data.error || 'Failed to get recommendations'}</div>`;
+                }
+            } catch (error) {
+                recommendationsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Find Best Match';
+            }
+        }
+
+        // Initialize combined map
+        function initCombinedMap() {
+            if (!mapsAvailable) {
+                console.log('Google Maps not available');
+                return;
+            }
+            
+            // Princeton University campus center
+            const princeton = { lat: 40.3480, lng: -74.6514 };
+            
+            combinedMap = new google.maps.Map(document.getElementById('combinedMap'), {
+                zoom: 14,
+                center: princeton,
+                mapTypeId: 'roadmap',
+                mapTypeControl: true,
+                streetViewControl: true,
+                fullscreenControl: true
+            });
+        }
+
+        // Update combined map with hosts and events
+        async function updateCombinedMap(hosts, events) {
+            if (!mapsAvailable) {
+                document.getElementById('combinedMapContainer').style.display = 'none';
+                return;
+            }
+
+            if (!combinedMap) {
+                initCombinedMap();
+            }
+
+            // Clear existing markers
+            combinedMarkers.forEach(marker => marker.setMap(null));
+            combinedMarkers = [];
+
+            document.getElementById('combinedMapContainer').style.display = 'block';
+
+            const bounds = new google.maps.LatLngBounds();
+            
+            // Default host locations (since hosts don't have lat/lng, use approximate campus locations)
+            const hostLocations = [
+                { lat: 40.3485, lng: -74.6510 }, // Approximate location 1
+                { lat: 40.3475, lng: -74.6520 }, // Approximate location 2
+                { lat: 40.3495, lng: -74.6505 }  // Approximate location 3
+            ];
+
+            // Add host markers
+            hosts.forEach((rec, index) => {
+                const host = rec.host;
+                const isRecommended = recommendedHostIds.has(host.id);
+                const location = hostLocations[index % hostLocations.length];
+                
+                const marker = new google.maps.Marker({
+                    position: location,
+                    map: combinedMap,
+                    title: `${host.name} - Host`,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: isRecommended ? '#f59e0b' : '#667eea',
+                        fillOpacity: 1,
+                        strokeColor: '#fff',
+                        strokeWeight: 2
+                    },
+                    label: {
+                        text: 'H',
+                        color: 'white',
+                        fontSize: '10px'
+                    }
+                });
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="padding: 10px; min-width: 200px;">
+                            <h3 style="margin: 0 0 10px 0; color: #667eea;">${host.name} ${isRecommended ? '⭐' : ''}</h3>
+                            <p style="margin: 5px 0;"><strong>Vibe:</strong> ${host.dorm_vibe || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Interests:</strong> ${host.interests || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Capacity:</strong> ${host.capacity}</p>
+                            ${rec.reasoning ? `<p style="margin: 5px 0; font-style: italic; color: #666;">${rec.reasoning}</p>` : ''}
+                        </div>
+                    `
+                });
+
+                marker.addListener('click', () => {
+                    infoWindow.open(combinedMap, marker);
+                });
+
+                combinedMarkers.push(marker);
+                bounds.extend(location);
+            });
+
+            // Add event markers
+            events.forEach(rec => {
+                const event = rec.event;
+                if (event.location_lat && event.location_lng) {
+                    const isRecommended = recommendedEventIdsCombined.has(event.id);
+                    const position = { lat: event.location_lat, lng: event.location_lng };
+
+                    const marker = new google.maps.Marker({
+                        position: position,
+                        map: combinedMap,
+                        title: `${event.title} - Event`,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 10,
+                            fillColor: isRecommended ? '#f59e0b' : '#10b981',
+                            fillOpacity: 1,
+                            strokeColor: '#fff',
+                            strokeWeight: 2
+                        },
+                        label: {
+                            text: 'E',
+                            color: 'white',
+                            fontSize: '10px'
+                        }
+                    });
+
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <div style="padding: 10px; min-width: 200px;">
+                                <h3 style="margin: 0 0 10px 0; color: #10b981;">${event.title} ${isRecommended ? '⭐' : ''}</h3>
+                                <p style="margin: 5px 0;"><strong>Date:</strong> ${event.date} at ${event.time}</p>
+                                <p style="margin: 5px 0;"><strong>Location:</strong> ${event.location}</p>
+                                <p style="margin: 5px 0;"><strong>Cost:</strong> ${event.cost === 0 ? 'Free' : `$${event.cost.toFixed(2)}`}</p>
+                                ${rec.reasoning ? `<p style="margin: 5px 0; font-style: italic; color: #666;">${rec.reasoning}</p>` : ''}
+                            </div>
+                        `
+                    });
+
+                    marker.addListener('click', () => {
+                        infoWindow.open(combinedMap, marker);
+                    });
+
+                    combinedMarkers.push(marker);
+                    bounds.extend(position);
+                }
+            });
+
+            if (combinedMarkers.length > 0) {
+                combinedMap.fitBounds(bounds);
+            }
+        }
+
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+            const activeContent = document.getElementById(`${tabName}Content`);
+            activeContent.classList.add('active');
+            activeContent.style.display = 'block';
+
+            // Load data for the active tab
+            if (tabName === 'events') {
+                loadEvents();
+            } else if (tabName === 'housing') {
+                loadHousing();
+            }
+        }
+
+        // Load housing listings
+        async function loadHousing() {
+            const dateNeeded = document.getElementById('housingDateFilter').value;
+            const capacity = document.getElementById('housingCapacityFilter').value;
+
+            document.getElementById('housingContainer').innerHTML = '<div class="loading">Loading housing options</div>';
+
+            try {
+                const params = new URLSearchParams();
+                if (dateNeeded) params.append('date', dateNeeded);
+                if (capacity) params.append('capacity', capacity);
+
+                const response = await fetch(`/api/listings?${params.toString()}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const listings = data.listings || [];
+                    displayHousing(listings);
+                } else {
+                    throw new Error(data.error || 'Failed to load housing');
+                }
+            } catch (error) {
+                document.getElementById('housingContainer').innerHTML = `
+                    <div class="error">Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Display housing listings
+        function displayHousing(listings) {
+            const container = document.getElementById('housingContainer');
+            
+            if (listings.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No housing available</h3>
+                        <p>Try adjusting your search criteria or check back later!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = listings.map(listing => {
+                const rating = listing.average_rating || 0;
+                const reviewCount = listing.review_count || 0;
+                
+                return `
+                    <div class="housing-card" onclick="window.location.href='/listing/${listing.id}'">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                            <div>
+                                <h3 style="font-size: 1.3em; color: #333; margin-bottom: 5px;">${listing.name}</h3>
+                                ${rating > 0 ? `<div style="color: #f59e0b;">⭐ ${rating.toFixed(1)} (${reviewCount} reviews)</div>` : ''}
+                            </div>
+                            <span class="event-category">Host</span>
+                        </div>
+                        <div style="color: #666; margin-bottom: 15px; line-height: 1.6;">
+                            ${listing.description || 'No description available'}
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; font-size: 0.9em; color: #555;">
+                            <div><strong>Capacity:</strong> ${listing.capacity} ${listing.capacity === 1 ? 'person' : 'people'}</div>
+                            <div><strong>Available Dates:</strong> ${listing.available_dates?.length || 0} dates</div>
+                            ${listing.dorm_vibe ? `<div><strong>Vibe:</strong> ${listing.dorm_vibe}</div>` : ''}
+                            ${listing.interests ? `<div><strong>Interests:</strong> ${listing.interests}</div>` : ''}
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            
+            // Set up tab switching
+            document.getElementById('eventsTab').addEventListener('click', () => switchTab('events'));
+            document.getElementById('housingTab').addEventListener('click', () => switchTab('housing'));
+            
+            // Set up button event listeners
+            document.getElementById('applyFiltersBtn').addEventListener('click', loadEvents);
+            document.getElementById('aiButton').addEventListener('click', getAIRecommendations);
+            document.getElementById('combinedButton').addEventListener('click', getCombinedMatch);
+            document.getElementById('searchHousingBtn').addEventListener('click', loadHousing);
+            
+            // Load default tab (events)
+            loadEvents();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Host Dashboard - DormMatch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+        }
+
+        .nav-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .auth-required, .loading {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error, .success {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            border-left: 4px solid #c33;
+        }
+
+        .success {
+            background: #efe;
+            color: #3c3;
+            border-left: 4px solid #3c3;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .date-range-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .date-range-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .date-range-group label {
+            font-weight: 600;
+            color: #667eea;
+            min-width: 80px;
+        }
+
+        .date-range-group input {
+            flex: 1;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            background: #f0f0f0;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #e8e8ff;
+            border-color: #764ba2;
+        }
+
+        .upload-input {
+            display: none;
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .image-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .listing-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .listing-info h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .info-row {
+            margin-bottom: 10px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #667eea;
+            display: inline-block;
+            width: 150px;
+        }
+
+        .info-value {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Host Dashboard</h1>
+            <div class="nav-btns">
+                <a href="/" class="nav-btn">Home</a>
+                <button class="nav-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div id="authRequired" class="auth-required" style="display: none;">
+                <h2>Authentication Required</h2>
+                <p style="color: #666; margin-bottom: 30px;">Please log in as a host to access your dashboard.</p>
+                <a href="/login" class="nav-btn" style="display: inline-block; background: white; color: #667eea;">Go to Login</a>
+            </div>
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading your listing...</p>
+            </div>
+            
+            <div id="error" class="error" style="display: none;"></div>
+            <div id="success" class="success" style="display: none;"></div>
+            
+            <!-- Listings List (shown when listings exist) -->
+            <div id="listingsList" style="display: none;">
+                <div class="listings-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2 style="color: #333;">My Listings</h2>
+                    <button class="create-listing-btn" id="showCreateFormBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">+ Create New Listing</button>
+                </div>
+                <div id="listingsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;"></div>
+            </div>
+            
+            <!-- Create Listing Form (shown when creating new listing) -->
+            <div id="createForm" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #333;">Create New Listing</h2>
+                    <button class="nav-btn" id="backToListBtn" style="background: #f0f0f0; color: #667eea; border: 2px solid #667eea;">← Back to Listings</button>
+                </div>
+                <div class="section">
+                    <form id="createListingForm">
+                        <div class="form-group">
+                            <label for="description">Description *</label>
+                            <textarea id="description" name="description" required placeholder="Describe your dorm room, amenities, and what makes it special..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dorm_vibe">Dorm Vibe *</label>
+                            <input type="text" id="dorm_vibe" name="dorm_vibe" required placeholder="e.g., Quiet space, early bedtime (11 PM)">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="interests">Your Interests *</label>
+                            <input type="text" id="interests" name="interests" required placeholder="e.g., Quiet study, loves coffee, early riser">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="capacity">Capacity (Number of Guests) *</label>
+                            <input type="number" id="capacity" name="capacity" min="1" max="10" value="1" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Available Date Range *</label>
+                            <div class="date-range-container">
+                                <div class="date-range-group">
+                                    <label>From:</label>
+                                    <input type="date" id="startDate" name="start_date" required>
+                                </div>
+                                <div class="date-range-group">
+                                    <label>To:</label>
+                                    <input type="date" id="endDate" name="end_date" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>Upload Photos</h2>
+                            <div class="upload-area" id="createUploadArea">
+                                <div style="font-size: 3em; margin-bottom: 15px;">📷</div>
+                                <div style="color: #666; font-size: 1.1em; margin-bottom: 10px;">Click or drag to upload photos</div>
+                                <div style="color: #999; font-size: 0.9em;">PNG, JPG, JPEG, GIF, or WEBP</div>
+                                <input type="file" id="createFileInput" class="upload-input" accept="image/*" multiple>
+                            </div>
+                            <div id="createImagesGrid" class="images-grid"></div>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn" id="createBtn">Create Listing</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Edit Listing Form (shown when editing a listing) -->
+            <div id="editForm" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #333;">Edit Listing</h2>
+                    <button class="nav-btn" id="backToListBtnEdit" style="background: #f0f0f0; color: #667eea; border: 2px solid #667eea;">← Back to Listings</button>
+                </div>
+                <div class="listing-info">
+                    <h3 id="listingName">Your Listing</h3>
+                    <div class="info-row">
+                        <span class="info-label">Listing ID:</span>
+                        <span class="info-value" id="listingId"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">View Listing:</span>
+                        <a href="#" id="listingLink" class="info-value" style="color: #667eea; text-decoration: none;">View Public Page</a>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Edit Listing Details</h2>
+                    <form id="editListingForm">
+                        <div class="form-group">
+                            <label for="edit_description">Description</label>
+                            <textarea id="edit_description" name="description" placeholder="Describe your dorm room..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit_dorm_vibe">Dorm Vibe</label>
+                            <input type="text" id="edit_dorm_vibe" name="dorm_vibe" placeholder="e.g., Quiet space, early bedtime">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit_interests">Your Interests</label>
+                            <input type="text" id="edit_interests" name="interests" placeholder="e.g., Quiet study, loves coffee">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit_capacity">Capacity</label>
+                            <input type="number" id="edit_capacity" name="capacity" min="1" max="10">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Available Date Range</label>
+                            <div class="date-range-container">
+                                <div class="date-range-group">
+                                    <label>From:</label>
+                                    <input type="date" id="editStartDate" name="start_date">
+                                </div>
+                                <div class="date-range-group">
+                                    <label>To:</label>
+                                    <input type="date" id="editEndDate" name="end_date">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 15px; margin-top: 20px;">
+                            <button type="submit" class="submit-btn" id="updateBtn" style="flex: 1;">Update Listing</button>
+                            <button type="button" class="submit-btn" id="deleteBtn" onclick="deleteListingFromEdit()" style="flex: 1; background: #dc3545; border: none;">Delete Listing</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="section">
+                    <h2>Upload Photos</h2>
+                    <div class="upload-area" id="uploadArea">
+                        <div style="font-size: 3em; margin-bottom: 15px;">📷</div>
+                        <div style="color: #666; font-size: 1.1em; margin-bottom: 10px;">Click or drag to upload photos</div>
+                        <div style="color: #999; font-size: 0.9em;">PNG, JPG, JPEG, GIF, or WEBP</div>
+                        <input type="file" id="fileInput" class="upload-input" accept="image/*" multiple>
+                    </div>
+                    <div id="imagesGrid" class="images-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loading = document.getElementById('loading');
+        const errorDiv = document.getElementById('error');
+        const successDiv = document.getElementById('success');
+        const authRequired = document.getElementById('authRequired');
+        const createForm = document.getElementById('createForm');
+        const editForm = document.getElementById('editForm');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const imagesGrid = document.getElementById('imagesGrid');
+        const createUploadArea = document.getElementById('createUploadArea');
+        const createFileInput = document.getElementById('createFileInput');
+        const createImagesGrid = document.getElementById('createImagesGrid');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const listingsList = document.getElementById('listingsList');
+        const showCreateFormBtn = document.getElementById('showCreateFormBtn');
+        const backToListBtn = document.getElementById('backToListBtn');
+        const backToListBtnEdit = document.getElementById('backToListBtnEdit');
+
+        let currentListing = null;
+        let createFormImages = []; // Store images for create form
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/check', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (!data.authenticated || !data.user || !data.user.roles || !data.user.roles.includes('host')) {
+                    loading.style.display = 'none';
+                    authRequired.style.display = 'block';
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                loading.style.display = 'none';
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+                return false;
+            }
+        }
+
+        // Load listings
+        async function loadListings() {
+            try {
+                const response = await fetch('http://localhost:5000/api/listing/my-listings', {
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                
+                if (!response.ok) {
+                    errorDiv.textContent = data.error || 'Failed to load listings';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                const listings = data.listings || [];
+                
+                // Check URL for listing ID to edit
+                const urlParams = new URLSearchParams(window.location.search);
+                const editListingId = urlParams.get('listing');
+                
+                if (editListingId) {
+                    // Edit specific listing
+                    const listing = listings.find(l => l.id == editListingId);
+                    if (listing) {
+                        currentListing = listing;
+                        populateEditForm(listing);
+                        editForm.style.display = 'block';
+                        listingsList.style.display = 'none';
+                        return;
+                    }
+                }
+                
+                if (listings.length > 0) {
+                    // Show listings list
+                    displayListingsList(listings);
+                    listingsList.style.display = 'block';
+                } else {
+                    // No listings - show create form
+                    createForm.style.display = 'block';
+                    setupCreateForm();
+                }
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function setupCreateForm() {
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            if (startDateInput && endDateInput) {
+                startDateInput.setAttribute('min', today);
+                endDateInput.setAttribute('min', today);
+                
+                // Update end date min when start date changes
+                startDateInput.addEventListener('change', () => {
+                    if (startDateInput.value) {
+                        endDateInput.setAttribute('min', startDateInput.value);
+                    }
+                });
+            }
+        }
+
+        function displayListingsList(listings) {
+            const grid = document.getElementById('listingsGrid');
+            grid.innerHTML = '';
+            
+            listings.forEach(listing => {
+                const card = document.createElement('div');
+                card.className = 'listing-card';
+                card.style.cssText = 'background: #f8f9fa; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0; transition: all 0.3s;';
+                card.onmouseover = function() {
+                    this.style.borderColor = '#667eea';
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                };
+                card.onmouseout = function() {
+                    this.style.borderColor = '#e0e0e0';
+                    this.style.transform = 'none';
+                    this.style.boxShadow = 'none';
+                };
+                
+                const description = listing.description || 'No description';
+                const preview = description.length > 100 ? description.substring(0, 100) + '...' : description;
+                
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="font-size: 1.3em; font-weight: 600; color: #333;">${escapeHtml(listing.name || 'Unnamed Listing')}</div>
+                        <div style="color: #999; font-size: 0.9em;">#${listing.id}</div>
+                    </div>
+                    <div style="color: #666; margin-bottom: 10px; line-height: 1.6;">${escapeHtml(preview)}</div>
+                    <div style="font-size: 0.9em; color: #999; margin-bottom: 15px;">
+                        Capacity: ${listing.capacity || 1} • Dates: ${listing.available_dates?.length || 0} available
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="/listing/${listing.id}" style="flex: 1; min-width: 80px; padding: 8px 16px; border-radius: 6px; background: #667eea; color: white; text-decoration: none; text-align: center; font-weight: 600;">View</a>
+                        <button onclick="editListing(${listing.id})" style="flex: 1; min-width: 80px; padding: 8px 16px; border-radius: 6px; background: #f0f0f0; color: #667eea; border: none; font-weight: 600; cursor: pointer;">Edit</button>
+                        <button onclick="deleteListing(${listing.id})" style="flex: 1; min-width: 80px; padding: 8px 16px; border-radius: 6px; background: #dc3545; color: white; border: none; font-weight: 600; cursor: pointer;">Delete</button>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function editListing(listingId) {
+            window.location.href = `/host/dashboard?listing=${listingId}`;
+        }
+
+        async function deleteListing(listingId) {
+        if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+            return;
+        }
+    
+        try {
+            const response = await fetch(`http://localhost:5000/api/listing/${listingId}/delete`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            successDiv.textContent = 'Listing deleted successfully';
+            successDiv.style.display = 'block';
+            // Reload listings to remove the deleted one
+            loadListings();
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 2000);
+        } else {
+            errorDiv.textContent = data.error || 'Failed to delete listing';
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        errorDiv.textContent = `Error: ${error.message}`;
+        errorDiv.style.display = 'block';
+        console.error('Delete error:', error);
+    }
+    }
+
+
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Delete listing from edit form
+    async function deleteListingFromEdit() {
+    if (!currentListing || !currentListing.id) {
+        errorDiv.textContent = 'No listing selected';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`http://localhost:5000/api/listing/${currentListing.id}/delete`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            successDiv.textContent = 'Listing deleted successfully';
+            successDiv.style.display = 'block';
+            // Redirect back to listings list after a short delay
+            setTimeout(() => {
+                window.location.href = '/host/dashboard';
+            }, 1500);
+        } else {
+            errorDiv.textContent = data.error || 'Failed to delete listing';
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        errorDiv.textContent = `Error: ${error.message}`;
+        errorDiv.style.display = 'block';
+    }
+    }
+
+        // Populate edit form
+        function populateEditForm(listing) {
+            document.getElementById('listingName').textContent = `${listing.name}'s Listing`;
+            document.getElementById('listingId').textContent = `#${listing.id}`;
+            document.getElementById('listingLink').href = `/listing/${listing.id}`;
+            
+            document.getElementById('edit_description').value = listing.description || '';
+            document.getElementById('edit_dorm_vibe').value = listing.dorm_vibe || '';
+            document.getElementById('edit_interests').value = listing.interests || '';
+            document.getElementById('edit_capacity').value = listing.capacity || 1;
+            
+            // Populate date range
+            if (listing.available_dates && listing.available_dates.length > 0) {
+                const sortedDates = listing.available_dates.sort();
+                document.getElementById('editStartDate').value = sortedDates[0];
+                document.getElementById('editEndDate').value = sortedDates[sortedDates.length - 1];
+            }
+            
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            const editStartDateInput = document.getElementById('editStartDate');
+            const editEndDateInput = document.getElementById('editEndDate');
+            editStartDateInput.setAttribute('min', today);
+            editEndDateInput.setAttribute('min', today);
+            
+            // Update end date min when start date changes
+            editStartDateInput.addEventListener('change', () => {
+                if (editStartDateInput.value) {
+                    editEndDateInput.setAttribute('min', editStartDateInput.value);
+                }
+            });
+            
+            // Display images
+            displayImages(listing.images || []);
+        }
+
+        // Generate date range array
+        function generateDateRange(startDate, endDate) {
+            const dates = [];
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            if (start > end) {
+                return []; // Invalid range
+            }
+            
+            const current = new Date(start);
+            while (current <= end) {
+                dates.push(current.toISOString().split('T')[0]);
+                current.setDate(current.getDate() + 1);
+            }
+            
+            return dates;
+        }
+
+        // Create listing
+        document.getElementById('createListingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('createBtn');
+            btn.disabled = true;
+            errorDiv.style.display = 'none';
+            
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                errorDiv.textContent = 'Please select a date range';
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+                return;
+            }
+            
+            const dates = generateDateRange(startDate, endDate);
+            
+            if (dates.length === 0) {
+                errorDiv.textContent = 'End date must be after start date';
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+                return;
+            }
+            
+            const formData = {
+                description: document.getElementById('description').value,
+                dorm_vibe: document.getElementById('dorm_vibe').value,
+                interests: document.getElementById('interests').value,
+                capacity: parseInt(document.getElementById('capacity').value),
+                available_dates: dates
+            };
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/listing/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    const listingId = data.listing.id;
+                    
+                    // Upload images if any
+                    if (createFormImages.length > 0) {
+                        for (const imageFile of createFormImages) {
+                            const imageFormData = new FormData();
+                            imageFormData.append('image', imageFile);
+                            
+                            try {
+                                await fetch(`http://localhost:5000/api/listing/${listingId}/upload`, {
+                                    method: 'POST',
+                                    credentials: 'include',
+                                    body: imageFormData
+                                });
+                            } catch (err) {
+                                console.error('Failed to upload image:', err);
+                            }
+                        }
+                    }
+                    
+                    successDiv.textContent = 'Listing created successfully!';
+                    successDiv.style.display = 'block';
+                    setTimeout(() => {
+                        createForm.style.display = 'none';
+                        createFormImages = [];
+                        createImagesGrid.innerHTML = '';
+                        document.getElementById('createListingForm').reset();
+                        loadListings();
+                    }, 1500);
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to create listing';
+                    errorDiv.style.display = 'block';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+            }
+        });
+
+        // Update listing
+        document.getElementById('editListingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('updateBtn');
+            btn.disabled = true;
+            errorDiv.style.display = 'none';
+            
+            const startDate = document.getElementById('editStartDate').value;
+            const endDate = document.getElementById('editEndDate').value;
+            
+            let dates = [];
+            if (startDate && endDate) {
+                dates = generateDateRange(startDate, endDate);
+                if (dates.length === 0) {
+                    errorDiv.textContent = 'End date must be after start date';
+                    errorDiv.style.display = 'block';
+                    btn.disabled = false;
+                    return;
+                }
+            }
+            
+            const formData = {
+                description: document.getElementById('edit_description').value,
+                dorm_vibe: document.getElementById('edit_dorm_vibe').value,
+                interests: document.getElementById('edit_interests').value,
+                capacity: parseInt(document.getElementById('edit_capacity').value),
+                available_dates: dates.length > 0 ? dates : currentListing.available_dates
+            };
+            
+            try {
+                const response = await fetch(`http://localhost:5000/api/listing/${currentListing.id}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    successDiv.textContent = 'Listing updated successfully!';
+                    successDiv.style.display = 'block';
+                    setTimeout(() => {
+                        successDiv.style.display = 'none';
+                        loadListings();
+                    }, 2000);
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to update listing';
+                    errorDiv.style.display = 'block';
+                }
+                btn.disabled = false;
+            } catch (error) {
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+            }
+        });
+
+        // Image upload for create form
+        createUploadArea?.addEventListener('click', () => createFileInput.click());
+        createUploadArea?.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            createUploadArea.classList.add('dragover');
+        });
+        createUploadArea?.addEventListener('dragleave', () => {
+            createUploadArea.classList.remove('dragover');
+        });
+        createUploadArea?.addEventListener('drop', (e) => {
+            e.preventDefault();
+            createUploadArea.classList.remove('dragover');
+            handleCreateFiles(e.dataTransfer.files);
+        });
+        createFileInput?.addEventListener('change', (e) => handleCreateFiles(e.target.files));
+
+        // Image upload for edit form
+        uploadArea?.addEventListener('click', () => fileInput.click());
+        uploadArea?.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea?.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea?.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+        fileInput?.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        function displayImages(images) {
+            imagesGrid.innerHTML = '';
+            if (images.length === 0) {
+                imagesGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">No photos uploaded yet</div>';
+                return;
+            }
+            images.forEach(imageUrl => {
+                const item = document.createElement('div');
+                item.className = 'image-item';
+                const img = document.createElement('img');
+                img.src = `http://localhost:5000${imageUrl}`;
+                img.alt = 'Listing photo';
+                item.appendChild(img);
+                imagesGrid.appendChild(item);
+            });
+        }
+
+        function displayCreateImages(files) {
+            createImagesGrid.innerHTML = '';
+            if (files.length === 0) {
+                return;
+            }
+            
+            files.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = 'image-item';
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.alt = 'Preview';
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = '×';
+                removeBtn.style.cssText = 'position: absolute; top: 5px; right: 5px; background: #c33; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 1.2em;';
+                removeBtn.onclick = () => {
+                    createFormImages.splice(index, 1);
+                    displayCreateImages(createFormImages);
+                };
+                
+                item.style.position = 'relative';
+                item.appendChild(img);
+                item.appendChild(removeBtn);
+                createImagesGrid.appendChild(item);
+            });
+        }
+
+        function handleCreateFiles(files) {
+            for (let file of files) {
+                if (file.type.startsWith('image/')) {
+                    createFormImages.push(file);
+                }
+            }
+            displayCreateImages(createFormImages);
+            createFileInput.value = '';
+        }
+
+        async function handleFiles(files) {
+            if (!currentListing) return;
+            for (let file of files) {
+                if (!file.type.startsWith('image/')) continue;
+                const formData = new FormData();
+                formData.append('image', file);
+                try {
+                    const response = await fetch(`http://localhost:5000/api/listing/${currentListing.id}/upload`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        successDiv.textContent = 'Image uploaded!';
+                        successDiv.style.display = 'block';
+                        setTimeout(() => successDiv.style.display = 'none', 3000);
+                        loadListings();
+                    } else {
+                        errorDiv.textContent = data.error || 'Upload failed';
+                        errorDiv.style.display = 'block';
+                    }
+                } catch (error) {
+                    errorDiv.textContent = `Error: ${error.message}`;
+                    errorDiv.style.display = 'block';
+                }
+            }
+            fileInput.value = '';
+        }
+
+        // Navigation buttons
+        showCreateFormBtn?.addEventListener('click', () => {
+            listingsList.style.display = 'none';
+            createForm.style.display = 'block';
+            setupCreateForm();
+        });
+
+        backToListBtn?.addEventListener('click', () => {
+            createForm.style.display = 'none';
+            loadListings();
+        });
+
+        backToListBtnEdit?.addEventListener('click', () => {
+            editForm.style.display = 'none';
+            loadListings();
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            await fetch('http://localhost:5000/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            window.location.href = '/login';
+        });
+
+        (async () => {
+            const isAuth = await checkAuth();
+            if (isAuth) await loadListings();
+        })();
+    </script>
+</body>
+</html>

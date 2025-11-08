@@ -1,0 +1,291 @@
+"""
+Flask API server that integrates with the existing Dedalus Labs AI agent.
+Run with: python server.py
+"""
+from flask import Flask, request, jsonify, send_from_directory, session
+from flask_cors import CORS
+import asyncio
+import json
+import os
+from ai_agent import run_matching_agent
+from auth import create_user, verify_user, get_user
+
+app = Flask(__name__, static_folder='static')
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+CORS(app, supports_credentials=True)  # Enable CORS with credentials for sessions
+
+@app.route('/')
+def index():
+    """Serve the main matching page (requires visitor login)."""
+    return send_from_directory('.', 'index.html')
+
+@app.route('/login')
+def login_page():
+    """Serve the login page."""
+    return send_from_directory('.', 'login.html')
+
+@app.route('/signup')
+def signup_page():
+    """Serve the signup page."""
+    return send_from_directory('.', 'signup.html')
+
+@app.route('/api/match', methods=['POST'])
+def match_visitor():
+    """
+    API endpoint that uses the existing Dedalus Labs agent to match visitors with hosts.
+    
+    Expects JSON:
+    {
+        "visitor_query": "I need a quiet place, early bedtime...",
+        "date_needed": "2025-11-08"
+    }
+    
+    Returns:
+    {
+        "success": true,
+        "matches": { ... }  // Result from Dedalus agent
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        visitor_query = data.get('visitor_query', '').strip()
+        date_needed = data.get('date_needed', '').strip()
+        
+        if not visitor_query:
+            return jsonify({"error": "visitor_query is required"}), 400
+        if not date_needed:
+            return jsonify({"error": "date_needed is required"}), 400
+        
+        # Call the existing Dedalus Labs agent
+        result = asyncio.run(run_matching_agent(visitor_query, date_needed))
+        
+        # The agent returns a string (JSON), try to parse it
+        if isinstance(result, str):
+            # Try to extract JSON from markdown code blocks or plain text
+            import re
+            json_str = result.strip()
+            
+            # Remove markdown code blocks if present
+            json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', json_str, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1)
+            else:
+                # Try to find JSON object in the string
+                json_match = re.search(r'\{.*\}', json_str, re.DOTALL)
+                if json_match:
+                    json_str = json_match.group(0)
+            
+            try:
+                parsed_result = json.loads(json_str)
+                return jsonify({
+                    "success": True,
+                    "matches": parsed_result
+                }), 200
+            except json.JSONDecodeError:
+                # If it's not valid JSON, try to return it as-is for frontend to handle
+                return jsonify({
+                    "success": True,
+                    "matches": {"raw_output": result}
+                }), 200
+        else:
+            # If it's already a dict/object
+            return jsonify({
+                "success": True,
+                "matches": result
+            }), 200
+        
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "details": error_details
+        }), 500
+
+@app.route('/api/auth/signup', methods=['POST'])
+def signup():
+    """Sign up a new user (host or visitor)."""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        email = data.get('email', '').strip().lower()
+        password = data.get('password', '').strip()
+        name = data.get('name', '').strip()
+        user_type = data.get('type', '').strip().lower()  # 'host' or 'visitor'
+        
+        if not email or not password or not name:
+            return jsonify({"error": "Email, password, and name are required"}), 400
+        
+        if user_type not in ['host', 'visitor']:
+            return jsonify({"error": "Type must be 'host' or 'visitor'"}), 400
+        
+        if create_user(email, password, name, user_type):
+            # Auto-login after signup
+            session['user_email'] = email
+            session['user_type'] = user_type
+            return jsonify({
+                "success": True,
+                "message": "Account created successfully",
+                "user": {
+                    "email": email,
+                    "name": name,
+                    "type": user_type
+                }
+            }), 200
+        else:
+            return jsonify({"error": "Email already exists"}), 400
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    """Login a user (host or visitor)."""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        email = data.get('email', '').strip().lower()
+        password = data.get('password', '').strip()
+        user_type = data.get('type', '').strip().lower()
+        
+        if not email or not password:
+            return jsonify({"error": "Email and password are required"}), 400
+        
+        if user_type not in ['host', 'visitor']:
+            return jsonify({"error": "Type must be 'host' or 'visitor'"}), 400
+        
+        user = verify_user(email, password, user_type)
+        
+        if user:
+            session['user_email'] = email
+            session['user_type'] = user_type
+            return jsonify({
+                "success": True,
+                "message": "Login successful",
+                "user": user
+            }), 200
+        else:
+            return jsonify({"error": "Invalid email or password"}), 401
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/auth/logout', methods=['POST'])
+def logout():
+    """Logout the current user."""
+    session.clear()
+    return jsonify({"success": True, "message": "Logged out successfully"}), 200
+
+@app.route('/api/auth/check', methods=['GET'])
+def check_auth():
+    """Check if user is authenticated."""
+    if 'user_email' in session:
+        user = get_user(session['user_email'], session.get('user_type', 'visitor'))
+        if user:
+            return jsonify({
+                "authenticated": True,
+                "user": user
+            }), 200
+    
+    return jsonify({"authenticated": False}), 200
+
+@app.route('/api/match', methods=['POST'])
+def match_visitor():
+    """
+    API endpoint that uses the existing Dedalus Labs agent to match visitors with hosts.
+    Requires visitor authentication.
+    """
+    # Check authentication
+    if 'user_email' not in session or session.get('user_type') != 'visitor':
+        return jsonify({"error": "Authentication required. Please login as a visitor."}), 401
+    
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        visitor_query = data.get('visitor_query', '').strip()
+        date_needed = data.get('date_needed', '').strip()
+        
+        if not visitor_query:
+            return jsonify({"error": "visitor_query is required"}), 400
+        if not date_needed:
+            return jsonify({"error": "date_needed is required"}), 400
+        
+        # Call the existing Dedalus Labs agent
+        result = asyncio.run(run_matching_agent(visitor_query, date_needed))
+        
+        # The agent returns a string (JSON), try to parse it
+        if isinstance(result, str):
+            # Try to extract JSON from markdown code blocks or plain text
+            import re
+            json_str = result.strip()
+            
+            # Remove markdown code blocks if present
+            json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', json_str, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1)
+            else:
+                # Try to find JSON object in the string
+                json_match = re.search(r'\{.*\}', json_str, re.DOTALL)
+                if json_match:
+                    json_str = json_match.group(0)
+            
+            try:
+                parsed_result = json.loads(json_str)
+                return jsonify({
+                    "success": True,
+                    "matches": parsed_result
+                }), 200
+            except json.JSONDecodeError:
+                # If it's not valid JSON, try to return it as-is for frontend to handle
+                return jsonify({
+                    "success": True,
+                    "matches": {"raw_output": result}
+                }), 200
+        else:
+            # If it's already a dict/object
+            return jsonify({
+                "success": True,
+                "matches": result
+            }), 200
+        
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "details": error_details
+        }), 500
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint."""
+    return jsonify({"status": "healthy", "service": "Dorm Matching API"}), 200
+
+if __name__ == '__main__':
+    print("🚀 Starting Dorm Matching API Server...")
+    print("📡 API available at: http://localhost:5000")
+    print("🌐 Frontend: http://localhost:5000")
+    print("🔗 API endpoint: http://localhost:5000/api/match")
+    app.run(debug=True, port=5000)
+

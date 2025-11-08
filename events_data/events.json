@@ -1,0 +1,221 @@
+[
+  {
+    "id": 1,
+    "title": "AI & Ethics Symposium",
+    "description": "A full-day symposium on the intersection of artificial intelligence, policy, and human values. Hosted at Friend Center Auditorium.",
+    "date": "2025-11-12",
+    "time": "09:00",
+    "location": "Friend Center Auditorium",
+    "location_lat": 40.35,
+    "location_lng": -74.653,
+    "category": "academic",
+    "cost": 0.0,
+    "organizer": "Center for Human Values",
+    "capacity": 200,
+    "tags": [
+      "academic",
+      "free",
+      "ai",
+      "ethics"
+    ],
+    "image_url": null,
+    "registration_url": null
+  },
+  {
+    "id": 2,
+    "title": "Fall A Cappella Jam",
+    "description": "Join Princeton's top vocal groups for a night of music, rhythm, and campus energy in Richardson Auditorium.",
+    "date": "2025-11-14",
+    "time": "19:00",
+    "location": "Richardson Auditorium",
+    "location_lat": 40.351,
+    "location_lng": -74.655,
+    "category": "arts",
+    "cost": 10.0,
+    "organizer": "Music Department",
+    "capacity": 800,
+    "tags": [
+      "arts",
+      "music",
+      "a cappella"
+    ],
+    "image_url": null,
+    "registration_url": null
+  },
+  {
+    "id": 3,
+    "title": "Global Food Bazaar",
+    "description": "Sample cuisines from student-run international booths at Frist Campus Center Lawn. A true feast for all cultures.",
+    "date": "2025-11-16",
+    "time": "12:00",
+    "location": "Frist Campus Center Lawn",
+    "location_lat": 40.348,
+    "location_lng": -74.6514,
+    "category": "food",
+    "cost": 8.0,
+    "organizer": "International Student Association",
+    "capacity": 500,
+    "tags": [
+      "food",
+      "cultural",
+      "social"
+    ],
+    "image_url": null,
+    "registration_url": null
+  },
+  {
+    "id": 4,
+    "title": "Yoga by the Lake",
+    "description": "Early morning group yoga at Carnegie Lake to center your mind and body before finals week.",
+    "date": "2025-11-09",
+    "time": "07:00",
+    "location": "Carnegie Lake",
+    "location_lat": 40.343,
+    "location_lng": -74.647,
+    "category": "sports",
+    "cost": 5.0,
+    "organizer": "Wellness Center",
+    "capacity": 50,
+    "tags": [
+      "sports",
+      "wellness",
+      "yoga",
+      "outdoor"
+    ],
+    "image_url": null,
+    "registration_url": null
+  },
+  {
+    "id": 5,
+    "title": "Startup Coffee Chat",
+    "description": "Meet founders, designers, and coders from across campus at Small World Coffee. Bring your ideas and curiosity.",
+    "date": "2025-11-11",
+    "time": "15:00",
+    "location": "Small World Coffee",
+    "location_lat": 40.349,
+    "location_lng": -74.65,
+    "category": "social",
+    "cost": 0.0,
+    "organizer": "Entrepreneurship Club",
+    "capacity": 30,
+    "tags": [
+      "social",
+      "free",
+      "networking",
+      "startup"
+    ],
+    "image_url": null,
+    "registration_url": null
+  },
+  {
+    "id": 6,
+    "title": "TigerHacks: Sustainability Challenge",
+    "description": "Princeton's largest 24-hour hackathon focused on sustainable innovation and AI-driven green solutions.",
+    "date": "2025-11-22",
+    "time": "09:00",
+    "location": "Friend Center",
+    "location_lat": 40.35,
+    "location_lng": -74.653,
+    "category": "academic",
+    "cost": 0.0,
+    "organizer": "TigerHacks",
+    "capacity": 300,
+    "tags": [
+      "academic",
+      "free",
+      "hackathon",
+      "sustainability",
+      "ai"
+    ],
+    "image_url": null,
+    "registration_url": null
+  },
+  {
+    "id": 7,
+    "title": "Outdoor Movie Night: La La Land",
+    "description": "An open-air movie screening at Poe Field with popcorn, blankets, and fairy lights.",
+    "date": "2025-11-13",
+    "time": "19:00",
+    "location": "Poe Field",
+    "location_lat": 40.345,
+    "location_lng": -74.648,
+    "category": "arts",
+    "cost": 7.0,
+    "organizer": "Student Activities",
+    "capacity": 200,
+    "tags": [
+      "arts",
+      "movie",
+      "outdoor",
+      "social"
+    ],
+    "image_url": null,
+    "registration_url": null
+  },
+  {
+    "id": 8,
+    "title": "Intercollegiate Soccer Match",
+    "description": "Cheer for the Princeton Tigers as they face off against Harvard in a thrilling soccer showdown.",
+    "date": "2025-11-18",
+    "time": "15:00",
+    "location": "Roberts Stadium",
+    "location_lat": 40.345,
+    "location_lng": -74.648,
+    "category": "sports",
+    "cost": 0.0,
+    "organizer": "Athletics Department",
+    "capacity": 2000,
+    "tags": [
+      "sports",
+      "free",
+      "soccer",
+      "competition"
+    ],
+    "image_url": null,
+    "registration_url": null
+  },
+  {
+    "id": 9,
+    "title": "Open Mic & Poetry Night",
+    "description": "An intimate evening of poetry, acoustic music, and personal storytelling at Caf\u00e9 Vivian.",
+    "date": "2025-11-20",
+    "time": "19:30",
+    "location": "Caf\u00e9 Vivian",
+    "location_lat": 40.3485,
+    "location_lng": -74.651,
+    "category": "arts",
+    "cost": 5.0,
+    "organizer": "Creative Writing Club",
+    "capacity": 60,
+    "tags": [
+      "arts",
+      "poetry",
+      "music",
+      "open mic"
+    ],
+    "image_url": null,
+    "registration_url": null
+  },
+  {
+    "id": 10,
+    "title": "Thanksgiving Potluck Dinner",
+    "description": "A cozy community meal at the Graduate College dining hall \u2014 everyone brings a dish and a story to share.",
+    "date": "2025-11-27",
+    "time": "18:00",
+    "location": "Graduate College Dining Hall",
+    "location_lat": 40.352,
+    "location_lng": -74.656,
+    "category": "food",
+    "cost": 10.0,
+    "organizer": "Graduate Student Council",
+    "capacity": 150,
+    "tags": [
+      "food",
+      "social",
+      "thanksgiving",
+      "community"
+    ],
+    "image_url": null,
+    "registration_url": null
+  }
+]

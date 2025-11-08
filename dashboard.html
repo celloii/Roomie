@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - DormMatch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+        }
+
+        .nav-btns {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .user-info {
+            margin-right: 15px;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            background: white;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .loading, .auth-required {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error, .success {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            border-left: 4px solid #c33;
+        }
+
+        .success {
+            background: #efe;
+            color: #3c3;
+            border-left: 4px solid #3c3;
+        }
+
+        /* Host Tab Styles */
+        .listings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .create-listing-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .create-listing-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .listing-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .listing-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .listing-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .listing-card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .listing-card-id {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .listing-card-info {
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .listing-card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .edit-btn {
+            background: #f0f0f0;
+            color: #667eea;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .no-listings {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+
+        /* Visitor Tab Styles (matching form) */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        textarea, input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        textarea:focus, input[type="date"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner.active {
+            display: block;
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .match-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .match-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .match-score {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .listing-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .listing-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .listing-card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .listing-card-info {
+            color: #666;
+            margin-bottom: 8px;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .listing-card-meta {
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .date-range-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .stars {
+            color: #ffd700;
+            font-size: 1.1em;
+        }
+
+        .rating-text {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .match-percentage {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 DormMatch Dashboard</h1>
+            <div class="nav-btns">
+                <span class="user-info" id="userInfo"></span>
+                <button class="nav-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="visitor" id="visitorTab">🔍 Find Listings</div>
+            <div class="tab" data-tab="host" id="hostTab">🏠 My Listings</div>
+        </div>
+        
+        <div class="content">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+            
+            <div id="authRequired" class="auth-required" style="display: none;">
+                <h2>Authentication Required</h2>
+                <p style="margin: 20px 0;">Please log in to access your dashboard.</p>
+                <a href="/login" class="nav-btn" style="display: inline-block; background: white; color: #667eea;">Go to Login</a>
+            </div>
+            
+            <div id="error" class="error" style="display: none;"></div>
+            <div id="success" class="success" style="display: none;"></div>
+            
+            <!-- Visitor Tab -->
+            <div class="tab-content active" id="visitorContent">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2 style="color: #333;">Browse Available Listings</h2>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 20px; color: #333;">Search Filters</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="idealVibes">Ideal Vibes</label>
+                            <input 
+                                type="text" 
+                                id="idealVibes" 
+                                placeholder="e.g., quiet, study-friendly, early bedtime"
+                                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;"
+                            >
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="dateRangeStart">Available Date Range</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input 
+                                    type="date" 
+                                    id="dateRangeStart" 
+                                    style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;"
+                                >
+                                <span>to</span>
+                                <input 
+                                    type="date" 
+                                    id="dateRangeEnd" 
+                                    style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <button id="searchBtn" class="submit-btn" style="width: auto; padding: 12px 30px;">
+                        🔍 Search with AI Matching
+                    </button>
+                </div>
+                
+                <div id="allListingsContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading listings...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Host Tab -->
+            <div class="tab-content" id="hostContent">
+                <div class="listings-header">
+                    <h2 style="color: #333;">My Listings</h2>
+                    <button class="create-listing-btn" id="createListingBtn">+ Create New Listing</button>
+                </div>
+                
+                <div id="listingsContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading your listings...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loading = document.getElementById('loading');
+        const authRequired = document.getElementById('authRequired');
+        const errorDiv = document.getElementById('error');
+        const successDiv = document.getElementById('success');
+        const userInfo = document.getElementById('userInfo');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const visitorTab = document.getElementById('visitorTab');
+        const hostTab = document.getElementById('hostTab');
+        const visitorContent = document.getElementById('visitorContent');
+        const hostContent = document.getElementById('hostContent');
+        const listingsContainer = document.getElementById('listingsContainer');
+        const createListingBtn = document.getElementById('createListingBtn');
+        const allListingsContainer = document.getElementById('allListingsContainer');
+        const idealVibes = document.getElementById('idealVibes');
+        const dateRangeStart = document.getElementById('dateRangeStart');
+        const dateRangeEnd = document.getElementById('dateRangeEnd');
+        const searchBtn = document.getElementById('searchBtn');
+
+        let currentUser = null;
+        let allListings = [];
+        let matchScores = {}; // Store AI match scores
+
+        // Tab switching
+        visitorTab.addEventListener('click', () => switchTab('visitor'));
+        hostTab.addEventListener('click', () => switchTab('host'));
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tab === 'visitor') {
+                visitorTab.classList.add('active');
+                visitorContent.classList.add('active');
+                loadAllListings();
+            } else {
+                hostTab.classList.add('active');
+                hostContent.classList.add('active');
+                loadHostListings();
+            }
+        }
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/check', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (!data.authenticated) {
+                    loading.style.display = 'none';
+                    authRequired.style.display = 'block';
+                    return false;
+                }
+                
+                currentUser = data.user;
+                userInfo.textContent = `👤 ${data.user.name}`;
+                
+                // Always show both tabs
+                visitorTab.style.display = 'block';
+                hostTab.style.display = 'block';
+                
+                loading.style.display = 'none';
+                return true;
+            } catch (error) {
+                loading.style.display = 'none';
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+                return false;
+            }
+        }
+
+        // Load all listings for visitor tab
+        async function loadAllListings() {
+            try {
+                const response = await fetch('http://localhost:5000/api/listings', {
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    allListingsContainer.innerHTML = `<div class="error">${data.error || 'Failed to load listings'}</div>`;
+                    return;
+                }
+                
+                allListings = data.listings || [];
+                displayAllListings(allListings);
+            } catch (error) {
+                allListingsContainer.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function formatDateRange(dates) {
+            if (!dates || dates.length === 0) {
+                return 'No dates available';
+            }
+            const sortedDates = dates.sort();
+            const startDate = sortedDates[0];
+            const endDate = sortedDates[sortedDates.length - 1];
+            if (startDate === endDate) {
+                return startDate;
+            }
+            return `${startDate} to ${endDate}`;
+        }
+
+        function formatRating(rating, reviewCount) {
+            if (reviewCount === 0) {
+                return '<div class="rating-text">No reviews yet</div>';
+            }
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            
+            let stars = '★'.repeat(fullStars);
+            if (hasHalfStar) stars += '½';
+            stars += '☆'.repeat(emptyStars);
+            
+            return `
+                <div class="rating-display">
+                    <span class="stars">${stars}</span>
+                    <span class="rating-text">${rating.toFixed(1)} (${reviewCount} review${reviewCount !== 1 ? 's' : ''})</span>
+                </div>
+            `;
+        }
+
+        function displayAllListings(listings) {
+            if (listings.length === 0) {
+                allListingsContainer.innerHTML = `
+                    <div class="no-listings">
+                        <div style="font-size: 4em; margin-bottom: 20px;">🔍</div>
+                        <h3 style="margin-bottom: 15px;">No listings found</h3>
+                        <p style="color: #666;">Try adjusting your search filters.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            allListingsContainer.innerHTML = '';
+            const grid = document.createElement('div');
+            grid.className = 'listings-grid';
+            
+            // Sort by match score if available
+            const sortedListings = [...listings].sort((a, b) => {
+                const scoreA = matchScores[a.id] || 0;
+                const scoreB = matchScores[b.id] || 0;
+                return scoreB - scoreA;
+            });
+            
+            sortedListings.forEach(listing => {
+                const card = document.createElement('div');
+                card.className = 'listing-card';
+                card.onclick = () => window.location.href = `/listing/${listing.id}`;
+                
+                const description = listing.description || 'No description';
+                const preview = description.length > 150 ? description.substring(0, 150) + '...' : description;
+                
+                const dateRangeText = formatDateRange(listing.available_dates);
+                const rating = listing.average_rating || 0;
+                const reviewCount = listing.review_count || 0;
+                const matchScore = matchScores[listing.id];
+                
+                card.innerHTML = `
+                    <div class="listing-card-title">${escapeHtml(listing.name || 'Unnamed Listing')}</div>
+                    ${matchScore !== undefined ? `<div class="match-percentage">${Math.round(matchScore * 100)}% Match</div>` : ''}
+                    <div class="listing-card-info">${escapeHtml(preview)}</div>
+                    <div class="listing-card-info" style="font-size: 0.9em;">
+                        <strong>Vibe:</strong> ${escapeHtml(listing.dorm_vibe || 'Not specified')}
+                    </div>
+                    <div class="listing-card-info" style="font-size: 0.9em;">
+                        <strong>Interests:</strong> ${escapeHtml(listing.interests || 'Not specified')}
+                    </div>
+                    <div class="listing-card-meta">
+                        Capacity: ${listing.capacity || 1} guest${listing.capacity !== 1 ? 's' : ''}
+                    </div>
+                    ${formatRating(rating, reviewCount)}
+                    <div class="date-range-display">📅 ${dateRangeText}</div>
+                `;
+                
+                grid.appendChild(card);
+            });
+            
+            allListingsContainer.appendChild(grid);
+        }
+
+        // AI Search functionality
+        searchBtn.addEventListener('click', async () => {
+            const vibes = idealVibes.value.trim();
+            const startDate = dateRangeStart.value;
+            const endDate = dateRangeEnd.value;
+            
+            if (!vibes || !startDate || !endDate) {
+                errorDiv.textContent = 'Please fill in all search fields';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            searchBtn.disabled = true;
+            searchBtn.textContent = 'Searching...';
+            errorDiv.style.display = 'none';
+            allListingsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><p>AI is analyzing listings...</p></div>';
+            
+            try {
+                // First get all listings
+                const listingsResponse = await fetch('http://localhost:5000/api/listings', {
+                    credentials: 'include'
+                });
+                const listingsData = await listingsResponse.json();
+                
+                if (!listingsResponse.ok) {
+                    throw new Error(listingsData.error || 'Failed to load listings');
+                }
+                
+                allListings = listingsData.listings || [];
+                
+                // Filter by date range first
+                const dateFiltered = allListings.filter(listing => {
+                    if (!listing.available_dates || listing.available_dates.length === 0) return false;
+                    const listingDates = listing.available_dates.sort();
+                    const listingStart = listingDates[0];
+                    const listingEnd = listingDates[listingDates.length - 1];
+                    // Check if there's overlap
+                    return listingStart <= endDate && listingEnd >= startDate;
+                });
+                
+                if (dateFiltered.length === 0) {
+                    allListingsContainer.innerHTML = `
+                        <div class="no-listings">
+                            <div style="font-size: 4em; margin-bottom: 20px;">📅</div>
+                            <h3 style="margin-bottom: 15px;">No listings available for this date range</h3>
+                            <p style="color: #666;">Try selecting a different date range.</p>
+                        </div>
+                    `;
+                    searchBtn.disabled = false;
+                    searchBtn.textContent = '🔍 Search with AI Matching';
+                    return;
+                }
+                
+                // Use AI to match
+                const visitorQuery = `I'm looking for: ${vibes}. I need accommodation from ${startDate} to ${endDate}.`;
+                
+                const matchResponse = await fetch('http://localhost:5000/api/listings/match', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        visitor_query: visitorQuery,
+                        date_needed: startDate
+                    })
+                });
+                
+                const matchData = await matchResponse.json();
+                
+                // Extract match scores - map host_id to listing.id
+                matchScores = {};
+                if (matchData.success && matchData.matches) {
+                    const rankedMatches = matchData.matches.ranked_matches || [];
+                    rankedMatches.forEach(match => {
+                        // host_id from AI should correspond to listing.id
+                        if (match.host_id !== undefined) {
+                            matchScores[match.host_id] = match.compatibility_score || 0;
+                        }
+                    });
+                }
+                
+                // Display filtered and matched listings
+                displayAllListings(dateFiltered);
+                
+            } catch (error) {
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+                allListingsContainer.innerHTML = '';
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = '🔍 Search with AI Matching';
+            }
+        });
+
+        // Load host listings
+        async function loadHostListings() {
+            try {
+                const response = await fetch('http://localhost:5000/api/listing/my-listings', {
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    listingsContainer.innerHTML = `<div class="error">${data.error || 'Failed to load listings'}</div>`;
+                    return;
+                }
+                
+                const listings = data.listings || [];
+                
+                if (listings.length === 0) {
+                    listingsContainer.innerHTML = `
+                        <div class="no-listings">
+                            <div style="font-size: 4em; margin-bottom: 20px;">🏠</div>
+                            <h3 style="margin-bottom: 15px;">No listings yet</h3>
+                            <p style="color: #666; margin-bottom: 30px;">Create your first listing to start hosting visitors!</p>
+                            <button class="create-listing-btn" onclick="window.location.href='/host/dashboard'">Create Your First Listing</button>
+                        </div>
+                    `;
+                } else {
+                    listingsContainer.innerHTML = '';
+                    const grid = document.createElement('div');
+                    grid.className = 'listings-grid';
+                    
+                    listings.forEach(listing => {
+                        const card = document.createElement('div');
+                        card.className = 'listing-card';
+                        
+                        const description = listing.description || 'No description';
+                        const preview = description.length > 100 ? description.substring(0, 100) + '...' : description;
+                        
+                        const dateRangeText = formatDateRange(listing.available_dates);
+                        const rating = listing.average_rating || 0;
+                        const reviewCount = listing.review_count || 0;
+                        
+                        card.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div class="listing-card-title">${escapeHtml(listing.name || 'Unnamed Listing')}</div>
+                                <div style="color: #999; font-size: 0.9em;">#${listing.id}</div>
+                            </div>
+                            <div class="listing-card-info">${escapeHtml(preview)}</div>
+                            <div class="listing-card-meta">
+                                Capacity: ${listing.capacity || 1} guest${listing.capacity !== 1 ? 's' : ''}
+                            </div>
+                            ${formatRating(rating, reviewCount)}
+                            <div class="date-range-display" style="margin-top: 10px;">📅 ${dateRangeText}</div>
+                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                <a href="/listing/${listing.id}" style="flex: 1; padding: 8px 16px; border-radius: 6px; background: #667eea; color: white; text-decoration: none; text-align: center; font-weight: 600;">View</a>
+                                <button onclick="editListing(${listing.id})" style="flex: 1; padding: 8px 16px; border-radius: 6px; background: #f0f0f0; color: #667eea; border: none; font-weight: 600; cursor: pointer;">Edit</button>
+                            </div>
+                        `;
+                        
+                        grid.appendChild(card);
+                    });
+                    
+                    listingsContainer.appendChild(grid);
+                }
+            } catch (error) {
+                listingsContainer.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function editListing(listingId) {
+            window.location.href = `/host/dashboard?listing=${listingId}`;
+        }
+
+        // Create listing button
+        createListingBtn.addEventListener('click', () => {
+            window.location.href = '/host/dashboard';
+        });
+
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            await fetch('http://localhost:5000/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            window.location.href = '/login';
+        });
+
+        // Set minimum dates
+        const today = new Date().toISOString().split('T')[0];
+        dateRangeStart.setAttribute('min', today);
+        dateRangeEnd.setAttribute('min', today);
+        
+        dateRangeStart.addEventListener('change', () => {
+            if (dateRangeStart.value) {
+                dateRangeEnd.setAttribute('min', dateRangeStart.value);
+            }
+        });
+
+        // Initialize
+        (async () => {
+            const isAuth = await checkAuth();
+            if (isAuth) {
+                loadAllListings(); // Load listings for visitor tab by default
+            }
+        })();
+    </script>
+</body>
+</html>
+

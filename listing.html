@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listing Details - DormMatch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #c33;
+        }
+
+        .listing-header {
+            margin-bottom: 30px;
+        }
+
+        .listing-name {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .listing-meta {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .images-section {
+            margin-bottom: 30px;
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .image-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .no-images {
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            color: #666;
+        }
+
+        .info-section {
+            margin-bottom: 30px;
+        }
+
+        .info-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .dates-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .date-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .reviews-section {
+            margin-top: 40px;
+        }
+
+        .review-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .review-form h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .rating-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .star-btn {
+            background: none;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+
+        .star-btn.active {
+            color: #ffd700;
+        }
+
+        .review-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .reviewer-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .review-date {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .review-rating {
+            color: #ffd700;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .review-comment {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .no-reviews {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Listing Details</h1>
+            <a href="/" class="back-btn" id="backToSearchBtn">← Back to Search</a>
+        </div>
+        
+        <div class="content">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading listing...</p>
+            </div>
+            
+            <div id="error" class="error" style="display: none;"></div>
+            <div id="success" class="error" style="display: none; background: #efe; color: #3c3; border-left-color: #3c3;"></div>
+            
+            <div id="listingContent" style="display: none;">
+                <div class="listing-header">
+                    <h1 class="listing-name" id="listingName"></h1>
+                    <div class="listing-meta" id="listingMeta"></div>
+                </div>
+                
+                <div class="images-section">
+                    <h2>Photos</h2>
+                    <div id="imagesContainer"></div>
+                </div>
+                
+                <div class="info-section">
+                    <h2>About This Place</h2>
+                    <div class="info-card">
+                        <div class="info-value" id="description"></div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h2>Details</h2>
+                    <div class="info-card">
+                        <div class="info-label">Dorm Vibe</div>
+                        <div class="info-value" id="dormVibe"></div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Host Interests</div>
+                        <div class="info-value" id="interests"></div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Capacity</div>
+                        <div class="info-value" id="capacity"></div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Available Dates</div>
+                        <div class="dates-list" id="availableDates"></div>
+                    </div>
+                </div>
+                
+                <div class="reviews-section">
+                    <h2>Reviews</h2>
+                    
+                    <div class="review-form">
+                        <h3>Write a Review</h3>
+                        <form id="reviewForm">
+                            <div class="form-group">
+                                <label for="reviewerName">Your Name</label>
+                                <input type="text" id="reviewerName" name="reviewer_name" required>
+                            </div>
+                            <div class="rating-input">
+                                <label>Rating:</label>
+                                <div id="starRating">
+                                    <button type="button" class="star-btn" data-rating="1">★</button>
+                                    <button type="button" class="star-btn" data-rating="2">★</button>
+                                    <button type="button" class="star-btn" data-rating="3">★</button>
+                                    <button type="button" class="star-btn" data-rating="4">★</button>
+                                    <button type="button" class="star-btn" data-rating="5">★</button>
+                                </div>
+                                <input type="hidden" id="ratingValue" name="rating" value="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reviewComment">Your Review</label>
+                                <textarea id="reviewComment" name="comment" required minlength="10" placeholder="Share your experience..."></textarea>
+                            </div>
+                            <button type="submit" class="submit-btn">Submit Review</button>
+                        </form>
+                    </div>
+                    
+                    <div id="reviewsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const listingId = window.location.pathname.split('/').pop();
+        const loading = document.getElementById('loading');
+        const errorDiv = document.getElementById('error');
+        const successDiv = document.getElementById('success');
+        const listingContent = document.getElementById('listingContent');
+
+        const backToSearchBtn = document.getElementById('backToSearchBtn');
+        async function loadListing() {
+            try {
+                const response = await fetch(`http://localhost:5000/api/listing/${listingId}`, {
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                
+                if (!response.ok || !data.success) {
+                    errorDiv.textContent = data.error || 'Failed to load listing';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                const listing = data.listing;
+                
+                // Populate listing data
+                document.getElementById('listingName').textContent = listing.name || 'Unnamed Listing';
+                document.getElementById('listingMeta').textContent = `Hosted by ${listing.name}`;
+                document.getElementById('description').textContent = listing.description || 'No description available.';
+                document.getElementById('dormVibe').textContent = listing.dorm_vibe || 'Not specified';
+                document.getElementById('interests').textContent = listing.interests || 'Not specified';
+                document.getElementById('capacity').textContent = `${listing.capacity || 0} guest${listing.capacity !== 1 ? 's' : ''}`;
+                
+                // Display available dates
+                const datesContainer = document.getElementById('availableDates');
+                if (listing.available_dates && listing.available_dates.length > 0) {
+                    listing.available_dates.forEach(date => {
+                        const badge = document.createElement('div');
+                        badge.className = 'date-badge';
+                        badge.textContent = date;
+                        datesContainer.appendChild(badge);
+                    });
+                } else {
+                    datesContainer.innerHTML = '<span style="color: #666;">No dates available</span>';
+                }
+                
+                // Display images
+                const imagesContainer = document.getElementById('imagesContainer');
+                if (listing.images && listing.images.length > 0) {
+                    const grid = document.createElement('div');
+                    grid.className = 'images-grid';
+                    
+                    listing.images.forEach(imageUrl => {
+                        const imageItem = document.createElement('div');
+                        imageItem.className = 'image-item';
+                        const img = document.createElement('img');
+                        img.src = `http://localhost:5000${imageUrl}`;
+                        img.alt = 'Listing photo';
+                        img.onerror = function() {
+                            this.style.display = 'none';
+                        };
+                        imageItem.appendChild(img);
+                        grid.appendChild(imageItem);
+                    });
+                    
+                    imagesContainer.appendChild(grid);
+                } else {
+                    imagesContainer.innerHTML = '<div class="no-images">📷 No photos uploaded yet</div>';
+                }
+                
+                listingContent.style.display = 'block';
+                
+                // Load reviews
+                displayReviews(listing.reviews || []);
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function displayReviews(reviews) {
+            const container = document.getElementById('reviewsContainer');
+            
+            if (reviews.length === 0) {
+                container.innerHTML = '<div class="no-reviews">No reviews yet. Be the first to review!</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            reviews.forEach(review => {
+                const reviewItem = document.createElement('div');
+                reviewItem.className = 'review-item';
+                
+                const date = new Date(review.date);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                
+                reviewItem.innerHTML = `
+                    <div class="review-header">
+                        <div class="reviewer-name">${escapeHtml(review.reviewer_name)}</div>
+                        <div class="review-date">${formattedDate}</div>
+                    </div>
+                    <div class="review-rating">${stars}</div>
+                    <div class="review-comment">${escapeHtml(review.comment)}</div>
+                `;
+                
+                container.appendChild(reviewItem);
+            });
+        }
+
+        // Review form handling
+        let selectedRating = 0;
+        const starButtons = document.querySelectorAll('.star-btn');
+        starButtons.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                selectedRating = index + 1;
+                document.getElementById('ratingValue').value = selectedRating;
+                starButtons.forEach((b, i) => {
+                    b.classList.toggle('active', i < selectedRating);
+                });
+            });
+        });
+
+        document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (selectedRating === 0) {
+                errorDiv.textContent = 'Please select a rating';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            const formData = {
+                reviewer_name: document.getElementById('reviewerName').value,
+                rating: selectedRating,
+                comment: document.getElementById('reviewComment').value
+            };
+            
+            try {
+                const response = await fetch(`http://localhost:5000/api/listing/${listingId}/review`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    successDiv.textContent = 'Review submitted successfully!';
+                    successDiv.style.display = 'block';
+                    document.getElementById('reviewForm').reset();
+                    selectedRating = 0;
+                    starButtons.forEach(b => b.classList.remove('active'));
+                    loadListing(); // Reload to show new review
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to submit review';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        loadListing();
+    </script>
+</body>
+</html>
+
