@@ -13,50 +13,53 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f7f7f7;
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1760px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
+            min-height: 100vh;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 40px;
+            background: white;
+            color: #03045e;
+            padding: 20px 80px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
         }
 
         .home-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
+            padding: 8px 16px;
+            background: transparent;
+            color: #0077b6;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 22px;
             font-weight: 600;
-            transition: background 0.3s;
-            z-index: 10;
+            font-size: 14px;
+            transition: background 0.2s;
+            border: 1px solid transparent;
         }
 
         .home-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #caf0f8;
         }
 
         .header h1 {
-            font-size: 2em;
+            font-size: 22px;
+            font-weight: 600;
+            color: #03045e;
+            margin: 0;
         }
 
         .nav-btns {
@@ -70,48 +73,56 @@
         }
 
         .nav-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
+            background: transparent;
+            border: 1px solid #dddddd;
+            color: #03045e;
+            padding: 8px 16px;
+            border-radius: 22px;
             text-decoration: none;
             font-weight: 600;
-            transition: background 0.3s;
+            font-size: 14px;
+            transition: all 0.2s;
             cursor: pointer;
-            border: none;
         }
 
         .nav-btn:hover {
-            background: rgba(255,255,255,0.3);
+            border-color: #0077b6;
+            box-shadow: 0 2px 4px rgba(0,119,182,0.18);
         }
 
         .tabs {
             display: flex;
-            background: #f8f9fa;
-            border-bottom: 2px solid #e0e0e0;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 80px;
         }
 
         .tab {
             flex: 1;
-            padding: 20px;
+            padding: 20px 0;
             text-align: center;
             cursor: pointer;
-            font-weight: 600;
-            color: #666;
-            transition: all 0.3s;
-            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            color: #717171;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            font-size: 14px;
+        }
+
+        .tab:hover {
+            color: #03045e;
         }
 
         .tab.active {
-            color: #667eea;
-            background: white;
-            border-bottom-color: #667eea;
+            color: #03045e;
+            font-weight: 600;
+            border-bottom-color: #03045e;
         }
 
         .tab-content {
             display: none;
-            padding: 40px;
+            padding: 40px 80px;
+            background: white;
         }
 
         .tab-content.active {
@@ -125,8 +136,8 @@
         }
 
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid #0077b6;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -146,15 +157,17 @@
         }
 
         .error {
-            background: #fee;
+            background: #fff5f5;
             color: #c33;
-            border-left: 4px solid #c33;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
         }
 
         .success {
-            background: #efe;
-            color: #3c3;
-            border-left: 4px solid #3c3;
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
         }
 
         /* Host Tab Styles */
@@ -166,38 +179,40 @@
         }
 
         .create-listing-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0077b6;
             color: white;
             border: none;
             padding: 12px 24px;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.2s;
+            font-size: 14px;
         }
 
         .create-listing-btn:hover {
-            transform: translateY(-2px);
+            background: #005a8a;
+            box-shadow: 0 2px 8px rgba(0,119,182,0.3);
         }
 
         .listings-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 40px 24px;
         }
 
         .listing-card {
-            background: #f8f9fa;
+            background: white;
             border-radius: 12px;
-            padding: 20px;
-            border: 2px solid #e0e0e0;
-            transition: all 0.3s;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s;
+            cursor: pointer;
         }
 
         .listing-card:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
         }
 
         .listing-card-header {
@@ -241,13 +256,14 @@
         }
 
         .view-btn {
-            background: #667eea;
+            background: #0077b6;
             color: white;
         }
 
         .edit-btn {
-            background: #f0f0f0;
-            color: #667eea;
+            background: white;
+            color: #0077b6;
+            border: 1px solid #0077b6;
         }
 
         .action-btn:hover {
@@ -273,14 +289,14 @@
             color: #333;
         }
 
-        textarea, input[type="date"] {
+        textarea, input[type="text"], input[type="date"] {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
+            padding: 14px 16px;
+            border: 1px solid #b0b0b0;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: 16px;
             font-family: inherit;
-            transition: border-color 0.3s;
+            transition: all 0.2s;
         }
 
         textarea {
@@ -288,26 +304,28 @@
             resize: vertical;
         }
 
-        textarea:focus, input[type="date"]:focus {
+        textarea:focus, input[type="text"]:focus, input[type="date"]:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #0077b6;
+            box-shadow: 0 0 0 2px rgba(0,119,182,0.1);
         }
 
         .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: auto;
+            padding: 14px 24px;
+            background: #0077b6;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1.1em;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.2s;
         }
 
         .submit-btn:hover {
-            transform: translateY(-2px);
+            background: #005a8a;
+            box-shadow: 0 2px 8px rgba(0,119,182,0.3);
         }
 
         .submit-btn:disabled {
@@ -385,33 +403,37 @@
         }
 
         .listing-card-title {
-            font-size: 1.3em;
+            font-size: 16px;
             font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
+            color: #03045e;
+            margin-bottom: 8px;
+            padding: 16px 16px 0;
         }
 
         .listing-card-info {
-            color: #666;
+            color: #717171;
             margin-bottom: 8px;
-            line-height: 1.6;
-            font-size: 0.95em;
+            line-height: 1.5;
+            font-size: 14px;
+            padding: 0 16px;
         }
 
         .listing-card-meta {
-            color: #999;
-            font-size: 0.9em;
-            margin-top: 10px;
+            color: #717171;
+            font-size: 14px;
+            margin-top: 8px;
+            padding: 0 16px;
         }
 
         .date-range-display {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.85em;
+            background: #caf0f8;
+            color: #0077b6;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
             display: inline-block;
-            margin-top: 10px;
+            margin: 8px 16px 16px;
         }
 
         .rating-display {
@@ -422,24 +444,25 @@
         }
 
         .stars {
-            color: #ffd700;
-            font-size: 1.1em;
+            color: #ffb700;
+            font-size: 14px;
         }
 
         .rating-text {
-            color: #666;
-            font-size: 0.9em;
+            color: #717171;
+            font-size: 14px;
+            padding: 0 16px;
         }
 
         .match-percentage {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            background: #00b4d8;
             color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.9em;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
             font-weight: 600;
             display: inline-block;
-            margin-top: 10px;
+            margin: 8px 16px 0;
         }
     </style>
 </head>
@@ -476,40 +499,39 @@
             
             <!-- Visitor Tab -->
             <div class="tab-content active" id="visitorContent">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                    <h2 style="color: #333;">Browse Available Listings</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="color: #03045e; font-size: 22px; font-weight: 600; margin: 0;">Browse Available Listings</h2>
                 </div>
                 
-                <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 30px;">
-                    <h3 style="margin-bottom: 20px; color: #333;">Search Filters</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="background: white; padding: 32px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 40px; box-shadow: 0 1px 2px rgba(0,0,0,0.08);">
+                    <h3 style="margin-bottom: 24px; color: #03045e; font-size: 22px; font-weight: 600;">Search Filters</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label for="idealVibes">Ideal Vibes</label>
+                            <label for="idealVibes" style="font-size: 14px; font-weight: 600; color: #03045e; margin-bottom: 8px;">Ideal Vibes</label>
                             <input 
                                 type="text" 
                                 id="idealVibes" 
                                 placeholder="e.g., quiet, study-friendly, early bedtime"
-                                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;"
                             >
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label for="dateRangeStart">Available Date Range</label>
-                            <div style="display: flex; gap: 10px; align-items: center;">
+                            <label for="dateRangeStart" style="font-size: 14px; font-weight: 600; color: #03045e; margin-bottom: 8px;">Available Date Range</label>
+                            <div style="display: flex; gap: 12px; align-items: center;">
                                 <input 
                                     type="date" 
                                     id="dateRangeStart" 
-                                    style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;"
+                                    style="flex: 1;"
                                 >
-                                <span>to</span>
+                                <span style="color: #717171; font-size: 14px;">to</span>
                                 <input 
                                     type="date" 
                                     id="dateRangeEnd" 
-                                    style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;"
+                                    style="flex: 1;"
                                 >
                             </div>
                         </div>
                     </div>
-                    <button id="searchBtn" class="submit-btn" style="width: auto; padding: 12px 30px;">
+                    <button id="searchBtn" class="submit-btn">
                         🔍 Search with AI Matching
                     </button>
                 </div>
@@ -525,7 +547,7 @@
             <!-- Host Tab -->
             <div class="tab-content" id="hostContent">
                 <div class="listings-header">
-                    <h2 style="color: #333;">My Listings</h2>
+                    <h2 style="color: #03045e; font-size: 22px; font-weight: 600; margin: 0;">My Listings</h2>
                     <button class="create-listing-btn" id="createListingBtn">+ Create New Listing</button>
                 </div>
                 
