@@ -437,7 +437,10 @@
                             </div>
                         </div>
                         
-                        <button type="submit" class="submit-btn" id="updateBtn">Update Listing</button>
+                        <div style="display: flex; gap: 15px; margin-top: 20px;">
+                            <button type="submit" class="submit-btn" id="updateBtn" style="flex: 1;">Update Listing</button>
+                            <button type="button" class="submit-btn" id="deleteBtn" onclick="deleteListingFromEdit()" style="flex: 1; background: #dc3545; border: none;">Delete Listing</button>
+                        </div>
                     </form>
                 </div>
                 
@@ -485,7 +488,7 @@
                 });
                 const data = await response.json();
                 
-                if (!data.authenticated || data.user.type !== 'host') {
+                if (!data.authenticated || !data.user || !data.user.roles || !data.user.roles.includes('host')) {
                     loading.style.display = 'none';
                     authRequired.style.display = 'block';
                     return false;
@@ -600,9 +603,10 @@
                     <div style="font-size: 0.9em; color: #999; margin-bottom: 15px;">
                         Capacity: ${listing.capacity || 1} • Dates: ${listing.available_dates?.length || 0} available
                     </div>
-                    <div style="display: flex; gap: 10px;">
-                        <a href="/listing/${listing.id}" style="flex: 1; padding: 8px 16px; border-radius: 6px; background: #667eea; color: white; text-decoration: none; text-align: center; font-weight: 600;">View</a>
-                        <button onclick="editListing(${listing.id})" style="flex: 1; padding: 8px 16px; border-radius: 6px; background: #f0f0f0; color: #667eea; border: none; font-weight: 600; cursor: pointer;">Edit</button>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="/listing/${listing.id}" style="flex: 1; min-width: 80px; padding: 8px 16px; border-radius: 6px; background: #667eea; color: white; text-decoration: none; text-align: center; font-weight: 600;">View</a>
+                        <button onclick="editListing(${listing.id})" style="flex: 1; min-width: 80px; padding: 8px 16px; border-radius: 6px; background: #f0f0f0; color: #667eea; border: none; font-weight: 600; cursor: pointer;">Edit</button>
+                        <button onclick="deleteListing(${listing.id})" style="flex: 1; min-width: 80px; padding: 8px 16px; border-radius: 6px; background: #dc3545; color: white; border: none; font-weight: 600; cursor: pointer;">Delete</button>
                     </div>
                 `;
                 
@@ -619,6 +623,43 @@
             div.textContent = text;
             return div.innerHTML;
         }
+
+        // Delete listing from edit form
+    async function deleteListingFromEdit() {
+    if (!currentListing || !currentListing.id) {
+        errorDiv.textContent = 'No listing selected';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`http://localhost:5001/api/listing/${currentListing.id}/delete`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            successDiv.textContent = 'Listing deleted successfully';
+            successDiv.style.display = 'block';
+            // Redirect back to listings list after a short delay
+            setTimeout(() => {
+                window.location.href = '/host/dashboard';
+            }, 1500);
+        } else {
+            errorDiv.textContent = data.error || 'Failed to delete listing';
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        errorDiv.textContent = `Error: ${error.message}`;
+        errorDiv.style.display = 'block';
+    }
+    }
 
         // Populate edit form
         function populateEditForm(listing) {

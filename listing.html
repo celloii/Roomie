@@ -331,7 +331,7 @@
         <div class="header">
             <a href="/events" class="home-btn">🏠 Home (Events & Housing)</a>
             <h1>🏠 Listing Details</h1>
-            <a href="/" class="back-btn">← Back to Search</a>
+            <a href="/" class="back-btn" id="backToSearchBtn">← Back to Search</a>
         </div>
         
         <div class="content">
@@ -423,6 +423,7 @@
         const successDiv = document.getElementById('success');
         const listingContent = document.getElementById('listingContent');
 
+        const backToSearchBtn = document.getElementById('backToSearchBtn');
         async function loadListing() {
             try {
                 const response = await fetch(`http://localhost:5000/api/listing/${listingId}`, {

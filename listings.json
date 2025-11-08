@@ -169,5 +169,29 @@
       "/uploads/103_Screenshot_2025-08-31_at_9.07.00_AM.png"
     ],
     "reviews": []
+  },
+  {
+    "id": 104,
+    "email": "cchen0866@gmail.com",
+    "name": "Chloe Chen",
+    "description": "1 room with a bunk bed, 200 square feet",
+    "available_dates": [
+      "2025-11-08",
+      "2025-11-09",
+      "2025-11-10"
+    ],
+    "capacity": 1,
+    "dorm_vibe": "Quiet space, early bedtime (10 pm)",
+    "interests": "Early riser, close to shops on the street",
+    "images": [],
+    "reviews": [
+      {
+        "id": 1,
+        "reviewer_name": "Shrek",
+        "rating": 5,
+        "comment": "Amazing room! Spacious and clean! Highly recommend!",
+        "date": "2025-11-08T11:49:37.711076"
+      }
+    ]
   }
 ]

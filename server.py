@@ -13,7 +13,7 @@ from auth import create_user, verify_user, get_user, add_role_to_user
 from tools import (
     load_listings, get_listing_by_id, get_listing_by_email, 
     update_listing, add_image_to_listing, ensure_upload_folder,
-    create_listing, update_listing_details, add_review
+    create_listing, update_listing_details, add_review, delete_listing
 )
 
 app = Flask(__name__, static_folder='static')
@@ -454,6 +454,40 @@ def update_listing_endpoint(listing_id):
             "error": str(e)
         }), 500
 
+@app.route('/api/listing/<int:listing_id>/delete', methods=['DELETE'])
+def delete_listing_endpoint(listing_id):
+    """Delete a listing."""
+    if 'user_email' not in session:
+        return jsonify({"error": "Authentication required. Please login."}), 401
+    
+    user = get_user(session['user_email'])
+    if not user or 'host' not in user.get('roles', []):
+        return jsonify({"error": "Only hosts can delete listings"}), 403
+    
+    # Verify the listing belongs to this user
+    listing = get_listing_by_id(listing_id)
+    if not listing:
+        return jsonify({"error": "Listing not found"}), 404
+    
+    if listing.get('email') != session['user_email']:
+        return jsonify({"error": "You can only delete your own listings"}), 403
+    
+    try:
+        from tools import delete_listing
+        if delete_listing(listing_id):
+            return jsonify({
+                "success": True,
+                "message": "Listing deleted successfully"
+            }), 200
+        else:
+            return jsonify({"error": "Failed to delete listing"}), 500
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
 @app.route('/api/listing/<int:listing_id>/review', methods=['POST'])
 def add_review_endpoint(listing_id):
     """Add a review to a listing."""
@@ -770,7 +804,7 @@ def get_combined_match():
 
 if __name__ == '__main__':
     import os
-    port = int(os.environ.get('PORT', 5001))
+    port = int(os.environ.get('PORT', 5000))
     print("🚀 Starting Dorm Matching API Server...")
     print(f"📡 API available at: http://localhost:{port}")
     print(f"🌐 Frontend: http://localhost:{port}")
