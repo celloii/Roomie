@@ -988,7 +988,7 @@
         // Check authentication
         async function checkAuth() {
             try {
-                const response = await fetch('http://localhost:5000/api/auth/check', {
+                const response = await fetch('/api/auth/check', {
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -1019,7 +1019,7 @@
         // Load all listings for visitor tab
         async function loadAllListings() {
             try {
-                const response = await fetch('http://localhost:5000/api/listings', {
+                const response = await fetch('/api/listings', {
                     credentials: 'include'
                 });
                 
@@ -1164,7 +1164,7 @@
             
             try {
                 // First get all listings
-                const listingsResponse = await fetch('http://localhost:5000/api/listings', {
+                const listingsResponse = await fetch('/api/listings', {
                     credentials: 'include'
                 });
                 const listingsData = await listingsResponse.json();
@@ -1201,7 +1201,7 @@
                 // Use AI to match
                 const visitorQuery = `I'm looking for: ${vibes}. I need accommodation from ${startDate} to ${endDate}.`;
                 
-                const matchResponse = await fetch('http://localhost:5000/api/listings/match', {
+                const matchResponse = await fetch('/api/listings/match', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -1241,7 +1241,7 @@
         // Load host listings
         async function loadHostListings() {
             try {
-                const response = await fetch('http://localhost:5000/api/listing/my-listings', {
+                const response = await fetch('/api/listing/my-listings', {
                     credentials: 'include'
                 });
                 
@@ -1325,7 +1325,7 @@
 
         // Logout
         logoutBtn.addEventListener('click', async () => {
-            await fetch('http://localhost:5000/api/auth/logout', {
+            await fetch('/api/auth/logout', {
                 method: 'POST',
                 credentials: 'include'
             });
