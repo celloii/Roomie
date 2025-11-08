@@ -822,6 +822,11 @@
                                 ${event.tags.map(tag => `<span class="event-tag ${tag.toLowerCase() === 'free' ? 'free' : ''}">${tag}</span>`).join('')}
                             </div>
                         ` : ''}
+                        <div style="margin-top: 15px;">
+                            <button onclick="addToCalendar(${event.id}, this)" style="padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em;">
+                                📅 Add to Calendar
+                            </button>
+                        </div>
                     </div>
                 `;
             }).join('') + '</div>';
@@ -914,6 +919,79 @@
         function showEventDetails(eventId) {
             // Could navigate to a detail page or show a modal
             console.log('Event details for:', eventId);
+        }
+
+        // Add event to calendar
+        function addToCalendar(eventId, buttonElement) {
+            const eventData = allEvents.find(e => e.id === eventId);
+            if (!eventData) {
+                alert('Event not found');
+                return;
+            }
+
+            // Parse date and time
+            const [year, month, day] = eventData.date.split('-').map(Number);
+            const [hours, minutes] = eventData.time.split(':').map(Number);
+            
+            // Create start datetime (assume 1 hour duration, or 24 hours for hackathon)
+            let duration = 60 * 60 * 1000; // 1 hour default
+            if (eventData.title.includes('TigerHacks') || eventData.title.includes('hackathon')) {
+                duration = 24 * 60 * 60 * 1000; // 24 hours for hackathons
+            }
+            
+            const startDate = new Date(year, month - 1, day, hours, minutes);
+            const endDate = new Date(startDate.getTime() + duration);
+            
+            // Format dates for iCal (YYYYMMDDTHHMMSS)
+            const formatDate = (date) => {
+                const pad = (n) => n.toString().padStart(2, '0');
+                return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}00`;
+            };
+            
+            const startStr = formatDate(startDate);
+            const endStr = formatDate(endDate);
+            const nowStr = formatDate(new Date());
+            
+            // Create iCal content (escape special characters)
+            const description = eventData.description.replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
+            const location = eventData.location.replace(/,/g, '\\,').replace(/;/g, '\\;');
+            const title = eventData.title.replace(/,/g, '\\,').replace(/;/g, '\\;');
+            
+            const icalContent = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Princeton Events//EN',
+                'BEGIN:VEVENT',
+                `UID:${eventId}@princeton-events`,
+                `DTSTAMP:${nowStr}`,
+                `DTSTART:${startStr}`,
+                `DTEND:${endStr}`,
+                `SUMMARY:${title}`,
+                `DESCRIPTION:${description}`,
+                `LOCATION:${location}`,
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].join('\r\n');
+            
+            // Create blob and download
+            const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${eventData.title.replace(/[^a-z0-9]/gi, '_')}.ics`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show success message
+            if (buttonElement) {
+                const originalText = buttonElement.innerHTML;
+                buttonElement.innerHTML = '✓ Added!';
+                buttonElement.style.background = '#10b981';
+                setTimeout(() => {
+                    buttonElement.innerHTML = originalText;
+                    buttonElement.style.background = '#10b981';
+                }, 2000);
+            }
         }
 
         // Combined map and matching

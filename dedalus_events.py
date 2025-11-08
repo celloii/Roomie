@@ -1,7 +1,6 @@
 """
 Dedalus - FastAPI Backend Server for Events
 Stores and fetches event data, serving as the core API for events.
-Integrates with Eventbrite API to fetch real events.
 """
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,9 +9,7 @@ from typing import List, Optional
 from datetime import datetime, date
 import json
 import os
-import httpx
 from typing import List, Dict
-from knot import Knot
 
 app = FastAPI(title="Dedalus Events API", version="1.0.0")
 
@@ -69,102 +66,6 @@ class EventUpdate(BaseModel):
     registration_url: Optional[str] = None
 
 # Helper functions
-async def fetch_eventbrite_events(location: str = "Princeton, NJ", max_results: int = 20) -> List[Dict]:
-    """Fetch events from Eventbrite API."""
-    eventbrite_config = Knot.get_eventbrite_config()
-    if not eventbrite_config:
-        return []
-    
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            # Search for events near Princeton
-            response = await client.get(
-                f"{eventbrite_config['base_url']}/events/search/",
-                params={
-                    "q": "",
-                    "location.address": location,
-                    "location.within": "10mi",
-                    "expand": "venue",
-                    "status": "live",
-                    "order_by": "start_asc",
-                },
-                headers={
-                    "Authorization": f"Bearer {eventbrite_config['api_key']}"
-                }
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                events = data.get("events", [])
-                
-                # Convert Eventbrite format to our format
-                converted_events = []
-                for event in events[:max_results]:
-                    # Get event details
-                    event_id = event.get("id")
-                    if event_id:
-                        try:
-                            detail_response = await client.get(
-                                f"{eventbrite_config['base_url']}/events/{event_id}/",
-                                headers={
-                                    "Authorization": f"Bearer {eventbrite_config['api_key']}"
-                                }
-                            )
-                            if detail_response.status_code == 200:
-                                event_detail = detail_response.json()
-                                
-                                # Extract venue info
-                                venue = event_detail.get("venue", {})
-                                venue_name = venue.get("name", "TBA")
-                                address = venue.get("address", {})
-                                
-                                # Parse date
-                                start = event_detail.get("start", {})
-                                start_utc = start.get("utc", "")
-                                
-                                # Determine category
-                                category_id = event_detail.get("category_id", "")
-                                category_map = {
-                                    "103": "academic",
-                                    "105": "arts",
-                                    "108": "food",
-                                    "109": "sports",
-                                    "110": "social"
-                                }
-                                category = category_map.get(str(category_id), "social")
-                                
-                                # Check if free
-                                ticket_availability = event_detail.get("ticket_availability", {})
-                                is_free = ticket_availability.get("is_free", False)
-                                
-                                converted_event = {
-                                    "id": f"eb_{event_id}",
-                                    "title": event_detail.get("name", {}).get("text", "Untitled Event"),
-                                    "description": event_detail.get("description", {}).get("text", "")[:500],
-                                    "date": start_utc[:10] if start_utc else "",
-                                    "time": start_utc[11:16] if len(start_utc) > 16 else "",
-                                    "location": venue_name,
-                                    "location_lat": address.get("latitude"),
-                                    "location_lng": address.get("longitude"),
-                                    "category": category,
-                                    "cost": 0.0 if is_free else None,
-                                    "organizer": event_detail.get("organizer", {}).get("name", "Eventbrite"),
-                                    "capacity": ticket_availability.get("maximum_ticket_count"),
-                                    "tags": ["eventbrite"] + ([event_detail.get("format_id")] if event_detail.get("format_id") else []),
-                                    "image_url": event_detail.get("logo", {}).get("url") if event_detail.get("logo") else None,
-                                    "registration_url": event_detail.get("url")
-                                }
-                                converted_events.append(converted_event)
-                        except Exception as e:
-                            print(f"Error fetching event details: {e}")
-                            continue
-                
-                return converted_events
-    except Exception as e:
-        print(f"Error fetching from Eventbrite: {e}")
-    
-    return []
-
 def load_events() -> List[Dict]:
     """Load events from JSON file."""
     if os.path.exists(EVENTS_FILE):
@@ -181,141 +82,175 @@ def save_events(events: List[Dict]):
         json.dump(events, f, indent=2)
 
 def get_default_events() -> List[Dict]:
-    """Get default sample events."""
+    """Get default Princeton campus events."""
     return [
         {
             "id": 1,
-            "title": "Campus Food Festival",
-            "description": "Join us for a diverse food festival featuring cuisines from around the world. Free food samples and live music!",
-            "date": "2025-11-15",
-            "time": "12:00",
-            "location": "Frist Campus Center",
-            "location_lat": 40.3480,
-            "location_lng": -74.6514,
-            "category": "food",
+            "title": "AI & Ethics Symposium",
+            "description": "A full-day symposium on the intersection of artificial intelligence, policy, and human values. Hosted at Friend Center Auditorium.",
+            "date": "2025-11-12",
+            "time": "09:00",
+            "location": "Friend Center Auditorium",
+            "location_lat": 40.3500,
+            "location_lng": -74.6530,
+            "category": "academic",
             "cost": 0.0,
-            "organizer": "Student Activities",
-            "capacity": 500,
-            "tags": ["free", "food", "music", "social"],
+            "organizer": "Center for Human Values",
+            "capacity": 200,
+            "tags": ["academic", "free", "ai", "ethics"],
             "image_url": None,
             "registration_url": None
         },
         {
             "id": 2,
-            "title": "AI & Machine Learning Workshop",
-            "description": "Learn the fundamentals of AI and ML with hands-on coding exercises. Perfect for beginners!",
-            "date": "2025-11-12",
-            "time": "14:00",
-            "location": "Computer Science Building",
-            "location_lat": 40.3500,
-            "location_lng": -74.6530,
-            "category": "academic",
-            "cost": 0.0,
-            "organizer": "CS Department",
-            "capacity": 50,
-            "tags": ["academic", "technology", "workshop", "free"],
+            "title": "Fall A Cappella Jam",
+            "description": "Join Princeton's top vocal groups for a night of music, rhythm, and campus energy in Richardson Auditorium.",
+            "date": "2025-11-14",
+            "time": "19:00",
+            "location": "Richardson Auditorium",
+            "location_lat": 40.3510,
+            "location_lng": -74.6550,
+            "category": "arts",
+            "cost": 10.0,
+            "organizer": "Music Department",
+            "capacity": 800,
+            "tags": ["arts", "music", "a cappella"],
             "image_url": None,
             "registration_url": None
         },
         {
             "id": 3,
-            "title": "Basketball Game: Tigers vs Lions",
-            "description": "Cheer on our team in this exciting home game! Free admission for students.",
-            "date": "2025-11-18",
+            "title": "Global Food Bazaar",
+            "description": "Sample cuisines from student-run international booths at Frist Campus Center Lawn. A true feast for all cultures.",
+            "date": "2025-11-16",
+            "time": "12:00",
+            "location": "Frist Campus Center Lawn",
+            "location_lat": 40.3480,
+            "location_lng": -74.6514,
+            "category": "food",
+            "cost": 8.0,
+            "organizer": "International Student Association",
+            "capacity": 500,
+            "tags": ["food", "cultural", "social"],
+            "image_url": None,
+            "registration_url": None
+        },
+        {
+            "id": 4,
+            "title": "Yoga by the Lake",
+            "description": "Early morning group yoga at Carnegie Lake to center your mind and body before finals week.",
+            "date": "2025-11-09",
+            "time": "07:00",
+            "location": "Carnegie Lake",
+            "location_lat": 40.3430,
+            "location_lng": -74.6470,
+            "category": "sports",
+            "cost": 5.0,
+            "organizer": "Wellness Center",
+            "capacity": 50,
+            "tags": ["sports", "wellness", "yoga", "outdoor"],
+            "image_url": None,
+            "registration_url": None
+        },
+        {
+            "id": 5,
+            "title": "Startup Coffee Chat",
+            "description": "Meet founders, designers, and coders from across campus at Small World Coffee. Bring your ideas and curiosity.",
+            "date": "2025-11-11",
+            "time": "15:00",
+            "location": "Small World Coffee",
+            "location_lat": 40.3490,
+            "location_lng": -74.6500,
+            "category": "social",
+            "cost": 0.0,
+            "organizer": "Entrepreneurship Club",
+            "capacity": 30,
+            "tags": ["social", "free", "networking", "startup"],
+            "image_url": None,
+            "registration_url": None
+        },
+        {
+            "id": 6,
+            "title": "TigerHacks: Sustainability Challenge",
+            "description": "Princeton's largest 24-hour hackathon focused on sustainable innovation and AI-driven green solutions.",
+            "date": "2025-11-22",
+            "time": "09:00",
+            "location": "Friend Center",
+            "location_lat": 40.3500,
+            "location_lng": -74.6530,
+            "category": "academic",
+            "cost": 0.0,
+            "organizer": "TigerHacks",
+            "capacity": 300,
+            "tags": ["academic", "free", "hackathon", "sustainability", "ai"],
+            "image_url": None,
+            "registration_url": None
+        },
+        {
+            "id": 7,
+            "title": "Outdoor Movie Night: La La Land",
+            "description": "An open-air movie screening at Poe Field with popcorn, blankets, and fairy lights.",
+            "date": "2025-11-13",
             "time": "19:00",
-            "location": "Jadwin Gymnasium",
+            "location": "Poe Field",
+            "location_lat": 40.3450,
+            "location_lng": -74.6480,
+            "category": "arts",
+            "cost": 7.0,
+            "organizer": "Student Activities",
+            "capacity": 200,
+            "tags": ["arts", "movie", "outdoor", "social"],
+            "image_url": None,
+            "registration_url": None
+        },
+        {
+            "id": 8,
+            "title": "Intercollegiate Soccer Match",
+            "description": "Cheer for the Princeton Tigers as they face off against Harvard in a thrilling soccer showdown.",
+            "date": "2025-11-18",
+            "time": "15:00",
+            "location": "Roberts Stadium",
             "location_lat": 40.3450,
             "location_lng": -74.6480,
             "category": "sports",
             "cost": 0.0,
             "organizer": "Athletics Department",
             "capacity": 2000,
-            "tags": ["sports", "free", "entertainment"],
+            "tags": ["sports", "free", "soccer", "competition"],
             "image_url": None,
             "registration_url": None
         },
         {
-            "id": 4,
-            "title": "Jazz Night at the Art Museum",
-            "description": "Enjoy an evening of live jazz music in the beautiful art museum. Wine and cheese reception included.",
+            "id": 9,
+            "title": "Open Mic & Poetry Night",
+            "description": "An intimate evening of poetry, acoustic music, and personal storytelling at Café Vivian.",
             "date": "2025-11-20",
-            "time": "18:30",
-            "location": "Princeton University Art Museum",
-            "location_lat": 40.3460,
-            "location_lng": -74.6520,
-            "category": "arts",
-            "cost": 15.0,
-            "organizer": "Art Museum",
-            "capacity": 100,
-            "tags": ["arts", "music", "culture"],
-            "image_url": None,
-            "registration_url": None
-        },
-        {
-            "id": 5,
-            "title": "Study Group Meetup",
-            "description": "Join fellow students for a collaborative study session. Bring your books and snacks!",
-            "date": "2025-11-14",
-            "time": "16:00",
-            "location": "Firestone Library",
-            "location_lat": 40.3490,
-            "location_lng": -74.6500,
-            "category": "academic",
-            "cost": 0.0,
-            "organizer": "Student Study Group",
-            "capacity": 30,
-            "tags": ["academic", "study", "free", "social"],
-            "image_url": None,
-            "registration_url": None
-        },
-        {
-            "id": 6,
-            "title": "Tech Startup Networking Night",
-            "description": "Connect with entrepreneurs, investors, and fellow tech enthusiasts. Free pizza and drinks!",
-            "date": "2025-11-16",
-            "time": "18:00",
-            "location": "Engineering Quad",
-            "location_lat": 40.3470,
-            "location_lng": -74.6540,
-            "category": "social",
-            "cost": 0.0,
-            "organizer": "Entrepreneurship Club",
-            "capacity": 100,
-            "tags": ["networking", "technology", "free", "food", "career"],
-            "image_url": None,
-            "registration_url": None
-        },
-        {
-            "id": 7,
-            "title": "Yoga & Meditation Session",
-            "description": "Relax and recharge with a free yoga and meditation session. All levels welcome!",
-            "date": "2025-11-13",
-            "time": "17:30",
-            "location": "Dillon Gym",
-            "location_lat": 40.3440,
-            "location_lng": -74.6490,
-            "category": "social",
-            "cost": 0.0,
-            "organizer": "Wellness Center",
-            "capacity": 40,
-            "tags": ["wellness", "free", "health", "relaxation"],
-            "image_url": None,
-            "registration_url": None
-        },
-        {
-            "id": 8,
-            "title": "Classical Music Concert",
-            "description": "Enjoy an evening of classical music performed by the university orchestra. Free for students!",
-            "date": "2025-11-19",
             "time": "19:30",
-            "location": "Richardson Auditorium",
-            "location_lat": 40.3510,
-            "location_lng": -74.6550,
+            "location": "Café Vivian",
+            "location_lat": 40.3485,
+            "location_lng": -74.6510,
             "category": "arts",
-            "cost": 0.0,
-            "organizer": "Music Department",
-            "capacity": 500,
-            "tags": ["music", "arts", "free", "culture"],
+            "cost": 5.0,
+            "organizer": "Creative Writing Club",
+            "capacity": 60,
+            "tags": ["arts", "poetry", "music", "open mic"],
+            "image_url": None,
+            "registration_url": None
+        },
+        {
+            "id": 10,
+            "title": "Thanksgiving Potluck Dinner",
+            "description": "A cozy community meal at the Graduate College dining hall — everyone brings a dish and a story to share.",
+            "date": "2025-11-27",
+            "time": "18:00",
+            "location": "Graduate College Dining Hall",
+            "location_lat": 40.3520,
+            "location_lng": -74.6560,
+            "category": "food",
+            "cost": 10.0,
+            "organizer": "Graduate Student Council",
+            "capacity": 150,
+            "tags": ["food", "social", "thanksgiving", "community"],
             "image_url": None,
             "registration_url": None
         }
@@ -338,19 +273,10 @@ async def get_events(
     date_from: Optional[str] = Query(None, description="Filter events from this date (YYYY-MM-DD)"),
     date_to: Optional[str] = Query(None, description="Filter events until this date (YYYY-MM-DD)"),
     free_only: Optional[bool] = Query(False, description="Show only free events"),
-    tags: Optional[str] = Query(None, description="Comma-separated tags to filter by"),
-    include_eventbrite: Optional[bool] = Query(True, description="Include Eventbrite events")
+    tags: Optional[str] = Query(None, description="Comma-separated tags to filter by")
 ):
-    """Get all events with optional filters. Fetches from local storage and Eventbrite."""
+    """Get all events with optional filters."""
     events = load_events()
-    
-    # Fetch from Eventbrite if enabled
-    if include_eventbrite:
-        try:
-            eventbrite_events = await fetch_eventbrite_events(location="Princeton, NJ", max_results=20)
-            events.extend(eventbrite_events)
-        except Exception as e:
-            print(f"Error fetching Eventbrite events: {e}")
     
     # Apply filters
     if category:
