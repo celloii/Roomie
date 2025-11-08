@@ -489,26 +489,38 @@
         let createFormImages = []; // Store images for create form
 
         // Check authentication
-        async function checkAuth() {
-            try {
-                const response = await fetch('http://localhost:5000/api/auth/check', {
-                    credentials: 'include'
-                });
-                const data = await response.json();
-                
-                if (!data.authenticated || !data.user || !data.user.roles || !data.user.roles.includes('host')) {
-                    loading.style.display = 'none';
-                    authRequired.style.display = 'block';
-                    return false;
-                }
-                return true;
-            } catch (error) {
+        // Check authentication
+    async function checkAuth() {
+        try {
+            const response = await fetch('http://localhost:5000/api/auth/check', {
+            credentials: 'include'
+        });
+            const data = await response.json();
+        
+            if (!data.authenticated || !data.user) {
                 loading.style.display = 'none';
-                errorDiv.textContent = `Error: ${error.message}`;
-                errorDiv.style.display = 'block';
+                authRequired.style.display = 'block';
                 return false;
             }
-        }
+        
+        // If user is authenticated but doesn't have host role, add it automatically
+            if (!data.user.roles || !data.user.roles.includes('host')) {
+            // The role will be added automatically when they create a listing
+            // For now, allow them to access the page
+            // The backend will add the role when they create their first listing
+            }
+        
+            loading.style.display = 'none';
+            authRequired.style.display = 'none';
+            return true;
+    } catch (error) {
+        loading.style.display = 'none';
+        errorDiv.textContent = `Error: ${error.message}`;
+        errorDiv.style.display = 'block';
+        return false;
+    }
+}
+     
 
         // Load listings
         async function loadListings() {

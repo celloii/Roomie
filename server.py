@@ -23,7 +23,19 @@ CORS(app, supports_credentials=True)  # Enable CORS with credentials for session
 from datetime import timedelta
 
 # Make sessions permanent so they persist
-app.permanent_session_lifetime = timedelta(days=1)  # Sessions last 7 days
+app.permanent_session_lifetime = timedelta(days=1)  # Sessions last 1 day
+
+# Configure session cookie settings for persistence
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # This helps with cross-tab persistence
+
+# Before each request, mark session as permanent if it has any data
+@app.before_request
+def make_session_permanent():
+    if 'user_email' in session or 'guest' in session:
+        session.permanent = True
 
 @app.route('/')
 def index():
@@ -85,14 +97,15 @@ def signup():
             return jsonify({"error": "Email, password, and name are required"}), 400
         
         if create_user(email, password, name):
-            # Auto-login after signup
+    # Auto-login after signup
             session['user_email'] = email
+            session.permanent = True  # Make session persist for 1 day
             user = get_user(email)
             return jsonify({
-                "success": True,
-                "message": "Account created successfully",
-                "user": user
-            }), 200
+            "success": True,
+            "message": "Account created successfully",
+            "user": user
+        }), 200
         else:
             return jsonify({"error": "Email already exists"}), 400
             
