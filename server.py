@@ -135,11 +135,19 @@ def login():
         if user:
             session['user_email'] = email
             session.permanent = True
-    return jsonify({
-        "success": True,
-        "message": "Continuing as guest",
-        "guest": True
-    }), 200
+            return jsonify({
+                "success": True,
+                "message": "Login successful",
+                "user": user
+            }), 200
+        else:
+            return jsonify({"error": "Invalid email or password"}), 401
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 @app.route('/api/auth/check', methods=['GET'])
 def check_auth():
