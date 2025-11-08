@@ -16,7 +16,7 @@ from tools import (
     create_listing, update_listing_details, add_review, delete_listing
 )
 
-app = Flask(__name__, static_folder='static')
+app = Flask(__name__, static_folder='.')
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 CORS(app, supports_credentials=True)  # Enable CORS with credentials for sessions
 
@@ -135,32 +135,6 @@ def login():
         if user:
             session['user_email'] = email
             session.permanent = True
-            return jsonify({
-                "success": True,
-                "message": "Login successful",
-                "user": user
-            }), 200
-        else:
-            return jsonify({"error": "Invalid email or password"}), 401
-            
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
-
-@app.route('/api/auth/logout', methods=['POST'])
-def logout():
-    """Logout the current user."""
-    session.clear()
-    return jsonify({"success": True, "message": "Logged out successfully"}), 200
-
-@app.route('/api/auth/guest', methods=['POST'])
-def guest_login():
-    """Allow user to continue as a guest."""
-    session['guest'] = True
-    session['user_type'] = 'visitor'  # Guests are treated as visitors
-    session.permanent = True
     return jsonify({
         "success": True,
         "message": "Continuing as guest",
@@ -602,8 +576,7 @@ def get_events():
     Get events directly from Dedalus events module.
     """
     try:
-        from dedalus_events import load_events
-        
+>>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
         category = request.args.get('category')
         date_from = request.args.get('date_from')
         date_to = request.args.get('date_to')
@@ -651,7 +624,7 @@ def get_events():
             events = [e for e in events if e.get("date", "") <= date_to]
         
         if free_only:
-            events = [e for e in events if e.get("cost", 0) == 0.0]
+            events = [e for e in events if (e.get("cost", 0) == 0 or e.get("cost", 0) == 0.0 or e.get("cost") is None or e.get("cost") == "0" or e.get("cost") == "0.0")]
         
         if tags:
             tag_list = [t.strip().lower() for t in tags.split(",")]

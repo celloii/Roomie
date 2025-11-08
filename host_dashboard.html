@@ -15,51 +15,34 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: #f7f7f7;
             min-height: 100vh;
-            padding: 0;
+            padding: 20px;
         }
 
         .container {
-            max-width: 1760px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
-            min-height: 100vh;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
         }
 
         .header {
             background: white;
             color: #03045e;
-            padding: 20px 80px;
+            padding: 30px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
             border-bottom: 1px solid #e0e0e0;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-        }
-
-        .home-btn {
-            padding: 8px 16px;
-            background: transparent;
-            color: #0077b6;
-            text-decoration: none;
-            border-radius: 22px;
-            font-weight: 600;
-            font-size: 14px;
-            transition: background 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .home-btn:hover {
-            background: #caf0f8;
         }
 
         .header h1 {
             font-size: 22px;
             font-weight: 600;
             color: #03045e;
-            margin: 0;
+>>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
         }
 
         .nav-btns {
@@ -69,8 +52,8 @@
 
         .nav-btn {
             background: transparent;
-            border: 1px solid #dddddd;
-            color: #03045e;
+            border: 1px solid #0077b6;
+            color: #0077b6;
             padding: 8px 16px;
             border-radius: 22px;
             text-decoration: none;
@@ -81,12 +64,11 @@
         }
 
         .nav-btn:hover {
-            border-color: #0077b6;
-            box-shadow: 0 2px 4px rgba(0,119,182,0.18);
+            background: #caf0f8;
         }
 
         .content {
-            padding: 40px 80px;
+            padding: 40px;
         }
 
         .auth-required, .loading {
@@ -133,10 +115,9 @@
         }
 
         .section h2 {
-            color: #03045e;
+            color: #333;
             margin-bottom: 20px;
-            font-size: 22px;
-            font-weight: 600;
+            font-size: 1.8em;
         }
 
         .form-group {
@@ -205,10 +186,10 @@
             border: none;
             padding: 14px 24px;
             border-radius: 8px;
-            font-size: 1.1em;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.2s;
         }
 
         .submit-btn:hover {
@@ -223,24 +204,24 @@
         }
 
         .upload-area {
-            border: 2px dashed #b0b0b0;
+            border: 3px dashed #0077b6;
             border-radius: 12px;
             padding: 40px;
             text-align: center;
-            background: white;
+            background: #f8f9fa;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
             margin-bottom: 20px;
         }
 
         .upload-area:hover {
             background: #caf0f8;
-            border-color: #0077b6;
+            border-color: #005a8a;
         }
 
         .upload-area.dragover {
-            background: #90e0ef;
-            border-color: #00b4d8;
+            background: #caf0f8;
+            border-color: #005a8a;
         }
 
         .upload-input {
@@ -268,18 +249,16 @@
         }
 
         .listing-info {
-            background: white;
+            background: #f8f9fa;
             padding: 25px;
             border-radius: 12px;
             margin-bottom: 30px;
-            border: 1px solid #e0e0e0;
         }
 
         .listing-info h3 {
-            color: #03045e;
+            color: #333;
             margin-bottom: 15px;
-            font-size: 22px;
-            font-weight: 600;
+            font-size: 1.5em;
         }
 
         .info-row {
@@ -294,7 +273,7 @@
         }
 
         .info-value {
-            color: #03045e;
+            color: #333;
         }
     </style>
 </head>
@@ -326,8 +305,8 @@
             <!-- Listings List (shown when listings exist) -->
             <div id="listingsList" style="display: none;">
                 <div class="listings-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                    <h2 style="color: #03045e; font-size: 22px; font-weight: 600; margin: 0;">My Listings</h2>
-                    <button class="create-listing-btn" id="showCreateFormBtn" style="background: #0077b6; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">+ Create New Listing</button>
+                    <h2 style="color: #333;">My Listings</h2>
+                    <button class="create-listing-btn" id="showCreateFormBtn" style="background: #0077b6; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">+ Create New Listing</button>
                 </div>
                 <div id="listingsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;"></div>
             </div>
@@ -335,8 +314,8 @@
             <!-- Create Listing Form (shown when creating new listing) -->
             <div id="createForm" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="color: #03045e; font-size: 22px; font-weight: 600; margin: 0;">Create New Listing</h2>
-                    <button class="nav-btn" id="backToListBtn" style="background: white; color: #0077b6; border: 1px solid #0077b6;">← Back to Listings</button>
+                    <h2 style="color: #333;">Create New Listing</h2>
+                    <button class="nav-btn" id="backToListBtn" style="background: #f0f0f0; color: #0077b6; border: 1px solid #0077b6;">← Back to Listings</button>
                 </div>
                 <div class="section">
                     <form id="createListingForm">
@@ -393,8 +372,8 @@
             <!-- Edit Listing Form (shown when editing a listing) -->
             <div id="editForm" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="color: #03045e; font-size: 22px; font-weight: 600; margin: 0;">Edit Listing</h2>
-                    <button class="nav-btn" id="backToListBtnEdit" style="background: white; color: #0077b6; border: 1px solid #0077b6;">← Back to Listings</button>
+                    <h2 style="color: #333;">Edit Listing</h2>
+                    <button class="nav-btn" id="backToListBtnEdit" style="background: #f0f0f0; color: #0077b6; border: 1px solid #0077b6;">← Back to Listings</button>
                 </div>
                 <div class="listing-info">
                     <h3 id="listingName">Your Listing</h3>
@@ -489,43 +468,31 @@
         let createFormImages = []; // Store images for create form
 
         // Check authentication
-        // Check authentication
-    async function checkAuth() {
-        try {
-            const response = await fetch('http://localhost:5000/api/auth/check', {
-            credentials: 'include'
-        });
-            const data = await response.json();
-        
-            if (!data.authenticated || !data.user) {
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/check', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (!data.authenticated || !data.user || !data.user.roles || !data.user.roles.includes('host')) {
+                    loading.style.display = 'none';
+                    authRequired.style.display = 'block';
+                    return false;
+                }
+                return true;
+            } catch (error) {
                 loading.style.display = 'none';
-                authRequired.style.display = 'block';
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
                 return false;
             }
-        
-        // If user is authenticated but doesn't have host role, add it automatically
-            if (!data.user.roles || !data.user.roles.includes('host')) {
-            // The role will be added automatically when they create a listing
-            // For now, allow them to access the page
-            // The backend will add the role when they create their first listing
-            }
-        
-            loading.style.display = 'none';
-            authRequired.style.display = 'none';
-            return true;
-    } catch (error) {
-        loading.style.display = 'none';
-        errorDiv.textContent = `Error: ${error.message}`;
-        errorDiv.style.display = 'block';
-        return false;
-    }
-}
-     
+        }
 
         // Load listings
         async function loadListings() {
             try {
-                const response = await fetch('http://localhost:5000/api/listing/my-listings', {
+                const response = await fetch('/api/listing/my-listings', {
                     credentials: 'include'
                 });
                 
@@ -625,7 +592,7 @@
                     </div>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <a href="/listing/${listing.id}" style="flex: 1; min-width: 80px; padding: 8px 16px; border-radius: 6px; background: #0077b6; color: white; text-decoration: none; text-align: center; font-weight: 600;">View</a>
-                        <button onclick="editListing(${listing.id})" style="flex: 1; min-width: 80px; padding: 8px 16px; border-radius: 6px; background: white; color: #0077b6; border: 1px solid #0077b6; font-weight: 600; cursor: pointer;">Edit</button>
+                        <button onclick="editListing(${listing.id})" style="flex: 1; min-width: 80px; padding: 8px 16px; border-radius: 6px; background: #f0f0f0; color: #0077b6; border: none; font-weight: 600; cursor: pointer;">Edit</button>
                         <button onclick="deleteListing(${listing.id})" style="flex: 1; min-width: 80px; padding: 8px 16px; border-radius: 6px; background: #dc3545; color: white; border: none; font-weight: 600; cursor: pointer;">Delete</button>
                     </div>
                 `;
@@ -644,7 +611,7 @@
         }
     
         try {
-            const response = await fetch(`http://localhost:5000/api/listing/${listingId}/delete`, {
+            const response = await fetch(`/api/listing/${listingId}/delete`, {
             method: 'DELETE',
             credentials: 'include'
         });
@@ -691,7 +658,7 @@
     }
     
     try {
-        const response = await fetch(`http://localhost:5000/api/listing/${currentListing.id}/delete`, {
+        const response = await fetch(`/api/listing/${currentListing.id}/delete`, {
             method: 'DELETE',
             credentials: 'include'
         });
@@ -805,7 +772,7 @@
             };
             
             try {
-                const response = await fetch('http://localhost:5000/api/listing/create', {
+                const response = await fetch('/api/listing/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -824,7 +791,7 @@
                             imageFormData.append('image', imageFile);
                             
                             try {
-                                await fetch(`http://localhost:5000/api/listing/${listingId}/upload`, {
+                                await fetch(`/api/listing/${listingId}/upload`, {
                                     method: 'POST',
                                     credentials: 'include',
                                     body: imageFormData
@@ -886,7 +853,7 @@
             };
             
             try {
-                const response = await fetch(`http://localhost:5000/api/listing/${currentListing.id}/update`, {
+                const response = await fetch(`/api/listing/${currentListing.id}/update`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -956,7 +923,7 @@
                 const item = document.createElement('div');
                 item.className = 'image-item';
                 const img = document.createElement('img');
-                img.src = `http://localhost:5000${imageUrl}`;
+                img.src = imageUrl;
                 img.alt = 'Listing photo';
                 item.appendChild(img);
                 imagesGrid.appendChild(item);
@@ -1008,7 +975,7 @@
                 const formData = new FormData();
                 formData.append('image', file);
                 try {
-                    const response = await fetch(`http://localhost:5000/api/listing/${currentListing.id}/upload`, {
+                    const response = await fetch(`/api/listing/${currentListing.id}/upload`, {
                         method: 'POST',
                         credentials: 'include',
                         body: formData
@@ -1040,21 +1007,16 @@
 
         backToListBtn?.addEventListener('click', () => {
             createForm.style.display = 'none';
-            //
-            editForm.style.display = 'none';
-            authRequired.style.display = 'none';
             loadListings();
         });
 
         backToListBtnEdit?.addEventListener('click', () => {
             editForm.style.display = 'none';
-            //
-            authRequired.style.display = 'none';
             loadListings();
         });
 
         logoutBtn.addEventListener('click', async () => {
-            await fetch('http://localhost:5000/api/auth/logout', {
+            await fetch('/api/auth/logout', {
                 method: 'POST',
                 credentials: 'include'
             });

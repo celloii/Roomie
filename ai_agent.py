@@ -2,7 +2,17 @@
 import os
 import asyncio
 from dotenv import load_dotenv
-from dedalus_labs import AsyncDedalus, DedalusRunner
+
+# Try to import dedalus_labs, but make it optional
+try:
+    from dedalus_labs import AsyncDedalus, DedalusRunner
+    DEDALUS_AVAILABLE = True
+except ImportError as e:
+    DEDALUS_AVAILABLE = False
+    print(f"Warning: dedalus_labs not available: {e}. AI matching will use fallback logic.")
+    AsyncDedalus = None
+    DedalusRunner = None
+
 from tools import find_available_hosts # Import your mock database tool
 
 # Ensure DEDALUS_API_KEY is set in your environment or .env file
@@ -11,7 +21,35 @@ load_dotenv() # Load environment variables from .env file
 async def run_matching_agent(visitor_query: str, date_needed: str) -> str:
     """
     Runs the Dedalus AI agent to find and rank the most compatible host.
+    Falls back to simple matching if dedalus_labs is not available.
     """
+    if not DEDALUS_AVAILABLE:
+        # Fallback: simple matching without AI
+        import json
+        hosts_json = find_available_hosts(visitor_date_range=date_needed)
+        hosts = json.loads(hosts_json) if isinstance(hosts_json, str) else hosts_json
+        # Simple scoring based on keyword matching
+        matches = []
+        query_lower = visitor_query.lower()
+        for host in hosts:
+            score = 0.5  # Base score
+            if host.get('dorm_vibe'):
+                vibe_lower = host['dorm_vibe'].lower()
+                if any(word in vibe_lower for word in query_lower.split()):
+                    score += 0.3
+            if host.get('interests'):
+                interests_lower = host['interests'].lower()
+                if any(word in interests_lower for word in query_lower.split()):
+                    score += 0.2
+            matches.append({
+                "host_id": host.get('id', 0),
+                "name": host.get('name', 'Unknown'),
+                "compatibility_score": min(score, 1.0),
+                "reasoning": "Basic keyword matching (AI unavailable)"
+            })
+        matches.sort(key=lambda x: x['compatibility_score'], reverse=True)
+        return json.dumps({"ranked_matches": matches})
+    
     # 1. Initialize the client and runner
     client = AsyncDedalus(api_key=os.environ.get("DEDALUS_API_KEY"))
     runner = DedalusRunner(client)

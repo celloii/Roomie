@@ -11,6 +11,7 @@
     ],
     "capacity": 1,
     "images": [],
+<<<<<<< HEAD
     "description": "A cozy, quiet dorm room perfect for studying. Early bedtime environment.",
     "reviews": [
       {
@@ -21,6 +22,9 @@
         "date": "2025-11-08T00:02:58.459095"
       }
     ]
+=======
+    "description": "A cozy, quiet dorm room perfect for studying. Early bedtime environment."
+>>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
   },
   {
     "id": 102,
@@ -34,6 +38,7 @@
     ],
     "capacity": 2,
     "images": [],
+<<<<<<< HEAD
     "description": "A vibrant, social dorm space. Great for night owls and gamers.",
     "reviews": [
       {
@@ -140,10 +145,21 @@
       "2026-02-02",
       "2026-02-03",
       "2026-02-04",
+=======
+    "description": "A vibrant, social dorm space. Great for night owls and gamers."
+  },
+  {
+    "id": 103,
+    "email": "welp@gmail.com",
+    "name": "Mai",
+    "description": "quad in yeh college",
+    "available_dates": [
+>>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
       "2026-02-05",
       "2026-02-06",
       "2026-02-07",
       "2026-02-08",
+<<<<<<< HEAD
       "2026-02-09",
       "2026-02-10",
       "2026-02-11",
@@ -186,5 +202,16 @@
     "interests": "Can study in the common room",
     "images": [],
     "reviews": []
+=======
+      "2026-02-09"
+    ],
+    "capacity": 1,
+    "dorm_vibe": "quiet, chill",
+    "interests": "coffee, reading, psetting",
+    "images": [
+      "/uploads/103_Screenshot_2025-01-18_at_1.59.06_PM.png"
+    ],
+    "reviews": []
+>>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
   }
 ]

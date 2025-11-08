@@ -4,21 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Events - Campus Events Platform</title>
-    <!-- Google Maps API - Add your API key here or leave as YOUR_API_KEY to use external map links only -->
-    <script>
-        // Check if API key is set, if not, skip loading Google Maps (external links will still work)
-        const mapsApiKey = 'AIzaSyDi8GhpcIpeUswYx486rif5YEYOQ_ei9dY';
-        if (mapsApiKey && mapsApiKey !== 'YOUR_API_KEY') {
-            const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&callback=initMap`;
-            script.async = true;
-            script.defer = true;
-            script.onerror = () => console.warn('Google Maps API not loaded. External map links will still work.');
-            document.head.appendChild(script);
-        } else {
-            console.log('Google Maps API key not set. External map links (Google Maps/Apple Maps) will still work.');
-        }
-    </script>
+>>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
     <style>
         * {
             margin: 0;
@@ -28,7 +14,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f7f7f7;
             min-height: 100vh;
             padding: 20px;
         }
@@ -37,26 +23,30 @@
             max-width: 1200px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
             overflow: hidden;
+            border: 1px solid #e0e0e0;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            color: #03045e;
             padding: 40px;
             text-align: center;
+            border-bottom: 1px solid #e0e0e0;
         }
 
         .header h1 {
-            font-size: 2.5em;
+            font-size: 24px;
+            font-weight: 600;
+            color: #03045e;
             margin-bottom: 10px;
         }
 
         .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
+            color: #717171;
+            font-size: 14px;
         }
 
         .nav {
@@ -69,16 +59,16 @@
         }
 
         .nav a {
-            color: #667eea;
+            color: #0077b6;
             text-decoration: none;
             font-weight: 600;
             padding: 8px 16px;
-            border-radius: 8px;
-            transition: background 0.3s;
+            border-radius: 22px;
+            transition: all 0.2s;
         }
 
         .nav a:hover {
-            background: #e0e7ff;
+            background: #caf0f8;
         }
 
         .content {
@@ -128,19 +118,21 @@
         .filter-item input:focus,
         .filter-item select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #0077b6;
+            box-shadow: 0 0 0 2px rgba(0,119,182,0.1);
         }
 
         .ai-section {
-            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            background: #caf0f8;
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
         }
 
         .ai-section h3 {
             margin-bottom: 15px;
-            color: #4338ca;
+            color: #03045e;
         }
 
         .ai-input-group {
@@ -151,26 +143,27 @@
 
         .ai-input-group input {
             flex: 1;
-            padding: 12px;
-            border: 2px solid #667eea;
+            padding: 14px 16px;
+            border: 1px solid #b0b0b0;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: 16px;
         }
 
         .ai-input-group button {
-            padding: 12px 24px;
-            background: #667eea;
+            padding: 14px 24px;
+            background: #0077b6;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.2s;
         }
 
         .ai-input-group button:hover {
-            background: #5568d3;
+            background: #005a8a;
+            box-shadow: 0 2px 8px rgba(0,119,182,0.3);
         }
 
         .ai-input-group button:disabled {
@@ -217,16 +210,16 @@
         .event-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border-color: #667eea;
+            border-color: #0077b6;
         }
 
         .event-card.recommended {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: #00b4d8;
+            background: #f0fdfa;
         }
 
         .event-card.recommended::before {
-            content: "Recommended";
+            content: "⭐ Recommended";
             display: block;
             font-size: 0.8em;
             color: #92400e;
@@ -251,7 +244,7 @@
         .event-category {
             display: inline-block;
             padding: 4px 12px;
-            background: #667eea;
+            background: #0077b6;
             color: white;
             border-radius: 20px;
             font-size: 0.8em;
@@ -294,8 +287,8 @@
 
         .event-tag {
             padding: 4px 10px;
-            background: #e0e7ff;
-            color: #4338ca;
+            background: #caf0f8;
+            color: #0077b6;
             border-radius: 12px;
             font-size: 0.8em;
             font-weight: 600;
@@ -361,79 +354,7 @@
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
         }
 
-        .map-modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-        }
-
-        .map-modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .map-modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            max-width: 90%;
-            max-height: 90%;
-            width: 800px;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .map-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .map-modal-header h3 {
-            margin: 0;
-            color: #333;
-        }
-
-        .map-modal-close {
-            background: #e0e0e0;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            font-size: 1.2em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
-        }
-
-        .map-modal-close:hover {
-            background: #d0d0d0;
-        }
-
-        .map-embed-container {
-            width: 100%;
-            height: 450px;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px solid #e0e0e0;
-        }
-
-        .map-embed-container iframe {
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-
+>>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
         .map-container {
             margin-top: 30px;
             height: 500px;
@@ -474,7 +395,7 @@
         }
 
         .host-marker {
-            background: #667eea;
+            background: #0077b6;
         }
 
         .event-marker {
@@ -515,14 +436,14 @@
         }
 
         .tab-button:hover {
-            color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
+            color: #0077b6;
+            background: #caf0f8;
         }
 
         .tab-button.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
+            color: #0077b6;
+            border-bottom-color: #0077b6;
+            background: #caf0f8;
         }
 
         .tab-content {
@@ -545,7 +466,7 @@
         .housing-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border-color: #667eea;
+            border-color: #0077b6;
         }
 
         @media (max-width: 768px) {
@@ -575,13 +496,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Campus Events</h1>
+            <h1>🎉 Campus Events</h1>
             <p>Discover events happening around campus, powered by AI recommendations</p>
         </div>
 
         <div class="nav">
             <div>
-                <a href="/events" style="background: #e0e7ff; font-weight: 600;">Home (Events & Housing)</a>
+                <a href="/">Home</a>
                 <a href="/dashboard">Dashboard</a>
             </div>
             <div id="userInfo"></div>
@@ -590,10 +511,10 @@
         <!-- Tab System for Events and Housing -->
         <div class="tabs-container">
             <div class="tab-button active" data-tab="events" id="eventsTab">
-                Events
+                🎉 Events
             </div>
             <div class="tab-button" data-tab="housing" id="housingTab">
-                Housing
+                🏠 Housing
             </div>
         </div>
 
@@ -601,7 +522,7 @@
             <!-- Events Tab Content -->
             <div class="tab-content active" id="eventsContent">
             <div class="filters">
-                <h3>Filter Events</h3>
+                <h3>🔍 Filter Events</h3>
                 <div class="filter-group">
                     <div class="filter-item">
                         <label>Category</label>
@@ -629,13 +550,13 @@
                         </label>
                     </div>
                 </div>
-                <button id="applyFiltersBtn" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                <button id="applyFiltersBtn" style="padding: 14px 24px; background: #0077b6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px;">
                     Apply Filters
                 </button>
             </div>
 
             <div class="ai-section">
-                <h3>AI-Powered Recommendations</h3>
+                <h3>🤖 AI-Powered Recommendations</h3>
                 <p style="margin-bottom: 15px; color: #666;">Tell us your interests and we'll recommend the best events for you!</p>
                 <div class="ai-input-group">
                     <input type="text" id="userInterests" placeholder="e.g., I love technology, free events, and social gatherings">
@@ -645,9 +566,8 @@
             </div>
 
             <div class="ai-section" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
-                <h3>Interactive Map View - Hosts & Events</h3>
-                <p style="margin-bottom: 10px; color: #666;">Get AI-powered recommendations for both accommodation and events that match your preferences!</p>
-                <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">Click on map markers to see details and open locations in Google Maps or Apple Maps</p>
+                <h3>🗺️ Combined Map View - Hosts & Events</h3>
+                <p style="margin-bottom: 15px; color: #666;">Get AI-powered recommendations for both accommodation and events that match your preferences!</p>
                 <div class="filter-group" style="grid-template-columns: 1fr 1fr; margin-bottom: 15px;">
                     <div class="filter-item">
                         <label>Date Needed (Optional)</label>
@@ -690,7 +610,7 @@
             <!-- Housing Tab Content -->
             <div class="tab-content" id="housingContent" style="display: none;">
                 <div class="filters">
-                    <h3>Find Housing</h3>
+                    <h3>🔍 Find Housing</h3>
                     <div class="filter-group">
                         <div class="filter-item">
                             <label>Date Needed</label>
@@ -706,7 +626,7 @@
                             </select>
                         </div>
                     </div>
-                    <button id="searchHousingBtn" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    <button id="searchHousingBtn" style="padding: 14px 24px; background: #0077b6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px;">
                         Search Housing
                     </button>
                 </div>
@@ -718,8 +638,8 @@
     </div>
 
     <script>
-        // Google Maps will be initialized when API loads
-        // If API key is not set, maps will gracefully degrade
+        // Google Maps API - Replace with your API key or remove if not needed
+        // To use maps, add this script tag in the head section with your API key
         
         let map = null;
         let markers = [];
@@ -790,65 +710,62 @@
             }
         }
 
-        // Get AI recommendations using matching API
+        // Get AI recommendations
         async function getAIRecommendations() {
             const interests = document.getElementById('userInterests').value.trim();
             if (!interests) {
-                alert('Please enter your interests and preferences to get recommendations!');
+                alert('Please enter your interests to get recommendations!');
                 return;
             }
-
-            // Get date from filter or use today's date
-            const dateNeeded = document.getElementById('dateFromFilter').value || new Date().toISOString().split('T')[0];
 
             const button = document.getElementById('aiButton');
             button.disabled = true;
             button.textContent = 'Getting Recommendations...';
 
             const aiSection = document.getElementById('aiRecommendations');
-            aiSection.innerHTML = '<div class="loading">Analyzing your preferences and finding best matches</div>';
+            aiSection.innerHTML = '<div class="loading">Analyzing events</div>';
             aiSection.classList.add('show');
 
             try {
-                // Use the matching API to get host recommendations
-                const response = await fetch('http://127.0.0.1:5000/api/match', {
+                const response = await fetch('/api/events/recommendations', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    credentials: 'include',
                     body: JSON.stringify({
-                        visitor_query: interests,
-                        date_needed: dateNeeded
+                        interests: interests,
+                        category: document.getElementById('categoryFilter').value,
+                        date_from: document.getElementById('dateFromFilter').value,
+                        date_to: document.getElementById('dateToFilter').value,
+                        free_only: document.getElementById('freeOnlyFilter').checked
                     })
                 });
 
                 const data = await response.json();
 
-                if (data.success && data.matches) {
-                    const matches = data.matches.ranked_matches || [];
-                    
+                if (data.success && data.recommendations) {
+                    const recs = data.recommendations.recommendations || [];
+                    recommendedEventIds = new Set(recs.map(r => r.event.id));
+
                     let html = '';
-                    
-                    if (matches.length > 0) {
-                        html += '<div style="margin-top: 15px;"><strong>Recommended Hosts Based on Your Preferences:</strong></div>';
-                        matches.forEach((match, index) => {
-                            const score = Math.round((match.compatibility_score || 0) * 100);
+                    if (data.recommendations.summary) {
+                        html += `<div class="summary">${data.recommendations.summary}</div>`;
+                    }
+
+                    if (recs.length > 0) {
+                        html += '<div style="margin-top: 15px;"><strong>Recommended Events:</strong></div>';
+                        recs.forEach(rec => {
                             html += `
-                                <div style="margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #667eea;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                        <strong>${match.name || `Host ${match.host_id}`}</strong>
-                                        <span style="background: #667eea; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: 600;">${score}% Match</span>
-                                    </div>
-                                    ${match.reasoning ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${match.reasoning}</div>` : ''}
-                                    <div style="font-size: 0.85em; color: #555; margin-top: 8px;">
-                                        Host ID: ${match.host_id}
-                                    </div>
+                                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 8px;">
+                                    <strong>${rec.event.title}</strong>
+                                    ${rec.reasoning ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${rec.reasoning}</div>` : ''}
+                                    ${rec.highlights && rec.highlights.length > 0 ? 
+                                        `<div style="margin-top: 5px;">
+                                            ${rec.highlights.map(h => `<span class="event-highlight">${h}</span>`).join('')}
+                                        </div>` : ''}
                                 </div>
                             `;
                         });
-                    } else {
-                        html += '<div class="error">No matching hosts found. Try adjusting your preferences or date.</div>';
                     }
 
                     aiSection.innerHTML = html;
@@ -856,10 +773,9 @@
                     // Reload events to show recommendations
                     await loadEvents();
                 } else {
-                    aiSection.innerHTML = '<div class="error">No recommendations available. Try adjusting your preferences.</div>';
+                    aiSection.innerHTML = '<div class="error">No recommendations available. Try adjusting your interests.</div>';
                 }
             } catch (error) {
-                console.error('Error getting recommendations:', error);
                 aiSection.innerHTML = `<div class="error">Error: ${error.message}</div>`;
             } finally {
                 button.disabled = false;
@@ -896,19 +812,19 @@
                         <div class="event-description">${event.description}</div>
                         <div class="event-details">
                             <div class="event-detail">
-                                <span>Date:</span>
+                                <span>📅</span>
                                 <span>${event.date} at ${event.time}</span>
                             </div>
                             <div class="event-detail">
-                                <span>Location:</span>
+                                <span>📍</span>
                                 <span>${event.location}</span>
                             </div>
                             <div class="event-detail">
-                                <span>Cost:</span>
+                                <span>💰</span>
                                 <span>${isFree ? 'Free' : `$${event.cost.toFixed(2)}`}</span>
                             </div>
                             <div class="event-detail">
-                                <span>Organizer:</span>
+                                <span>👤</span>
                                 <span>${event.organizer}</span>
                             </div>
                         </div>
@@ -917,18 +833,10 @@
                                 ${event.tags.map(tag => `<span class="event-tag ${tag.toLowerCase() === 'free' ? 'free' : ''}">${tag}</span>`).join('')}
                             </div>
                         ` : ''}
-                        <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <div style="margin-top: 15px;">
                             <button onclick="addToCalendar(${event.id}, this)" style="padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em;">
-                                Add to Calendar
+                                📅 Add to Calendar
                             </button>
-                            ${event.location_lat && event.location_lng ? `
-                                <button onclick="openInMaps(${event.location_lat}, ${event.location_lng}, '${event.location.replace(/'/g, "\\'")}')" style="padding: 8px 16px; background: #4285f4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em;">
-                                    Open in Maps
-                                </button>
-                                <button onclick="showMapEmbed(${event.location_lat}, ${event.location_lng}, '${event.location.replace(/'/g, "\\'")}')" style="padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em;">
-                                    View on Map
-                                </button>
-                            ` : ''}
                         </div>
                     </div>
                 `;
@@ -993,9 +901,7 @@
                         } : undefined
                     });
 
-                    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${event.location_lat},${event.location_lng}`;
-                    const appleMapsUrl = `https://maps.apple.com/?q=${event.location_lat},${event.location_lng}`;
-                    
+>>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
                     const infoWindow = new google.maps.InfoWindow({
                         content: `
                             <div style="padding: 10px;">
@@ -1031,97 +937,7 @@
             console.log('Event details for:', eventId);
         }
 
-        // Show map embed in modal
-        function showMapEmbed(lat, lng, locationName) {
-            // Replace YOUR_API_KEY with actual API key or use place search
-            const apiKey = 'AIzaSyDi8GhpcIpeUswYx486rif5YEYOQ_ei9dY';
-            const encodedLocation = encodeURIComponent(locationName || `${lat},${lng}`);
-            
-            // Create modal if it doesn't exist
-            let modal = document.getElementById('mapEmbedModal');
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'mapEmbedModal';
-                modal.className = 'map-modal';
-                modal.innerHTML = `
-                    <div class="map-modal-content">
-                        <div class="map-modal-header">
-                            <h3 id="mapModalTitle">Location Map</h3>
-                            <button class="map-modal-close" onclick="closeMapEmbed()">×</button>
-                        </div>
-                        <div class="map-embed-container" id="mapEmbedContainer"></div>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-                
-                // Close on background click
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        closeMapEmbed();
-                    }
-                });
-            }
-            
-            // Update title and iframe
-            document.getElementById('mapModalTitle').textContent = locationName || 'Location Map';
-            const container = document.getElementById('mapEmbedContainer');
-            
-            // Use embed URL - works with or without API key using place search
-            let embedUrl;
-            if (apiKey && apiKey !== 'YOUR_API_KEY') {
-                // With API key: use place search
-                embedUrl = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodedLocation}`;
-            } else {
-                // Without API key: use standard Google Maps embed (may have limitations)
-                embedUrl = `https://www.google.com/maps?q=${lat},${lng}&output=embed`;
-            }
-            
-            container.innerHTML = `
-                <iframe
-                    width="100%"
-                    height="100%"
-                    style="border:0"
-                    loading="lazy"
-                    allowfullscreen
-                    referrerpolicy="no-referrer-when-downgrade"
-                    src="${embedUrl}">
-                </iframe>
-            `;
-            
-            modal.classList.add('active');
-        }
-
-        // Close map embed modal
-        function closeMapEmbed() {
-            const modal = document.getElementById('mapEmbedModal');
-            if (modal) {
-                modal.classList.remove('active');
-            }
-        }
-
-        // Open location in external maps
-        function openInMaps(lat, lng, locationName) {
-            // Detect device type for better map app selection
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            const isAndroid = /Android/.test(navigator.userAgent);
-            
-            if (isIOS) {
-                // Try Apple Maps first on iOS
-                window.open(`https://maps.apple.com/?q=${lat},${lng}&ll=${lat},${lng}`, '_blank');
-            } else if (isAndroid) {
-                // Try Google Maps on Android
-                window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
-            } else {
-                // Desktop: show options
-                const useGoogle = confirm(`Open "${locationName}" in Google Maps?\n\nClick OK for Google Maps, Cancel for Apple Maps`);
-                if (useGoogle) {
-                    window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
-                } else {
-                    window.open(`https://maps.apple.com/?q=${lat},${lng}`, '_blank');
-                }
-            }
-        }
-
+>>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
         // Add event to calendar
         function addToCalendar(eventId, buttonElement) {
             const eventData = allEvents.find(e => e.id === eventId);
@@ -1201,7 +1017,7 @@
         let recommendedHostIds = new Set();
         let recommendedEventIdsCombined = new Set();
 
-        // Get combined AI recommendations using matching API
+        // Get combined AI recommendations
         async function getCombinedMatch() {
             const preferences = document.getElementById('combinedPreferences').value.trim();
             const dateNeeded = document.getElementById('combinedDateNeeded').value || new Date().toISOString().split('T')[0];
@@ -1216,96 +1032,90 @@
             button.textContent = 'Finding Best Matches...';
 
             const recommendationsDiv = document.getElementById('combinedRecommendations');
-            recommendationsDiv.innerHTML = '<div class="loading">Analyzing your preferences and finding best hosts and events</div>';
+            recommendationsDiv.innerHTML = '<div class="loading">Analyzing hosts and events</div>';
             recommendationsDiv.style.display = 'block';
 
             try {
-                // Get host matches using the matching API
-                const matchResponse = await fetch('http://127.0.0.1:5000/api/match', {
+                const response = await fetch('/api/combined/match', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    credentials: 'include',
                     body: JSON.stringify({
-                        visitor_query: preferences,
-                        date_needed: dateNeeded
+                        preferences: preferences,
+                        date_needed: dateNeeded || null,
+                        max_hosts: 5,
+                        max_events: 5
                     })
                 });
 
-                const matchData = await matchResponse.json();
+                const data = await response.json();
 
-                // Get events
-                const eventsResponse = await fetch('http://127.0.0.1:5000/api/events', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
+                if (data.success) {
+                    const hosts = data.hosts || [];
+                    const events = data.events || [];
+                    const insights = data.combined_insights || '';
 
-                const eventsData = await eventsResponse.json();
-                const allEvents = eventsData.events || [];
+                    recommendedHostIds = new Set(hosts.map(h => h.host.id));
+                    recommendedEventIdsCombined = new Set(events.map(e => e.event.id));
 
-                let html = '';
+                    let html = '';
+                    if (insights) {
+                        html += `<div class="summary"><strong>AI Insights:</strong> ${insights}</div>`;
+                    }
 
-                if (matchData.success && matchData.matches) {
-                    const hostMatches = matchData.matches.ranked_matches || [];
-                    recommendedHostIds = new Set(hostMatches.map(m => m.host_id));
-
-                    if (hostMatches.length > 0) {
-                        html += '<div style="margin-top: 15px;"><strong>Recommended Hosts Based on Your Preferences:</strong></div>';
-                        hostMatches.forEach(match => {
-                            const score = Math.round((match.compatibility_score || 0) * 100);
+                    if (hosts.length > 0) {
+                        html += '<div style="margin-top: 15px;"><strong>Recommended Hosts:</strong></div>';
+                        hosts.forEach(rec => {
+                            const host = rec.host;
                             html += `
-                                <div style="margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #667eea;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                        <strong>${match.name || `Host ${match.host_id}`}</strong>
-                                        <span style="background: #667eea; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: 600;">${score}% Match</span>
+                                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 8px; border-left: 4px solid #0077b6;">
+                                    <strong>${host.name}</strong>
+                                    ${rec.reasoning ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${rec.reasoning}</div>` : ''}
+                                    <div style="font-size: 0.85em; color: #555; margin-top: 5px;">
+                                        ${host.dorm_vibe ? `Vibe: ${host.dorm_vibe}<br>` : ''}
+                                        ${host.interests ? `Interests: ${host.interests}<br>` : ''}
+                                        Capacity: ${host.capacity}
                                     </div>
-                                    ${match.reasoning ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${match.reasoning}</div>` : ''}
-                                    <div style="font-size: 0.85em; color: #555; margin-top: 8px;">
-                                        Host ID: ${match.host_id}
-                                    </div>
+                                    ${rec.highlights && rec.highlights.length > 0 ? 
+                                        `<div style="margin-top: 5px;">
+                                            ${rec.highlights.map(h => `<span class="event-highlight">${h}</span>`).join('')}
+                                        </div>` : ''}
                                 </div>
                             `;
                         });
                     }
-                }
 
-                // Filter events based on preferences (simple keyword matching)
-                const preferenceKeywords = preferences.toLowerCase().split(/\s+/);
-                const relevantEvents = allEvents.filter(event => {
-                    const eventText = `${event.title} ${event.description || ''} ${event.category || ''}`.toLowerCase();
-                    return preferenceKeywords.some(keyword => keyword.length > 3 && eventText.includes(keyword));
-                }).slice(0, 5);
-
-                recommendedEventIdsCombined = new Set(relevantEvents.map(e => e.id));
-
-                if (relevantEvents.length > 0) {
-                    html += '<div style="margin-top: 15px;"><strong>Relevant Events:</strong></div>';
-                    relevantEvents.forEach(event => {
-                        html += `
-                            <div style="margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #10b981;">
-                                <strong>${event.title}</strong>
-                                <div style="font-size: 0.85em; color: #555; margin-top: 5px;">
-                                    ${event.date} at ${event.time || 'TBA'}<br>
-                                    ${event.location || 'Location TBA'}<br>
-                                    ${event.cost === 0 ? 'Free' : `$${event.cost ? event.cost.toFixed(2) : '0.00'}`}
+                    if (events.length > 0) {
+                        html += '<div style="margin-top: 15px;"><strong>Recommended Events:</strong></div>';
+                        events.forEach(rec => {
+                            const event = rec.event;
+                            html += `
+                                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 8px; border-left: 4px solid #10b981;">
+                                    <strong>${event.title}</strong>
+                                    ${rec.reasoning ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${rec.reasoning}</div>` : ''}
+                                    <div style="font-size: 0.85em; color: #555; margin-top: 5px;">
+                                        ${event.date} at ${event.time}<br>
+                                        ${event.location}<br>
+                                        ${event.cost === 0 ? 'Free' : `$${event.cost.toFixed(2)}`}
+                                    </div>
+                                    ${rec.highlights && rec.highlights.length > 0 ? 
+                                        `<div style="margin-top: 5px;">
+                                            ${rec.highlights.map(h => `<span class="event-highlight">${h}</span>`).join('')}
+                                        </div>` : ''}
                                 </div>
-                            </div>
-                        `;
-                    });
-                }
+                            `;
+                        });
+                    }
 
-                if (html === '') {
-                    html = '<div class="error">No matches found. Try adjusting your preferences or date.</div>';
+                    recommendationsDiv.innerHTML = html;
+                    
+                    // Update combined map
+                    await updateCombinedMap(hosts, events);
+                } else {
+                    recommendationsDiv.innerHTML = `<div class="error">Error: ${data.error || 'Failed to get recommendations'}</div>`;
                 }
-
-                recommendationsDiv.innerHTML = html;
-                
-                // Update combined map with hosts and events
-                const hostMatches = matchData.success && matchData.matches ? matchData.matches.ranked_matches || [] : [];
-                await updateCombinedMap(hostMatches, relevantEvents);
             } catch (error) {
-                console.error('Error getting combined recommendations:', error);
                 recommendationsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
             } finally {
                 button.disabled = false;
@@ -1334,7 +1144,7 @@
         }
 
         // Update combined map with hosts and events
-        async function updateCombinedMap(hostMatches, events) {
+        async function updateCombinedMap(hosts, events) {
             if (!mapsAvailable) {
                 document.getElementById('combinedMapContainer').style.display = 'none';
                 return;
@@ -1356,51 +1166,88 @@
             const hostLocations = [
                 { lat: 40.3485, lng: -74.6510 }, // Approximate location 1
                 { lat: 40.3475, lng: -74.6520 }, // Approximate location 2
-                { lat: 40.3495, lng: -74.6505 },  // Approximate location 3
-                { lat: 40.3465, lng: -74.6530 },  // Approximate location 4
-                { lat: 40.3505, lng: -74.6500 }   // Approximate location 5
+                { lat: 40.3495, lng: -74.6505 }  // Approximate location 3
             ];
 
             // Add host markers
-            if (hostMatches && hostMatches.length > 0) {
-                hostMatches.forEach((match, index) => {
-                    const isRecommended = recommendedHostIds.has(match.host_id);
-                    const location = hostLocations[index % hostLocations.length];
-                    const score = Math.round((match.compatibility_score || 0) * 100);
-                    
+            hosts.forEach((rec, index) => {
+                const host = rec.host;
+                const isRecommended = recommendedHostIds.has(host.id);
+                const location = hostLocations[index % hostLocations.length];
+                
+                const marker = new google.maps.Marker({
+                    position: location,
+                    map: combinedMap,
+                    title: `${host.name} - Host`,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: isRecommended ? '#f59e0b' : '#0077b6',
+                        fillOpacity: 1,
+                        strokeColor: '#fff',
+                        strokeWeight: 2
+                    },
+                    label: {
+                        text: 'H',
+                        color: 'white',
+                        fontSize: '10px'
+                    }
+                });
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="padding: 10px; min-width: 200px;">
+                            <h3 style="margin: 0 0 10px 0; color: #0077b6;">${host.name} ${isRecommended ? '⭐' : ''}</h3>
+                            <p style="margin: 5px 0;"><strong>Vibe:</strong> ${host.dorm_vibe || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Interests:</strong> ${host.interests || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Capacity:</strong> ${host.capacity}</p>
+                            ${rec.reasoning ? `<p style="margin: 5px 0; font-style: italic; color: #666;">${rec.reasoning}</p>` : ''}
+                        </div>
+                    `
+                });
+
+                marker.addListener('click', () => {
+                    infoWindow.open(combinedMap, marker);
+                });
+
+                combinedMarkers.push(marker);
+                bounds.extend(location);
+            });
+
+            // Add event markers
+            events.forEach(rec => {
+                const event = rec.event;
+                if (event.location_lat && event.location_lng) {
+                    const isRecommended = recommendedEventIdsCombined.has(event.id);
+                    const position = { lat: event.location_lat, lng: event.location_lng };
+
                     const marker = new google.maps.Marker({
-                        position: location,
+                        position: position,
                         map: combinedMap,
-                        title: `${match.name || `Host ${match.host_id}`} - Host`,
+                        title: `${event.title} - Event`,
                         icon: {
                             path: google.maps.SymbolPath.CIRCLE,
                             scale: 10,
-                            fillColor: isRecommended ? '#f59e0b' : '#667eea',
+                            fillColor: isRecommended ? '#f59e0b' : '#10b981',
                             fillOpacity: 1,
                             strokeColor: '#fff',
                             strokeWeight: 2
                         },
                         label: {
-                            text: 'H',
+                            text: 'E',
                             color: 'white',
                             fontSize: '10px'
                         }
                     });
 
-                    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${location.lat},${location.lng}`;
-                    const appleMapsUrl = `https://maps.apple.com/?q=${location.lat},${location.lng}`;
-                    
                     const infoWindow = new google.maps.InfoWindow({
                         content: `
                             <div style="padding: 10px; min-width: 200px;">
-                                <h3 style="margin: 0 0 10px 0; color: #667eea;">${match.name || `Host ${match.host_id}`}</h3>
-                                <p style="margin: 5px 0;"><strong>Match Score:</strong> ${score}%</p>
-                                ${match.reasoning ? `<p style="margin: 5px 0; font-style: italic; color: #666;">${match.reasoning}</p>` : ''}
-                                <p style="margin: 5px 0;"><strong>Host ID:</strong> ${match.host_id}</p>
-                                <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
-                                    <a href="${googleMapsUrl}" target="_blank" style="padding: 6px 12px; background: #4285f4; color: white; text-decoration: none; border-radius: 6px; font-size: 0.85em; font-weight: 600;">Google Maps</a>
-                                    <a href="${appleMapsUrl}" target="_blank" style="padding: 6px 12px; background: #000; color: white; text-decoration: none; border-radius: 6px; font-size: 0.85em; font-weight: 600;">Apple Maps</a>
-                                </div>
+                                <h3 style="margin: 0 0 10px 0; color: #10b981;">${event.title} ${isRecommended ? '⭐' : ''}</h3>
+                                <p style="margin: 5px 0;"><strong>Date:</strong> ${event.date} at ${event.time}</p>
+                                <p style="margin: 5px 0;"><strong>Location:</strong> ${event.location}</p>
+                                <p style="margin: 5px 0;"><strong>Cost:</strong> ${event.cost === 0 ? 'Free' : `$${event.cost.toFixed(2)}`}</p>
+                                ${rec.reasoning ? `<p style="margin: 5px 0; font-style: italic; color: #666;">${rec.reasoning}</p>` : ''}
                             </div>
                         `
                     });
@@ -1410,63 +1257,9 @@
                     });
 
                     combinedMarkers.push(marker);
-                    bounds.extend(location);
-                });
-            }
-
-            // Add event markers
-            if (events && events.length > 0) {
-                events.forEach(event => {
-                    if (event.location_lat && event.location_lng) {
-                        const isRecommended = recommendedEventIdsCombined.has(event.id);
-                        const position = { lat: event.location_lat, lng: event.location_lng };
-
-                        const marker = new google.maps.Marker({
-                            position: position,
-                            map: combinedMap,
-                            title: `${event.title} - Event`,
-                            icon: {
-                                path: google.maps.SymbolPath.CIRCLE,
-                                scale: 10,
-                                fillColor: isRecommended ? '#f59e0b' : '#10b981',
-                                fillOpacity: 1,
-                                strokeColor: '#fff',
-                                strokeWeight: 2
-                            },
-                            label: {
-                                text: 'E',
-                                color: 'white',
-                                fontSize: '10px'
-                            }
-                        });
-
-                        const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${event.location_lat},${event.location_lng}`;
-                        const appleMapsUrl = `https://maps.apple.com/?q=${event.location_lat},${event.location_lng}`;
-                        
-                        const infoWindow = new google.maps.InfoWindow({
-                            content: `
-                                <div style="padding: 10px; min-width: 200px;">
-                                    <h3 style="margin: 0 0 10px 0; color: #10b981;">${event.title}</h3>
-                                    <p style="margin: 5px 0;"><strong>Date:</strong> ${event.date} at ${event.time || 'TBA'}</p>
-                                    <p style="margin: 5px 0;"><strong>Location:</strong> ${event.location || 'Location TBA'}</p>
-                                    <p style="margin: 5px 0;"><strong>Cost:</strong> ${event.cost === 0 ? 'Free' : `$${event.cost ? event.cost.toFixed(2) : '0.00'}`}</p>
-                                    <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
-                                        <a href="${googleMapsUrl}" target="_blank" style="padding: 6px 12px; background: #4285f4; color: white; text-decoration: none; border-radius: 6px; font-size: 0.85em; font-weight: 600;">Google Maps</a>
-                                        <a href="${appleMapsUrl}" target="_blank" style="padding: 6px 12px; background: #000; color: white; text-decoration: none; border-radius: 6px; font-size: 0.85em; font-weight: 600;">Apple Maps</a>
-                                    </div>
-                                </div>
-                            `
-                        });
-
-                        marker.addListener('click', () => {
-                            infoWindow.open(combinedMap, marker);
-                        });
-
-                        combinedMarkers.push(marker);
-                        bounds.extend(position);
-                    }
-                });
-            }
+                    bounds.extend(position);
+                }
+            });
 
             if (combinedMarkers.length > 0) {
                 combinedMap.fitBounds(bounds);
@@ -1540,25 +1333,16 @@
                 return;
             }
 
-            container.innerHTML = listings.map((listing, index) => {
+            container.innerHTML = listings.map(listing => {
                 const rating = listing.average_rating || 0;
                 const reviewCount = listing.review_count || 0;
-                // Use approximate Princeton campus locations for housing
-                const housingLocations = [
-                    { lat: 40.3485, lng: -74.6510 },
-                    { lat: 40.3475, lng: -74.6520 },
-                    { lat: 40.3495, lng: -74.6505 },
-                    { lat: 40.3465, lng: -74.6530 },
-                    { lat: 40.3505, lng: -74.6495 }
-                ];
-                const location = housingLocations[index % housingLocations.length];
                 
                 return `
-                    <div class="housing-card">
+                    <div class="housing-card" onclick="window.location.href='/listing/${listing.id}'">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
                             <div>
                                 <h3 style="font-size: 1.3em; color: #333; margin-bottom: 5px;">${listing.name}</h3>
-                                ${rating > 0 ? `<div style="color: #f59e0b;">Rating: ${rating.toFixed(1)} (${reviewCount} reviews)</div>` : ''}
+                                ${rating > 0 ? `<div style="color: #f59e0b;">⭐ ${rating.toFixed(1)} (${reviewCount} reviews)</div>` : ''}
                             </div>
                             <span class="event-category">Host</span>
                         </div>
@@ -1571,15 +1355,9 @@
                             ${listing.dorm_vibe ? `<div><strong>Vibe:</strong> ${listing.dorm_vibe}</div>` : ''}
                             ${listing.interests ? `<div><strong>Interests:</strong> ${listing.interests}</div>` : ''}
                         </div>
-                        <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button onclick="window.location.href='/listing/${listing.id}'" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em;">
+                        <div style="margin-top: 15px;">
+                            <button style="padding: 8px 16px; background: #0077b6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
                                 View Details
-                            </button>
-                            <button onclick="openInMaps(${location.lat}, ${location.lng}, '${listing.name.replace(/'/g, "\\'")} - Princeton Campus')" style="padding: 8px 16px; background: #4285f4; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em;">
-                                Open in Maps
-                            </button>
-                            <button onclick="showMapEmbed(${location.lat}, ${location.lng}, '${listing.name.replace(/'/g, "\\'")} - Princeton Campus')" style="padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em;">
-                                View on Map
                             </button>
                         </div>
                     </div>

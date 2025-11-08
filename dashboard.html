@@ -107,7 +107,7 @@
             transition: all 0.2s;
             border-bottom: 2px solid transparent;
             font-size: 14px;
-            display: block;
+>>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
         }
 
         .tab:hover {
@@ -667,6 +667,113 @@
         .map-btn-secondary:hover {
             background: #caf0f8;
         }
+
+        /* Event Detail Modal Styles */
+        .event-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            overflow-y: auto;
+        }
+
+        .event-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .event-modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 700px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .event-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .event-modal-header h2 {
+            margin: 0;
+            color: #03045e;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .event-modal-close {
+            background: #e0e0e0;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            color: #03045e;
+        }
+
+        .event-modal-close:hover {
+            background: #b0b0b0;
+        }
+
+        .event-modal-body {
+            color: #333;
+        }
+
+        .event-modal-body .event-category {
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+
+        .event-modal-body .event-description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .event-modal-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .event-modal-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .event-modal-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -882,7 +989,7 @@
         // Check authentication
         async function checkAuth() {
             try {
-                const response = await fetch('http://localhost:5000/api/auth/check', {
+                const response = await fetch('/api/auth/check', {
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -896,11 +1003,9 @@
                 currentUser = data.user;
                 userInfo.textContent = `👤 ${data.user.name}`;
                 
-                // Tabs are always visible - no need to set display
-                // Ensure all tabs are visible
-                document.querySelectorAll('.tab').forEach(tab => {
-                    tab.style.display = 'block';
-                });
+                // Always show both tabs
+                visitorTab.style.display = 'block';
+                hostTab.style.display = 'block';
                 
                 loading.style.display = 'none';
                 return true;
@@ -915,7 +1020,7 @@
         // Load all listings for visitor tab
         async function loadAllListings() {
             try {
-                const response = await fetch('http://localhost:5000/api/listings', {
+                const response = await fetch('/api/listings', {
                     credentials: 'include'
                 });
                 
@@ -967,7 +1072,10 @@
         }
 
         function displayAllListings(listings) {
-            if (listings.length === 0) {
+            // Filter out any undefined/null listings
+            const validListings = listings.filter(listing => listing && listing.id !== undefined && listing.id !== null);
+            
+            if (validListings.length === 0) {
                 allListingsContainer.innerHTML = `
                     <div class="no-listings">
                         <div style="font-size: 4em; margin-bottom: 20px;">🔍</div>
@@ -983,79 +1091,15 @@
             grid.className = 'listings-grid';
             
             // Sort by match score if available
-            const sortedListings = [...listings].sort((a, b) => {
+            const sortedListings = [...validListings].sort((a, b) => {
+                if (!a || !b || a.id === undefined || b.id === undefined) return 0;
                 const scoreA = matchScores[a.id] || 0;
                 const scoreB = matchScores[b.id] || 0;
                 return scoreB - scoreA;
             });
             
             sortedListings.forEach(listing => {
-                const card = document.createElement('div');
-                card.className = 'listing-card';
-                card.onclick = () => window.location.href = `/listing/${listing.id}`;
-                
-                const description = listing.description || 'No description';
-                const preview = description.length > 150 ? description.substring(0, 150) + '...' : description;
-                
-                const dateRangeText = formatDateRange(listing.available_dates);
-                const rating = listing.average_rating || 0;
-                const reviewCount = listing.review_count || 0;
-                const matchScore = matchScores[listing.id];
-                const listingLocation = getListingLocation(listing);
-                
-                card.innerHTML = `
-                    <div class="listing-card-title">${escapeHtml(listing.name || 'Unnamed Listing')}</div>
-                    ${matchScore !== undefined ? `<div class="match-percentage">${Math.round(matchScore * 100)}% Match</div>` : ''}
-                    <div class="listing-card-info">${escapeHtml(preview)}</div>
-                    <div class="listing-card-info" style="font-size: 0.9em;">
-                        <strong>Vibe:</strong> ${escapeHtml(listing.dorm_vibe || 'Not specified')}
-                    </div>
-                    <div class="listing-card-info" style="font-size: 0.9em;">
-                        <strong>Interests:</strong> ${escapeHtml(listing.interests || 'Not specified')}
-                    </div>
-                    <div class="listing-card-meta">
-                        Capacity: ${listing.capacity || 1} guest${listing.capacity !== 1 ? 's' : ''}
-                    </div>
-                    ${formatRating(rating, reviewCount)}
-                    <div class="date-range-display">📅 ${dateRangeText}</div>
-                    ${listingLocation ? `
-                        <div class="map-buttons" style="padding: 0 16px 16px; margin-top: 8px;">
-                            <button onclick="event.stopPropagation(); openInMaps(${listingLocation.lat}, ${listingLocation.lng}, '${escapeHtml(listing.name || 'Listing')} - Princeton Campus')" class="map-btn map-btn-secondary" style="font-size: 12px; padding: 6px 12px;">
-                                🗺️ Maps
-                            </button>
-                            <button onclick="event.stopPropagation(); showMapEmbed(${listingLocation.lat}, ${listingLocation.lng}, '${escapeHtml(listing.name || 'Listing')} - Princeton Campus')" class="map-btn map-btn-secondary" style="font-size: 12px; padding: 6px 12px;">
-                                📍 View Map
-                            </button>
-                        </div>
-                    ` : ''}
-                `;
-                
-                grid.appendChild(card);
-            });
-            
-            allListingsContainer.appendChild(grid);
-        }
-
-        // AI Search functionality
-        searchBtn.addEventListener('click', async () => {
-            const vibes = idealVibes.value.trim();
-            const startDate = dateRangeStart.value;
-            const endDate = dateRangeEnd.value;
-            
-            if (!vibes || !startDate || !endDate) {
-                errorDiv.textContent = 'Please fill in all search fields';
-                errorDiv.style.display = 'block';
-                return;
-            }
-            
-            searchBtn.disabled = true;
-            searchBtn.textContent = 'Searching...';
-            errorDiv.style.display = 'none';
-            allListingsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><p>AI is analyzing listings...</p></div>';
-            
-            try {
-                // First get all listings
-                const listingsResponse = await fetch('http://localhost:5000/api/listings', {
+                const listingsResponse = await fetch('/api/listings', {
                     credentials: 'include'
                 });
                 const listingsData = await listingsResponse.json();
@@ -1092,7 +1136,7 @@
                 // Use AI to match
                 const visitorQuery = `I'm looking for: ${vibes}. I need accommodation from ${startDate} to ${endDate}.`;
                 
-                const matchResponse = await fetch('http://localhost:5000/api/listings/match', {
+                const matchResponse = await fetch('/api/listings/match', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -1132,7 +1176,7 @@
         // Load host listings
         async function loadHostListings() {
             try {
-                const response = await fetch('http://localhost:5000/api/listing/my-listings', {
+                const response = await fetch('/api/listing/my-listings', {
                     credentials: 'include'
                 });
                 
@@ -1143,7 +1187,7 @@
                     return;
                 }
                 
-                const listings = data.listings || [];
+                const listings = (data.listings || []).filter(listing => listing && listing.id !== undefined && listing.id !== null);
                 
                 if (listings.length === 0) {
                     listingsContainer.innerHTML = `
@@ -1160,62 +1204,7 @@
                     grid.className = 'listings-grid';
                     
                     listings.forEach(listing => {
-                        const card = document.createElement('div');
-                        card.className = 'listing-card';
-                        
-                        const description = listing.description || 'No description';
-                        const preview = description.length > 100 ? description.substring(0, 100) + '...' : description;
-                        
-                        const dateRangeText = formatDateRange(listing.available_dates);
-                        const rating = listing.average_rating || 0;
-                        const reviewCount = listing.review_count || 0;
-                        
-                        card.innerHTML = `
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                <div class="listing-card-title">${escapeHtml(listing.name || 'Unnamed Listing')}</div>
-                                <div style="color: #999; font-size: 0.9em;">#${listing.id}</div>
-                            </div>
-                            <div class="listing-card-info">${escapeHtml(preview)}</div>
-                            <div class="listing-card-meta">
-                                Capacity: ${listing.capacity || 1} guest${listing.capacity !== 1 ? 's' : ''}
-                            </div>
-                            ${formatRating(rating, reviewCount)}
-                            <div class="date-range-display" style="margin-top: 10px;">📅 ${dateRangeText}</div>
-                            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                <a href="/listing/${listing.id}" style="flex: 1; padding: 8px 16px; border-radius: 6px; background: #667eea; color: white; text-decoration: none; text-align: center; font-weight: 600;">View</a>
-                                <button onclick="editListing(${listing.id})" style="flex: 1; padding: 8px 16px; border-radius: 6px; background: #f0f0f0; color: #667eea; border: none; font-weight: 600; cursor: pointer;">Edit</button>
-                            </div>
-                        `;
-                        
-                        grid.appendChild(card);
-                    });
-                    
-                    listingsContainer.appendChild(grid);
-                }
-            } catch (error) {
-                listingsContainer.innerHTML = `<div class="error">Error: ${error.message}</div>`;
-            }
-        }
-
-        function editListing(listingId) {
-            window.location.href = `/host/dashboard?listing=${listingId}`;
-        }
-
-        // Create listing button
-        createListingBtn.addEventListener('click', () => {
-            window.location.href = '/host/dashboard';
-        });
-
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Logout
-        logoutBtn.addEventListener('click', async () => {
-            await fetch('http://localhost:5000/api/auth/logout', {
+            await fetch('/api/auth/logout', {
                 method: 'POST',
                 credentials: 'include'
             });
@@ -1239,18 +1228,7 @@
 
         // Map Functions (defined early so they can be used in display functions)
         function getListingLocation(listing) {
-            // Generate approximate Princeton campus locations for listings
-            const housingLocations = [
-                { lat: 40.3485, lng: -74.6510 },
-                { lat: 40.3475, lng: -74.6520 },
-                { lat: 40.3495, lng: -74.6505 },
-                { lat: 40.3465, lng: -74.6530 },
-                { lat: 40.3505, lng: -74.6495 },
-                { lat: 40.3455, lng: -74.6540 },
-                { lat: 40.3515, lng: -74.6485 }
-            ];
-            // Use listing ID to consistently assign location
-            const index = (listing.id || 0) % housingLocations.length;
+            const index = listing.id % housingLocations.length;
             return housingLocations[index];
         }
 
@@ -1359,7 +1337,15 @@
 
                 if (data.success) {
                     allEvents = data.events || [];
-                    displayEvents(allEvents);
+                    // Apply additional client-side free filter if needed
+                    let filteredEvents = allEvents;
+                    if (freeOnly) {
+                        filteredEvents = allEvents.filter(event => {
+                            const cost = event.cost;
+                            return cost === 0 || cost === 0.0 || cost === null || cost === undefined || cost === '0' || cost === '0.0';
+                        });
+                    }
+                    displayEvents(filteredEvents);
                 } else {
                     throw new Error(data.error || 'Failed to load events');
                 }
@@ -1377,7 +1363,10 @@
             const container = document.getElementById('eventsContainer');
             if (!container) return;
 
-            if (events.length === 0) {
+            // Filter out any undefined/null events or events without id
+            const validEvents = events.filter(event => event && event.id !== undefined && event.id !== null);
+
+            if (validEvents.length === 0) {
                 container.innerHTML = `
                     <div class="no-listings" style="grid-column: 1 / -1; text-align: center; padding: 60px;">
                         <div style="font-size: 4em; margin-bottom: 20px;">🎉</div>
@@ -1388,12 +1377,12 @@
                 return;
             }
 
-            container.innerHTML = events.map(event => {
-                const isRecommended = recommendedEventIds.has(event.id);
-                const isFree = event.cost === 0 || event.cost === 0.0;
+            container.innerHTML = validEvents.map(event => {
+                const isRecommended = event.id !== undefined && recommendedEventIds.has(event.id);
+                const isFree = event.cost === 0 || event.cost === 0.0 || event.cost === null || event.cost === undefined;
                 
                 return `
-                    <div class="event-card ${isRecommended ? 'recommended' : ''}">
+                    <div class="event-card ${isRecommended ? 'recommended' : ''}" onclick="showEventDetails(${event.id})" style="cursor: pointer;">
                         <div class="event-title">${escapeHtml(event.title)}</div>
                         <span class="event-category">${escapeHtml(event.category)}</span>
                         <div class="event-description">${escapeHtml(event.description || '')}</div>
@@ -1445,7 +1434,10 @@
             const container = document.getElementById('housingContainer');
             if (!container) return;
 
-            if (listings.length === 0) {
+            // Filter out any undefined/null listings
+            const validListings = listings.filter(listing => listing && listing.id !== undefined && listing.id !== null);
+
+            if (validListings.length === 0) {
                 container.innerHTML = `
                     <div class="no-listings" style="grid-column: 1 / -1; text-align: center; padding: 60px;">
                         <div style="font-size: 4em; margin-bottom: 20px;">🏠</div>
@@ -1456,7 +1448,7 @@
                 return;
             }
 
-            container.innerHTML = listings.map(listing => {
+            container.innerHTML = validListings.map(listing => {
                 const rating = listing.average_rating || 0;
                 const reviewCount = listing.review_count || 0;
                 const dateRange = formatDateRange(listing.available_dates);
@@ -1517,22 +1509,24 @@
             aiSection.innerHTML = '<div class="loading"><div class="spinner"></div><p>Analyzing events...</p></div>';
 
             try {
-                const response = await fetch('/api/events/recommendations', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        interests: interests,
-                        category: document.getElementById('categoryFilter')?.value,
-                        date_from: document.getElementById('dateFromFilter')?.value,
-                        date_to: document.getElementById('dateToFilter')?.value,
-                        free_only: document.getElementById('freeOnlyFilter')?.checked
+                        free_only: wantsFree
                     })
                 });
 
                 const data = await response.json();
                 if (data.success && data.recommendations) {
-                    const recs = data.recommendations.recommendations || [];
-                    recommendedEventIds = new Set(recs.map(r => r.event.id));
+                    // Filter recommendations to only include valid events
+                    let recs = (data.recommendations.recommendations || []).filter(r => r && r.event && r.event.id !== undefined && r.event.id !== null);
+                    
+                    // If user wants free events, filter out paid events
+                    if (wantsFree) {
+                        recs = recs.filter(r => {
+                            const cost = r.event.cost;
+                            return cost === 0 || cost === 0.0 || cost === null || cost === undefined || cost === '0' || cost === '0.0';
+                        });
+                    }
+                    
+                    recommendedEventIds = new Set(recs.map(r => r.event.id).filter(id => id !== undefined && id !== null));
                     
                     let html = '';
                     if (data.recommendations.summary) {
@@ -1541,15 +1535,23 @@
                     if (recs.length > 0) {
                         html += '<div style="margin-top: 15px;"><strong style="color: #03045e;">Recommended Events:</strong></div>';
                         recs.forEach(rec => {
+                            if (!rec || !rec.event || !rec.event.id) return;
                             html += `
                                 <div style="margin-top: 10px; padding: 12px; background: white; border-radius: 8px;">
-                                    <strong style="color: #03045e;">${escapeHtml(rec.event.title)}</strong>
+                                    <strong style="color: #03045e;">${escapeHtml(rec.event.title || 'Untitled Event')}</strong>
                                     ${rec.reasoning ? `<div style="font-size: 14px; color: #717171; margin-top: 5px;">${escapeHtml(rec.reasoning)}</div>` : ''}
                                 </div>
                             `;
                         });
                     }
-                    aiSection.innerHTML = html;
+                    
+                    // Only show the recommendations section if there's content
+                    if (html.trim()) {
+                        aiSection.innerHTML = html;
+                        aiSection.style.display = 'block';
+                    } else {
+                        aiSection.style.display = 'none';
+                    }
                     await loadEvents();
                 } else {
                     aiSection.innerHTML = '<div class="error">No recommendations available. Try adjusting your interests.</div>';
@@ -1562,12 +1564,79 @@
             }
         });
 
+        // Event Details Modal
+        function showEventDetails(eventId) {
+            const event = allEvents.find(e => e.id === eventId);
+            if (!event) {
+                console.error('Event not found:', eventId);
+                return;
+            }
 
-        // Initialize - ensure tabs are visible
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.style.display = 'block';
-        });
-        
+            // Create modal if it doesn't exist
+            let modal = document.getElementById('eventDetailModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'eventDetailModal';
+                modal.className = 'event-modal';
+                document.body.appendChild(modal);
+                
+                // Close on background click
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeEventDetails();
+                    }
+                });
+            }
+
+            const isFree = event.cost === 0 || event.cost === 0.0 || event.cost === null || event.cost === undefined;
+
+            modal.innerHTML = `
+                <div class="event-modal-content" onclick="event.stopPropagation()">
+                    <div class="event-modal-header">
+                        <h2>${escapeHtml(event.title || 'Event Details')}</h2>
+                        <button class="event-modal-close" onclick="closeEventDetails()">×</button>
+                    </div>
+                    <div class="event-modal-body">
+                        <span class="event-category">${escapeHtml(event.category || 'General')}</span>
+                        <div class="event-description">${escapeHtml(event.description || 'No description available.')}</div>
+                        <div class="event-modal-details">
+                            <div class="event-modal-detail-item">
+                                <strong>📅 Date:</strong> ${event.date || 'TBA'}
+                            </div>
+                            <div class="event-modal-detail-item">
+                                <strong>⏰ Time:</strong> ${event.time || 'TBA'}
+                            </div>
+                            <div class="event-modal-detail-item">
+                                <strong>📍 Location:</strong> ${escapeHtml(event.location || 'TBA')}
+                            </div>
+                            <div class="event-modal-detail-item">
+                                <strong>💰 Cost:</strong> ${isFree ? 'Free' : `$${event.cost?.toFixed(2) || '0.00'}`}
+                            </div>
+                            ${event.organizer ? `
+                                <div class="event-modal-detail-item">
+                                    <strong>👤 Organizer:</strong> ${escapeHtml(event.organizer)}
+                                </div>
+                            ` : ''}
+                        </div>
+                        ${event.tags && event.tags.length > 0 ? `
+                            <div class="event-modal-tags">
+                                ${event.tags.map(tag => `<span class="event-tag">${escapeHtml(tag)}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeEventDetails() {
+            const modal = document.getElementById('eventDetailModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
         // Initialize
         (async () => {
             const isAuth = await checkAuth();

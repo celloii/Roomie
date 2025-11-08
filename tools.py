@@ -1,6 +1,7 @@
 # tools.py
 import json
 import os
+from datetime import datetime, timedelta
 
 # --- Mock Database (JSON file approach) ---
 LISTINGS_FILE = 'listings.json'
@@ -143,13 +144,8 @@ def add_review(listing_id: int, reviewer_name: str, rating: int, comment: str) -
             if "reviews" not in listing:
                 listing["reviews"] = []
             
+<<<<<<< HEAD
             import datetime
-            review = {
-                "id": len(listing["reviews"]) + 1,
-                "reviewer_name": reviewer_name,
-                "rating": rating,
-                "comment": comment,
-                "date": datetime.datetime.now().isoformat()
             }
             
             listing["reviews"].append(review)

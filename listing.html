@@ -15,57 +15,39 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: #f7f7f7;
             min-height: 100vh;
-            padding: 0;
+            padding: 20px;
         }
 
         .container {
-            max-width: 1760px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
-            min-height: 100vh;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
         }
 
         .header {
             background: white;
             color: #03045e;
-            padding: 20px 80px;
+            padding: 30px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
             border-bottom: 1px solid #e0e0e0;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-        }
-
-        .home-btn {
-            padding: 8px 16px;
-            background: transparent;
-            color: #0077b6;
-            text-decoration: none;
-            border-radius: 22px;
-            font-weight: 600;
-            font-size: 14px;
-            transition: background 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .home-btn:hover {
-            background: #caf0f8;
         }
 
         .header h1 {
             font-size: 22px;
             font-weight: 600;
             color: #03045e;
-            margin: 0;
         }
 
         .back-btn {
             background: transparent;
-            border: 1px solid #dddddd;
-            color: #03045e;
+            border: 1px solid #0077b6;
+            color: #0077b6;
             padding: 8px 16px;
             border-radius: 22px;
             text-decoration: none;
@@ -75,12 +57,11 @@
         }
 
         .back-btn:hover {
-            border-color: #0077b6;
-            box-shadow: 0 2px 4px rgba(0,119,182,0.18);
+            background: #caf0f8;
         }
 
         .content {
-            padding: 40px 80px;
+            padding: 40px;
         }
 
         .loading {
@@ -118,15 +99,14 @@
         }
 
         .listing-name {
-            font-size: 26px;
-            color: #03045e;
+            font-size: 2.5em;
+            color: #333;
             margin-bottom: 10px;
-            font-weight: 600;
         }
 
         .listing-meta {
-            color: #717171;
-            font-size: 16px;
+            color: #666;
+            font-size: 1.1em;
         }
 
         .images-section {
@@ -157,10 +137,9 @@
         .no-images {
             text-align: center;
             padding: 40px;
-            background: white;
-            border: 1px solid #e0e0e0;
+            background: #f8f9fa;
             border-radius: 12px;
-            color: #717171;
+            color: #666;
         }
 
         .info-section {
@@ -168,18 +147,16 @@
         }
 
         .info-section h2 {
-            color: #03045e;
+            color: #333;
             margin-bottom: 15px;
-            font-size: 22px;
-            font-weight: 600;
+            font-size: 1.5em;
         }
 
         .info-card {
-            background: white;
+            background: #f8f9fa;
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 15px;
-            border: 1px solid #e0e0e0;
         }
 
         .info-label {
@@ -189,7 +166,7 @@
         }
 
         .info-value {
-            color: #03045e;
+            color: #333;
             line-height: 1.6;
         }
 
@@ -201,12 +178,11 @@
         }
 
         .date-badge {
-            background: #caf0f8;
-            color: #0077b6;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 500;
+            background: #0077b6;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
         }
 
         .reviews-section {
@@ -214,18 +190,15 @@
         }
 
         .review-form {
-            background: white;
+            background: #f8f9fa;
             padding: 25px;
             border-radius: 12px;
             margin-bottom: 30px;
-            border: 1px solid #e0e0e0;
         }
 
         .review-form h3 {
-            color: #03045e;
+            color: #333;
             margin-bottom: 20px;
-            font-size: 22px;
-            font-weight: 600;
         }
 
         .rating-input {
@@ -245,7 +218,7 @@
         }
 
         .star-btn.active {
-            color: #ffb700;
+            color: #ffd700;
         }
 
         .review-item {
@@ -253,34 +226,22 @@
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 15px;
-            border: 1px solid #e0e0e0;
-        }
-
-        .review-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .reviewer-name {
-            font-weight: 600;
-            color: #03045e;
+            color: #333;
         }
 
         .review-date {
-            color: #717171;
-            font-size: 14px;
+            color: #999;
+            font-size: 0.9em;
         }
 
         .review-rating {
-            color: #ffb700;
-            font-size: 16px;
+            color: #ffd700;
+            font-size: 1.2em;
             margin-bottom: 10px;
         }
 
         .review-comment {
-            color: #717171;
+            color: #666;
             line-height: 1.6;
         }
 
@@ -304,12 +265,11 @@
         .form-group input[type="text"],
         .form-group textarea {
             width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #b0b0b0;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 1em;
             font-family: inherit;
-            transition: all 0.2s;
         }
 
         .form-group textarea {
@@ -328,7 +288,7 @@
             background: #0077b6;
             color: white;
             border: none;
-            padding: 14px 24px;
+            padding: 12px 30px;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
@@ -441,7 +401,7 @@
         const backToSearchBtn = document.getElementById('backToSearchBtn');
         async function loadListing() {
             try {
-                const response = await fetch(`http://localhost:5000/api/listing/${listingId}`, {
+                const response = await fetch(`/api/listing/${listingId}`, {
                     credentials: 'include'
                 });
                 
@@ -488,7 +448,7 @@
                         const imageItem = document.createElement('div');
                         imageItem.className = 'image-item';
                         const img = document.createElement('img');
-                        img.src = `http://localhost:5000${imageUrl}`;
+                        img.src = imageUrl;
                         img.alt = 'Listing photo';
                         img.onerror = function() {
                             this.style.display = 'none';
@@ -578,7 +538,7 @@
             };
             
             try {
-                const response = await fetch(`http://localhost:5000/api/listing/${listingId}/review`, {
+                const response = await fetch(`/api/listing/${listingId}/review`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',

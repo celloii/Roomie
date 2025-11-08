@@ -37,6 +37,17 @@
       "password_hash": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
       "name": "Mai",
       "roles": []
+<<<<<<< HEAD
+=======
+    },
+    "welp@gmail.com": {
+      "email": "welp@gmail.com",
+      "password_hash": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225",
+      "name": "Mai",
+      "roles": [
+        "host"
+      ]
+>>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
     }
   }
 }
