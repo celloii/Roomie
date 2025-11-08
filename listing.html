@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f7f7f7;
             min-height: 100vh;
             padding: 20px;
         }
@@ -22,37 +22,42 @@
             max-width: 1000px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
             overflow: hidden;
+            border: 1px solid #e0e0e0;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            color: #03045e;
             padding: 30px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid #e0e0e0;
         }
 
         .header h1 {
-            font-size: 2em;
+            font-size: 22px;
+            font-weight: 600;
+            color: #03045e;
         }
 
         .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
+            background: transparent;
+            border: 1px solid #0077b6;
+            color: #0077b6;
+            padding: 8px 16px;
+            border-radius: 22px;
             text-decoration: none;
             font-weight: 600;
-            transition: background 0.3s;
+            font-size: 14px;
+            transition: all 0.2s;
         }
 
         .back-btn:hover {
-            background: rgba(255,255,255,0.3);
+            background: #caf0f8;
         }
 
         .content {
@@ -66,8 +71,8 @@
         }
 
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid #0077b6;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -81,12 +86,12 @@
         }
 
         .error {
-            background: #fee;
+            background: #fff5f5;
             color: #c33;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
-            border-left: 4px solid #c33;
+            border: 1px solid #fecaca;
         }
 
         .listing-header {
@@ -156,7 +161,7 @@
 
         .info-label {
             font-weight: 600;
-            color: #667eea;
+            color: #0077b6;
             margin-bottom: 5px;
         }
 
@@ -173,7 +178,7 @@
         }
 
         .date-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0077b6;
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -221,7 +226,8 @@
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 15px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #0077b6;
+            border: 1px solid #e0e0e0;
         }
 
         .review-header {
@@ -287,23 +293,25 @@
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #0077b6;
+            box-shadow: 0 0 0 2px rgba(0,119,182,0.1);
         }
 
         .submit-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0077b6;
             color: white;
             border: none;
             padding: 12px 30px;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.2s;
         }
 
         .submit-btn:hover {
-            transform: translateY(-2px);
+            background: #005a8a;
+            box-shadow: 0 2px 8px rgba(0,119,182,0.3);
         }
     </style>
 </head>

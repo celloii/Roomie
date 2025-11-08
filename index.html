@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f7f7f7;
             min-height: 100vh;
             padding: 20px;
         }
@@ -22,26 +22,30 @@
             max-width: 800px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
             overflow: hidden;
+            border: 1px solid #e0e0e0;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            color: #03045e;
             padding: 40px;
             text-align: center;
+            border-bottom: 1px solid #e0e0e0;
         }
 
         .header h1 {
-            font-size: 2.5em;
+            font-size: 24px;
+            font-weight: 600;
+            color: #03045e;
             margin-bottom: 10px;
         }
 
         .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
+            color: #717171;
+            font-size: 14px;
         }
 
         .content {
@@ -62,12 +66,12 @@
 
         textarea, input[type="date"] {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
+            padding: 14px 16px;
+            border: 1px solid #b0b0b0;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: 16px;
             font-family: inherit;
-            transition: border-color 0.3s;
+            transition: all 0.2s;
         }
 
         textarea {
@@ -77,25 +81,26 @@
 
         textarea:focus, input[type="date"]:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #0077b6;
+            box-shadow: 0 0 0 2px rgba(0,119,182,0.1);
         }
 
         .submit-btn {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 14px 24px;
+            background: #0077b6;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1.1em;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.2s;
         }
 
         .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            background: #005a8a;
+            box-shadow: 0 2px 8px rgba(0,119,182,0.3);
         }
 
         .submit-btn:active {
@@ -112,7 +117,7 @@
             display: none;
             text-align: center;
             padding: 20px;
-            color: #667eea;
+            color: #0077b6;
         }
 
         .loading.active {
@@ -120,8 +125,8 @@
         }
 
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid #0077b6;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -150,12 +155,14 @@
         }
 
         .match-card {
-            background: #f8f9fa;
+            background: white;
+            border: 1px solid #e0e0e0;
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 15px;
-            border-left: 4px solid #667eea;
-            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 4px solid #0077b6;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
         }
 
         .match-card:hover {
@@ -177,7 +184,7 @@
         }
 
         .match-score {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0077b6;
             color: white;
             padding: 5px 15px;
             border-radius: 20px;
@@ -198,7 +205,7 @@
 
         .rank-badge {
             display: inline-block;
-            background: #667eea;
+            background: #0077b6;
             color: white;
             width: 28px;
             height: 28px;
@@ -241,12 +248,12 @@
         }
 
         .error {
-            background: #fee;
+            background: #fff5f5;
             color: #c33;
             padding: 15px;
             border-radius: 8px;
             margin-top: 20px;
-            border-left: 4px solid #c33;
+            border: 1px solid #fecaca;
         }
 
         .no-matches {
@@ -279,8 +286,8 @@
                 <h2 style="color: #333; margin-bottom: 20px;">Authentication Required</h2>
                 <p style="color: #666; margin-bottom: 30px;">Please log in as a visitor to find matches.</p>
                 <div style="display: flex; gap: 15px; justify-content: center;">
-                    <a href="/login" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600;">Go to Login</a>
-                    <a href="/host/dashboard" style="display: inline-block; background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 2px solid #667eea;">Are you a Host?</a>
+                    <a href="/login" style="display: inline-block; background: #0077b6; color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600;">Go to Login</a>
+                    <a href="/host/dashboard" style="display: inline-block; background: #caf0f8; color: #0077b6; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 1px solid #0077b6;">Are you a Host?</a>
                 </div>
             </div>
         </div>
@@ -560,7 +567,7 @@
                             <div class="${scoreClass}">${scorePercent}% Match</div>
                         </div>
                         ${reasoning ? `<div class="match-reasoning">${escapeHtml(reasoning)}</div>` : ''}
-                        ${match.host_id ? `<div class="match-id"><a href="/listing/${match.host_id}" style="color: #667eea; text-decoration: none; font-weight: 600;">View Listing →</a></div>` : ''}
+                        ${match.host_id ? `<div class="match-id"><a href="/listing/${match.host_id}" style="color: #0077b6; text-decoration: none; font-weight: 600;">View Listing →</a></div>` : ''}
                     `;
                     
                     matchesContainer.appendChild(card);
