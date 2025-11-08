@@ -39,8 +39,8 @@ def make_session_permanent():
 
 @app.route('/')
 def index():
-    """Serve the main matching page (requires visitor login)."""
-    return send_from_directory('.', 'index.html')
+    """Serve the login page as the home page."""
+    return send_from_directory('.', 'login.html')
 
 @app.route('/login')
 def login_page():
@@ -97,15 +97,15 @@ def signup():
             return jsonify({"error": "Email, password, and name are required"}), 400
         
         if create_user(email, password, name):
-    # Auto-login after signup
+            # Auto-login after signup
             session['user_email'] = email
             session.permanent = True  # Make session persist for 1 day
             user = get_user(email)
             return jsonify({
-            "success": True,
-            "message": "Account created successfully",
-            "user": user
-        }), 200
+                "success": True,
+                "message": "Account created successfully",
+                "user": user
+            }), 200
         else:
             return jsonify({"error": "Email already exists"}), 400
             
@@ -135,11 +135,19 @@ def login():
         if user:
             session['user_email'] = email
             session.permanent = True
-    return jsonify({
-        "success": True,
-        "message": "Continuing as guest",
-        "guest": True
-    }), 200
+            return jsonify({
+                "success": True,
+                "message": "Login successful",
+                "user": user
+            }), 200
+        else:
+            return jsonify({"error": "Invalid email or password"}), 401
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 @app.route('/api/auth/check', methods=['GET'])
 def check_auth():
@@ -576,7 +584,6 @@ def get_events():
     Get events directly from Dedalus events module.
     """
     try:
->>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
         category = request.args.get('category')
         date_from = request.args.get('date_from')
         date_to = request.args.get('date_to')

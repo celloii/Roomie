@@ -209,12 +209,12 @@
             submitBtn.disabled = true;
 
             const formData = {
-                email: document.getElementById('email').value,
+                email: document.getElementById('email').value.trim().toLowerCase(),
                 password: document.getElementById('password').value
             };
 
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/auth/login', {
+                const response = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -232,9 +232,12 @@
                 if (data.success) {
                     // Redirect to unified dashboard
                     window.location.href = '/dashboard';
+                } else {
+                    throw new Error(data.error || 'Login failed');
                 }
             } catch (error) {
-                errorDiv.textContent = error.message;
+                console.error('Login error:', error);
+                errorDiv.textContent = error.message || 'An error occurred. Please try again.';
                 errorDiv.classList.add('active');
                 submitBtn.disabled = false;
             }
@@ -260,8 +263,8 @@
                     const data = await response.json();
 
                     if (response.ok && data.success) {
-                        // Redirect to main page
-                        window.location.href = '/';
+                        // Redirect to dashboard
+                        window.location.href = '/dashboard';
                     } else {
                         throw new Error(data.error || 'Failed to continue as guest');
                     }
@@ -281,9 +284,15 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (data.authenticated || data.guest) {
-                window.location.href = '/';
+            if (data.authenticated) {
+                window.location.href = '/dashboard';
+            } else if (data.guest) {
+                window.location.href = '/dashboard';
             }
+        })
+        .catch(error => {
+            // Silently fail - user can still log in
+            console.error('Auth check failed:', error);
         });
     </script>
 </body>

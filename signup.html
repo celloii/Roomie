@@ -137,6 +137,72 @@
         }
 
         .links a:hover {
+            color: #005a8a;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 DormMatch</h1>
+            <p>Join Our Community</p>
+        </div>
+        
+        <div class="content">
+            <div class="error" id="error"></div>
+            
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required autocomplete="name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required autocomplete="email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required autocomplete="new-password" minlength="6">
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Create Account
+                </button>
+            </form>
+            
+            <div class="links">
+                <p>Already have an account? <a href="/login">Log in</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('signupForm');
+        const errorDiv = document.getElementById('error');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorDiv.classList.remove('active');
+            submitBtn.disabled = true;
+
+            const formData = {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim().toLowerCase(),
+                password: document.getElementById('password').value
+            };
+
+            if (formData.password.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters';
+                errorDiv.classList.add('active');
+                submitBtn.disabled = false;
+                return;
+            }
+
+            try {
                 const response = await fetch('/api/auth/signup', {
                     method: 'POST',
                     headers: {
@@ -155,9 +221,12 @@
                 if (data.success) {
                     // Redirect to unified dashboard
                     window.location.href = '/dashboard';
+                } else {
+                    throw new Error(data.error || 'Signup failed');
                 }
             } catch (error) {
-                errorDiv.textContent = error.message;
+                console.error('Signup error:', error);
+                errorDiv.textContent = error.message || 'An error occurred. Please try again.';
                 errorDiv.classList.add('active');
                 submitBtn.disabled = false;
             }
@@ -170,7 +239,7 @@
         .then(res => res.json())
         .then(data => {
             if (data.authenticated) {
-                window.location.href = '/';
+                window.location.href = '/dashboard';
             }
         });
     </script>

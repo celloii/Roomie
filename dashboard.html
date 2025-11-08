@@ -107,7 +107,6 @@
             transition: all 0.2s;
             border-bottom: 2px solid transparent;
             font-size: 14px;
->>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
         }
 
         .tab:hover {
@@ -1099,6 +1098,72 @@
             });
             
             sortedListings.forEach(listing => {
+                if (!listing || listing.id === undefined) return;
+                const card = document.createElement('div');
+                card.className = 'listing-card';
+                card.onclick = () => window.location.href = `/listing/${listing.id}`;
+                
+                const description = listing.description || 'No description';
+                const preview = description.length > 150 ? description.substring(0, 150) + '...' : description;
+                
+                const dateRangeText = formatDateRange(listing.available_dates);
+                const rating = listing.average_rating || 0;
+                const reviewCount = listing.review_count || 0;
+                const matchScore = matchScores[listing.id];
+                const listingLocation = getListingLocation(listing);
+                
+                card.innerHTML = `
+                    <div class="listing-card-title">${escapeHtml(listing.name || 'Unnamed Listing')}</div>
+                    ${matchScore !== undefined ? `<div class="match-percentage">${Math.round(matchScore * 100)}% Match</div>` : ''}
+                    <div class="listing-card-info">${escapeHtml(preview)}</div>
+                    <div class="listing-card-info" style="font-size: 0.9em;">
+                        <strong>Vibe:</strong> ${escapeHtml(listing.dorm_vibe || 'Not specified')}
+                    </div>
+                    <div class="listing-card-info" style="font-size: 0.9em;">
+                        <strong>Interests:</strong> ${escapeHtml(listing.interests || 'Not specified')}
+                    </div>
+                    <div class="listing-card-meta">
+                        Capacity: ${listing.capacity || 1} guest${listing.capacity !== 1 ? 's' : ''}
+                    </div>
+                    ${formatRating(rating, reviewCount)}
+                    <div class="date-range-display">📅 ${dateRangeText}</div>
+                    ${listingLocation ? `
+                        <div class="map-buttons" style="padding: 0 16px 16px; margin-top: 8px;">
+                            <button onclick="event.stopPropagation(); openInMaps(${listingLocation.lat}, ${listingLocation.lng}, '${escapeHtml(listing.name || 'Listing')} - Princeton Campus')" class="map-btn map-btn-secondary" style="font-size: 12px; padding: 6px 12px;">
+                                🗺️ Maps
+                            </button>
+                            <button onclick="event.stopPropagation(); showMapEmbed(${listingLocation.lat}, ${listingLocation.lng}, '${escapeHtml(listing.name || 'Listing')} - Princeton Campus')" class="map-btn map-btn-secondary" style="font-size: 12px; padding: 6px 12px;">
+                                📍 View Map
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                
+                grid.appendChild(card);
+            });
+            
+            allListingsContainer.appendChild(grid);
+        }
+
+        // AI Search functionality
+        searchBtn.addEventListener('click', async () => {
+            const vibes = idealVibes.value.trim();
+            const startDate = dateRangeStart.value;
+            const endDate = dateRangeEnd.value;
+            
+            if (!vibes || !startDate || !endDate) {
+                errorDiv.textContent = 'Please fill in all search fields';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            searchBtn.disabled = true;
+            searchBtn.textContent = 'Searching...';
+            errorDiv.style.display = 'none';
+            allListingsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><p>AI is analyzing listings...</p></div>';
+            
+            try {
+                // First get all listings
                 const listingsResponse = await fetch('/api/listings', {
                     credentials: 'include'
                 });
@@ -1164,6 +1229,7 @@
                 displayAllListings(dateFiltered);
                 
             } catch (error) {
+                console.error('Search error:', error);
                 errorDiv.textContent = `Error: ${error.message}`;
                 errorDiv.style.display = 'block';
                 allListingsContainer.innerHTML = '';
@@ -1204,6 +1270,62 @@
                     grid.className = 'listings-grid';
                     
                     listings.forEach(listing => {
+                        if (!listing || listing.id === undefined) return;
+                        const card = document.createElement('div');
+                        card.className = 'listing-card';
+                        
+                        const description = listing.description || 'No description';
+                        const preview = description.length > 100 ? description.substring(0, 100) + '...' : description;
+                        
+                        const dateRangeText = formatDateRange(listing.available_dates);
+                        const rating = listing.average_rating || 0;
+                        const reviewCount = listing.review_count || 0;
+                        
+                        card.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div class="listing-card-title">${escapeHtml(listing.name || 'Unnamed Listing')}</div>
+                                <div style="color: #999; font-size: 0.9em;">#${listing.id}</div>
+                            </div>
+                            <div class="listing-card-info">${escapeHtml(preview)}</div>
+                            <div class="listing-card-meta">
+                                Capacity: ${listing.capacity || 1} guest${listing.capacity !== 1 ? 's' : ''}
+                            </div>
+                            ${formatRating(rating, reviewCount)}
+                            <div class="date-range-display" style="margin-top: 10px;">📅 ${dateRangeText}</div>
+                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                <a href="/listing/${listing.id}" style="flex: 1; padding: 8px 16px; border-radius: 6px; background: #0077b6; color: white; text-decoration: none; text-align: center; font-weight: 600;">View</a>
+                                <button onclick="editListing(${listing.id})" style="flex: 1; padding: 8px 16px; border-radius: 6px; background: #f0f0f0; color: #0077b6; border: none; font-weight: 600; cursor: pointer;">Edit</button>
+                            </div>
+                        `;
+                        
+                        grid.appendChild(card);
+                    });
+                    
+                    listingsContainer.appendChild(grid);
+                }
+            } catch (error) {
+                listingsContainer.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function editListing(listingId) {
+            window.location.href = `/host/dashboard?listing=${listingId}`;
+        }
+
+        // Create listing button
+        createListingBtn.addEventListener('click', () => {
+            window.location.href = '/host/dashboard';
+        });
+
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
             await fetch('/api/auth/logout', {
                 method: 'POST',
                 credentials: 'include'
@@ -1227,7 +1349,22 @@
         let allEvents = [];
 
         // Map Functions (defined early so they can be used in display functions)
+        // Generate approximate Princeton campus locations for listings
+        const housingLocations = [
+            { lat: 40.3485, lng: -74.6510 },
+            { lat: 40.3475, lng: -74.6520 },
+            { lat: 40.3495, lng: -74.6505 },
+            { lat: 40.3465, lng: -74.6530 },
+            { lat: 40.3505, lng: -74.6495 },
+            { lat: 40.3455, lng: -74.6540 },
+            { lat: 40.3515, lng: -74.6485 }
+        ];
+        
         function getListingLocation(listing) {
+            if (!listing || listing.id === undefined || listing.id === null) {
+                return null;
+            }
+            // Use listing ID to consistently assign location
             const index = listing.id % housingLocations.length;
             return housingLocations[index];
         }
@@ -1509,6 +1646,18 @@
             aiSection.innerHTML = '<div class="loading"><div class="spinner"></div><p>Analyzing events...</p></div>';
 
             try {
+                const freeOnlyCheckbox = document.getElementById('freeOnlyFilter')?.checked || false;
+                const interestsLower = interests.toLowerCase();
+                const wantsFree = freeOnlyCheckbox || interestsLower.includes('free');
+                
+                const response = await fetch('/api/events/recommendations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        interests: interests,
+                        category: document.getElementById('categoryFilter')?.value,
+                        date_from: document.getElementById('dateFromFilter')?.value,
+                        date_to: document.getElementById('dateToFilter')?.value,
                         free_only: wantsFree
                     })
                 });

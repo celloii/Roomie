@@ -1,53 +1,43 @@
 {
   "users": {
-    "beepbop@gmail.com": {
-      "email": "beepbop@gmail.com",
-      "password_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
-      "name": "Beep Bop",
-      "roles": [
-        "host"
-      ]
+    "test@example.com": {
+      "email": "test@example.com",
+      "password_hash": "ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae",
+      "name": "Test User",
+      "roles": []
     },
-    "beeep@gmail.com": {
-      "email": "beeep@gmail.com",
-      "password_hash": "2c9529dfe986c093267a4b35fead139479e3b20860041f840b66be39ad0a4f8f",
-      "name": "beeep",
-      "roles": [
-        "host"
-      ]
+    "testuser@example.com": {
+      "email": "testuser@example.com",
+      "password_hash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+      "name": "Test User",
+      "roles": []
     },
-    "mntran724@gmail.com": {
-      "email": "mntran724@gmail.com",
-      "password_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
-      "name": "Mai Tran",
+    "newuser@test.com": {
+      "email": "newuser@test.com",
+      "password_hash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+      "name": "New User",
+      "roles": []
+    },
+    "demo@example.com": {
+      "email": "demo@example.com",
+      "password_hash": "d3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791",
+      "name": "Demo User",
+      "roles": []
+    },
+    "fjkdsjaldkj@gmail.com": {
+      "email": "fjkdsjaldkj@gmail.com",
+      "password_hash": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+      "name": "Mai",
       "roles": [
+        "host",
         "visitor"
       ]
     },
-    "cchen0866@gmail.com": {
-      "email": "cchen0866@gmail.com",
-      "password_hash": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225",
-      "name": "Chloe Chen",
-      "roles": [
-        "host"
-      ]
-    },
-    "dkjfkdaj@gmail.com": {
-      "email": "dkjfkdaj@gmail.com",
-      "password_hash": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
-      "name": "Mai",
+    "fdjhfakd@aol.com": {
+      "email": "fdjhfakd@aol.com",
+      "password_hash": "593657b9f762fe82766c6a6db2a098ab43e94c55c34e6ec1a877900ba7e3fc5a",
+      "name": "maia",
       "roles": []
-<<<<<<< HEAD
-=======
-    },
-    "welp@gmail.com": {
-      "email": "welp@gmail.com",
-      "password_hash": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225",
-      "name": "Mai",
-      "roles": [
-        "host"
-      ]
->>>>>>> 5322e13aae8ab08673f10b8ba8a6bb26010d57a7
     }
   }
 }
