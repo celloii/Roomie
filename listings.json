@@ -11,7 +11,16 @@
     ],
     "capacity": 1,
     "images": [],
-    "description": "A cozy, quiet dorm room perfect for studying. Early bedtime environment."
+    "description": "A cozy, quiet dorm room perfect for studying. Early bedtime environment.",
+    "reviews": [
+      {
+        "id": 1,
+        "reviewer_name": "beeep",
+        "rating": 4,
+        "comment": "decent apartment!",
+        "date": "2025-11-08T00:02:58.459095"
+      }
+    ]
   },
   {
     "id": 102,
@@ -25,7 +34,16 @@
     ],
     "capacity": 2,
     "images": [],
-    "description": "A vibrant, social dorm space. Great for night owls and gamers."
+    "description": "A vibrant, social dorm space. Great for night owls and gamers.",
+    "reviews": [
+      {
+        "id": 1,
+        "reviewer_name": "beeep",
+        "rating": 4,
+        "comment": "okay ish dorm",
+        "date": "2025-11-08T00:11:38.215477"
+      }
+    ]
   },
   {
     "id": 103,

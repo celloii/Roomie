@@ -213,17 +213,87 @@ def match_visitor():
             "details": error_details
         }), 500
 
+@app.route('/api/listings', methods=['GET'])
+def get_all_listings():
+    """Get all available listings with average ratings."""
+    listings = load_listings()
+    from tools import get_average_rating
+    
+    # Add average rating to each listing
+    for listing in listings:
+        listing['average_rating'] = get_average_rating(listing.get('id', 0))
+        listing['review_count'] = len(listing.get('reviews', []))
+    
+    return jsonify({"success": True, "listings": listings}), 200
+
+@app.route('/api/listings/match', methods=['POST'])
+def match_listings():
+    """Use AI agent to match listings based on visitor preferences."""
+    if 'user_email' not in session:
+        return jsonify({"error": "Authentication required. Please login."}), 401
+    
+    try:
+        data = request.get_json()
+        visitor_query = data.get('visitor_query', '').strip()
+        date_needed = data.get('date_needed', '').strip()
+        
+        if not visitor_query or not date_needed:
+            return jsonify({"error": "visitor_query and date_needed are required"}), 400
+        
+        # Call the existing Dedalus Labs agent
+        result = asyncio.run(run_matching_agent(visitor_query, date_needed))
+        
+        # Parse the result
+        if isinstance(result, str):
+            import re
+            json_str = result.strip()
+            json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', json_str, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1)
+            else:
+                json_match = re.search(r'\{.*\}', json_str, re.DOTALL)
+                if json_match:
+                    json_str = json_match.group(0)
+            
+            try:
+                parsed_result = json.loads(json_str)
+                return jsonify({
+                    "success": True,
+                    "matches": parsed_result
+                }), 200
+            except json.JSONDecodeError:
+                return jsonify({
+                    "success": True,
+                    "matches": {"raw_output": result}
+                }), 200
+        else:
+            return jsonify({
+                "success": True,
+                "matches": result
+            }), 200
+        
+    except Exception as e:
+        import traceback
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "details": traceback.format_exc()
+        }), 500
+
 @app.route('/api/listing/<int:listing_id>', methods=['GET'])
 def get_listing(listing_id):
-    """Get listing details by ID."""
+    """Get listing details by ID with average rating."""
     listing = get_listing_by_id(listing_id)
     if listing:
+        from tools import get_average_rating
+        listing['average_rating'] = get_average_rating(listing_id)
+        listing['review_count'] = len(listing.get('reviews', []))
         return jsonify({"success": True, "listing": listing}), 200
     return jsonify({"error": "Listing not found"}), 404
 
 @app.route('/api/listing/my-listings', methods=['GET'])
 def get_my_listings():
-    """Get all listings for the current host."""
+    """Get all listings for the current host with average ratings."""
     if 'user_email' not in session:
         return jsonify({"error": "Authentication required. Please login."}), 401
     
@@ -232,8 +302,14 @@ def get_my_listings():
     if user and 'host' not in user.get('roles', []):
         add_role_to_user(session['user_email'], 'host')
     
-    from tools import get_listings_by_email
+    from tools import get_listings_by_email, get_average_rating
     listings = get_listings_by_email(session['user_email'])
+    
+    # Add average rating to each listing
+    for listing in listings:
+        listing['average_rating'] = get_average_rating(listing.get('id', 0))
+        listing['review_count'] = len(listing.get('reviews', []))
+    
     return jsonify({"success": True, "listings": listings}), 200
 
 @app.route('/api/listing/my-listing', methods=['GET'])

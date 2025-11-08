@@ -343,6 +343,85 @@
             border-radius: 20px;
             font-weight: 600;
         }
+
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .listing-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .listing-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .listing-card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .listing-card-info {
+            color: #666;
+            margin-bottom: 8px;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .listing-card-meta {
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .date-range-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .stars {
+            color: #ffd700;
+            font-size: 1.1em;
+        }
+
+        .rating-text {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .match-percentage {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -377,41 +456,49 @@
             
             <!-- Visitor Tab -->
             <div class="tab-content active" id="visitorContent">
-                <h2 style="margin-bottom: 30px; color: #333;">Find Your Perfect Match</h2>
-                <form id="matchForm">
-                    <div class="form-group">
-                        <label for="visitorQuery">Tell us about yourself and what you're looking for:</label>
-                        <textarea 
-                            id="visitorQuery" 
-                            name="visitor_query" 
-                            placeholder="e.g., I need a quiet place, I have classes early and go to bed by 10 PM. I'm a light sleeper and prefer a study-friendly environment."
-                            required
-                        ></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="dateNeeded">When do you need accommodation?</label>
-                        <input 
-                            type="date" 
-                            id="dateNeeded" 
-                            name="date_needed" 
-                            required
-                        >
-                    </div>
-                    
-                    <button type="submit" class="submit-btn" id="submitBtn">
-                        Find My Perfect Match 🎯
-                    </button>
-                </form>
-                
-                <div class="loading-spinner" id="loadingSpinner">
-                    <div class="spinner"></div>
-                    <p>AI is finding your perfect match...</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2 style="color: #333;">Browse Available Listings</h2>
                 </div>
                 
-                <div class="results" id="results">
-                    <h2 style="margin-top: 30px; margin-bottom: 20px;">Your Matches</h2>
-                    <div id="matchesContainer"></div>
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 20px; color: #333;">Search Filters</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="idealVibes">Ideal Vibes</label>
+                            <input 
+                                type="text" 
+                                id="idealVibes" 
+                                placeholder="e.g., quiet, study-friendly, early bedtime"
+                                style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;"
+                            >
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="dateRangeStart">Available Date Range</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input 
+                                    type="date" 
+                                    id="dateRangeStart" 
+                                    style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;"
+                                >
+                                <span>to</span>
+                                <input 
+                                    type="date" 
+                                    id="dateRangeEnd" 
+                                    style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <button id="searchBtn" class="submit-btn" style="width: auto; padding: 12px 30px;">
+                        🔍 Search with AI Matching
+                    </button>
+                </div>
+                
+                <div id="allListingsContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading listings...</p>
+                    </div>
                 </div>
             </div>
             
@@ -445,12 +532,15 @@
         const hostContent = document.getElementById('hostContent');
         const listingsContainer = document.getElementById('listingsContainer');
         const createListingBtn = document.getElementById('createListingBtn');
-        const matchForm = document.getElementById('matchForm');
-        const matchesContainer = document.getElementById('matchesContainer');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const results = document.getElementById('results');
+        const allListingsContainer = document.getElementById('allListingsContainer');
+        const idealVibes = document.getElementById('idealVibes');
+        const dateRangeStart = document.getElementById('dateRangeStart');
+        const dateRangeEnd = document.getElementById('dateRangeEnd');
+        const searchBtn = document.getElementById('searchBtn');
 
         let currentUser = null;
+        let allListings = [];
+        let matchScores = {}; // Store AI match scores
 
         // Tab switching
         visitorTab.addEventListener('click', () => switchTab('visitor'));
@@ -463,10 +553,11 @@
             if (tab === 'visitor') {
                 visitorTab.classList.add('active');
                 visitorContent.classList.add('active');
+                loadAllListings();
             } else {
                 hostTab.classList.add('active');
                 hostContent.classList.add('active');
-                loadListings();
+                loadHostListings();
             }
         }
 
@@ -487,15 +578,9 @@
                 currentUser = data.user;
                 userInfo.textContent = `👤 ${data.user.name}`;
                 
-                // Show/hide tabs based on roles
-                if (!data.user.roles || data.user.roles.length === 0) {
-                    // New user - show both tabs
-                    visitorTab.style.display = 'block';
-                    hostTab.style.display = 'block';
-                } else {
-                    visitorTab.style.display = data.user.roles.includes('visitor') || data.user.roles.length === 0 ? 'block' : 'none';
-                    hostTab.style.display = data.user.roles.includes('host') || data.user.roles.length === 0 ? 'block' : 'none';
-                }
+                // Always show both tabs
+                visitorTab.style.display = 'block';
+                hostTab.style.display = 'block';
                 
                 loading.style.display = 'none';
                 return true;
@@ -507,8 +592,214 @@
             }
         }
 
-        // Load listings
-        async function loadListings() {
+        // Load all listings for visitor tab
+        async function loadAllListings() {
+            try {
+                const response = await fetch('http://localhost:5000/api/listings', {
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    allListingsContainer.innerHTML = `<div class="error">${data.error || 'Failed to load listings'}</div>`;
+                    return;
+                }
+                
+                allListings = data.listings || [];
+                displayAllListings(allListings);
+            } catch (error) {
+                allListingsContainer.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function formatDateRange(dates) {
+            if (!dates || dates.length === 0) {
+                return 'No dates available';
+            }
+            const sortedDates = dates.sort();
+            const startDate = sortedDates[0];
+            const endDate = sortedDates[sortedDates.length - 1];
+            if (startDate === endDate) {
+                return startDate;
+            }
+            return `${startDate} to ${endDate}`;
+        }
+
+        function formatRating(rating, reviewCount) {
+            if (reviewCount === 0) {
+                return '<div class="rating-text">No reviews yet</div>';
+            }
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            
+            let stars = '★'.repeat(fullStars);
+            if (hasHalfStar) stars += '½';
+            stars += '☆'.repeat(emptyStars);
+            
+            return `
+                <div class="rating-display">
+                    <span class="stars">${stars}</span>
+                    <span class="rating-text">${rating.toFixed(1)} (${reviewCount} review${reviewCount !== 1 ? 's' : ''})</span>
+                </div>
+            `;
+        }
+
+        function displayAllListings(listings) {
+            if (listings.length === 0) {
+                allListingsContainer.innerHTML = `
+                    <div class="no-listings">
+                        <div style="font-size: 4em; margin-bottom: 20px;">🔍</div>
+                        <h3 style="margin-bottom: 15px;">No listings found</h3>
+                        <p style="color: #666;">Try adjusting your search filters.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            allListingsContainer.innerHTML = '';
+            const grid = document.createElement('div');
+            grid.className = 'listings-grid';
+            
+            // Sort by match score if available
+            const sortedListings = [...listings].sort((a, b) => {
+                const scoreA = matchScores[a.id] || 0;
+                const scoreB = matchScores[b.id] || 0;
+                return scoreB - scoreA;
+            });
+            
+            sortedListings.forEach(listing => {
+                const card = document.createElement('div');
+                card.className = 'listing-card';
+                card.onclick = () => window.location.href = `/listing/${listing.id}`;
+                
+                const description = listing.description || 'No description';
+                const preview = description.length > 150 ? description.substring(0, 150) + '...' : description;
+                
+                const dateRangeText = formatDateRange(listing.available_dates);
+                const rating = listing.average_rating || 0;
+                const reviewCount = listing.review_count || 0;
+                const matchScore = matchScores[listing.id];
+                
+                card.innerHTML = `
+                    <div class="listing-card-title">${escapeHtml(listing.name || 'Unnamed Listing')}</div>
+                    ${matchScore !== undefined ? `<div class="match-percentage">${Math.round(matchScore * 100)}% Match</div>` : ''}
+                    <div class="listing-card-info">${escapeHtml(preview)}</div>
+                    <div class="listing-card-info" style="font-size: 0.9em;">
+                        <strong>Vibe:</strong> ${escapeHtml(listing.dorm_vibe || 'Not specified')}
+                    </div>
+                    <div class="listing-card-info" style="font-size: 0.9em;">
+                        <strong>Interests:</strong> ${escapeHtml(listing.interests || 'Not specified')}
+                    </div>
+                    <div class="listing-card-meta">
+                        Capacity: ${listing.capacity || 1} guest${listing.capacity !== 1 ? 's' : ''}
+                    </div>
+                    ${formatRating(rating, reviewCount)}
+                    <div class="date-range-display">📅 ${dateRangeText}</div>
+                `;
+                
+                grid.appendChild(card);
+            });
+            
+            allListingsContainer.appendChild(grid);
+        }
+
+        // AI Search functionality
+        searchBtn.addEventListener('click', async () => {
+            const vibes = idealVibes.value.trim();
+            const startDate = dateRangeStart.value;
+            const endDate = dateRangeEnd.value;
+            
+            if (!vibes || !startDate || !endDate) {
+                errorDiv.textContent = 'Please fill in all search fields';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            searchBtn.disabled = true;
+            searchBtn.textContent = 'Searching...';
+            errorDiv.style.display = 'none';
+            allListingsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><p>AI is analyzing listings...</p></div>';
+            
+            try {
+                // First get all listings
+                const listingsResponse = await fetch('http://localhost:5000/api/listings', {
+                    credentials: 'include'
+                });
+                const listingsData = await listingsResponse.json();
+                
+                if (!listingsResponse.ok) {
+                    throw new Error(listingsData.error || 'Failed to load listings');
+                }
+                
+                allListings = listingsData.listings || [];
+                
+                // Filter by date range first
+                const dateFiltered = allListings.filter(listing => {
+                    if (!listing.available_dates || listing.available_dates.length === 0) return false;
+                    const listingDates = listing.available_dates.sort();
+                    const listingStart = listingDates[0];
+                    const listingEnd = listingDates[listingDates.length - 1];
+                    // Check if there's overlap
+                    return listingStart <= endDate && listingEnd >= startDate;
+                });
+                
+                if (dateFiltered.length === 0) {
+                    allListingsContainer.innerHTML = `
+                        <div class="no-listings">
+                            <div style="font-size: 4em; margin-bottom: 20px;">📅</div>
+                            <h3 style="margin-bottom: 15px;">No listings available for this date range</h3>
+                            <p style="color: #666;">Try selecting a different date range.</p>
+                        </div>
+                    `;
+                    searchBtn.disabled = false;
+                    searchBtn.textContent = '🔍 Search with AI Matching';
+                    return;
+                }
+                
+                // Use AI to match
+                const visitorQuery = `I'm looking for: ${vibes}. I need accommodation from ${startDate} to ${endDate}.`;
+                
+                const matchResponse = await fetch('http://localhost:5000/api/listings/match', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        visitor_query: visitorQuery,
+                        date_needed: startDate
+                    })
+                });
+                
+                const matchData = await matchResponse.json();
+                
+                // Extract match scores - map host_id to listing.id
+                matchScores = {};
+                if (matchData.success && matchData.matches) {
+                    const rankedMatches = matchData.matches.ranked_matches || [];
+                    rankedMatches.forEach(match => {
+                        // host_id from AI should correspond to listing.id
+                        if (match.host_id !== undefined) {
+                            matchScores[match.host_id] = match.compatibility_score || 0;
+                        }
+                    });
+                }
+                
+                // Display filtered and matched listings
+                displayAllListings(dateFiltered);
+                
+            } catch (error) {
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+                allListingsContainer.innerHTML = '';
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = '🔍 Search with AI Matching';
+            }
+        });
+
+        // Load host listings
+        async function loadHostListings() {
             try {
                 const response = await fetch('http://localhost:5000/api/listing/my-listings', {
                     credentials: 'include'
@@ -534,6 +825,9 @@
                     `;
                 } else {
                     listingsContainer.innerHTML = '';
+                    const grid = document.createElement('div');
+                    grid.className = 'listings-grid';
+                    
                     listings.forEach(listing => {
                         const card = document.createElement('div');
                         card.className = 'listing-card';
@@ -541,23 +835,31 @@
                         const description = listing.description || 'No description';
                         const preview = description.length > 100 ? description.substring(0, 100) + '...' : description;
                         
+                        const dateRangeText = formatDateRange(listing.available_dates);
+                        const rating = listing.average_rating || 0;
+                        const reviewCount = listing.review_count || 0;
+                        
                         card.innerHTML = `
-                            <div class="listing-card-header">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                                 <div class="listing-card-title">${escapeHtml(listing.name || 'Unnamed Listing')}</div>
-                                <div class="listing-card-id">#${listing.id}</div>
+                                <div style="color: #999; font-size: 0.9em;">#${listing.id}</div>
                             </div>
                             <div class="listing-card-info">${escapeHtml(preview)}</div>
-                            <div class="listing-card-info" style="font-size: 0.9em; color: #999;">
-                                Capacity: ${listing.capacity || 1} • Dates: ${listing.available_dates?.length || 0} available
+                            <div class="listing-card-meta">
+                                Capacity: ${listing.capacity || 1} guest${listing.capacity !== 1 ? 's' : ''}
                             </div>
-                            <div class="listing-card-actions">
-                                <a href="/listing/${listing.id}" class="action-btn view-btn" style="text-decoration: none; text-align: center;">View</a>
-                                <button class="action-btn edit-btn" onclick="editListing(${listing.id})">Edit</button>
+                            ${formatRating(rating, reviewCount)}
+                            <div class="date-range-display" style="margin-top: 10px;">📅 ${dateRangeText}</div>
+                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                <a href="/listing/${listing.id}" style="flex: 1; padding: 8px 16px; border-radius: 6px; background: #667eea; color: white; text-decoration: none; text-align: center; font-weight: 600;">View</a>
+                                <button onclick="editListing(${listing.id})" style="flex: 1; padding: 8px 16px; border-radius: 6px; background: #f0f0f0; color: #667eea; border: none; font-weight: 600; cursor: pointer;">Edit</button>
                             </div>
                         `;
                         
-                        listingsContainer.appendChild(card);
+                        grid.appendChild(card);
                     });
+                    
+                    listingsContainer.appendChild(grid);
                 }
             } catch (error) {
                 listingsContainer.innerHTML = `<div class="error">Error: ${error.message}</div>`;
@@ -573,88 +875,6 @@
             window.location.href = '/host/dashboard';
         });
 
-        // Match form submission
-        matchForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            errorDiv.style.display = 'none';
-            results.classList.remove('active');
-            loadingSpinner.classList.add('active');
-            document.getElementById('submitBtn').disabled = true;
-            matchesContainer.innerHTML = '';
-            
-            const formData = {
-                visitor_query: document.getElementById('visitorQuery').value,
-                date_needed: document.getElementById('dateNeeded').value
-            };
-            
-            try {
-                const response = await fetch('http://localhost:5000/api/match', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify(formData)
-                });
-                
-                const data = await response.json();
-                
-                loadingSpinner.classList.remove('active');
-                document.getElementById('submitBtn').disabled = false;
-                
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to get matches');
-                }
-                
-                if (data.success && data.matches) {
-                    displayMatches(data.matches);
-                }
-            } catch (error) {
-                loadingSpinner.classList.remove('active');
-                document.getElementById('submitBtn').disabled = false;
-                errorDiv.textContent = `Error: ${error.message}`;
-                errorDiv.style.display = 'block';
-            }
-        });
-
-        function displayMatches(matches) {
-            matchesContainer.innerHTML = '';
-            
-            let rankedMatches = [];
-            if (matches.ranked_matches) {
-                rankedMatches = matches.ranked_matches;
-            } else if (Array.isArray(matches)) {
-                rankedMatches = matches;
-            }
-            
-            if (rankedMatches.length === 0) {
-                matchesContainer.innerHTML = '<div class="no-listings">No matches found. Try adjusting your preferences.</div>';
-            } else {
-                rankedMatches.forEach((match, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'match-card';
-                    
-                    const score = match.compatibility_score || 0;
-                    const scorePercent = Math.round(score * 100);
-                    const hostName = match.name || `Host ${match.host_id || index + 1}`;
-                    
-                    card.innerHTML = `
-                        <div class="match-header">
-                            <div class="match-name">
-                                <a href="/listing/${match.host_id || index + 1}" style="color: inherit; text-decoration: none;">
-                                    ${index + 1}. ${escapeHtml(hostName)}
-                                </a>
-                            </div>
-                            <div class="match-score">${scorePercent}% Match</div>
-                        </div>
-                        ${match.reasoning ? `<div style="color: #666; margin-top: 10px;">${escapeHtml(match.reasoning)}</div>` : ''}
-                    `;
-                    
-                    matchesContainer.appendChild(card);
-                });
-            }
-            
-            results.classList.add('active');
-        }
 
         function escapeHtml(text) {
             const div = document.createElement('div');
@@ -671,15 +891,22 @@
             window.location.href = '/login';
         });
 
-        // Set minimum date
+        // Set minimum dates
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('dateNeeded').setAttribute('min', today);
+        dateRangeStart.setAttribute('min', today);
+        dateRangeEnd.setAttribute('min', today);
+        
+        dateRangeStart.addEventListener('change', () => {
+            if (dateRangeStart.value) {
+                dateRangeEnd.setAttribute('min', dateRangeStart.value);
+            }
+        });
 
         // Initialize
         (async () => {
             const isAuth = await checkAuth();
             if (isAuth) {
-                loadListings();
+                loadAllListings(); // Load listings for visitor tab by default
             }
         })();
     </script>

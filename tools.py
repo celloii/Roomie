@@ -157,6 +157,19 @@ def add_review(listing_id: int, reviewer_name: str, rating: int, comment: str) -
             return True
     return False
 
+def get_average_rating(listing_id: int) -> float:
+    """Calculate average rating for a listing."""
+    listing = get_listing_by_id(listing_id)
+    if not listing or not listing.get("reviews"):
+        return 0.0
+    
+    reviews = listing["reviews"]
+    if len(reviews) == 0:
+        return 0.0
+    
+    total_rating = sum(review.get("rating", 0) for review in reviews)
+    return round(total_rating / len(reviews), 1)
+
 def find_available_hosts(visitor_date_range: str, min_capacity: int = 1) -> str:
     """
     Queries the listings database to find available hosts based on date and capacity.
