@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DormMatch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 450px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .user-type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .type-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c33;
+            display: none;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 DormMatch</h1>
+            <p>Welcome Back!</p>
+        </div>
+        
+        <div class="content">
+            <div class="error" id="error"></div>
+            
+            <div class="user-type-selector">
+                <button class="type-btn active" data-type="visitor" id="visitorBtn">Visitor</button>
+                <button class="type-btn" data-type="host" id="hostBtn">Host</button>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required autocomplete="email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Login
+                </button>
+            </form>
+            
+            <div class="links">
+                <p>Don't have an account? <a href="/signup">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userType = 'visitor';
+        const visitorBtn = document.getElementById('visitorBtn');
+        const hostBtn = document.getElementById('hostBtn');
+        const form = document.getElementById('loginForm');
+        const errorDiv = document.getElementById('error');
+        const submitBtn = document.getElementById('submitBtn');
+
+        visitorBtn.addEventListener('click', () => {
+            userType = 'visitor';
+            visitorBtn.classList.add('active');
+            hostBtn.classList.remove('active');
+        });
+
+        hostBtn.addEventListener('click', () => {
+            userType = 'host';
+            hostBtn.classList.add('active');
+            visitorBtn.classList.remove('active');
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorDiv.classList.remove('active');
+            submitBtn.disabled = true;
+
+            const formData = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                type: userType
+            };
+
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Login failed');
+                }
+
+                if (data.success) {
+                    // Redirect based on user type
+                    if (userType === 'visitor') {
+                        window.location.href = '/';
+                    } else {
+                        // Hosts might have a different dashboard
+                        window.location.href = '/';
+                    }
+                }
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.classList.add('active');
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Check if already logged in
+        fetch('http://localhost:5000/api/auth/check', {
+            credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.authenticated) {
+                window.location.href = '/';
+            }
+        });
+    </script>
+</body>
+</html>
+

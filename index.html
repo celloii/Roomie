@@ -264,11 +264,25 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏠 DormMatch</h1>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h1 style="margin: 0;">🏠 DormMatch</h1>
+                <div id="userInfo" style="display: none;">
+                    <span id="userName" style="margin-right: 15px;"></span>
+                    <button id="logoutBtn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9em;">Logout</button>
+                </div>
+            </div>
             <p>AI-Powered Campus Host Matching</p>
         </div>
         
-        <div class="content">
+        <div class="content" id="authRequired" style="display: none;">
+            <div style="text-align: center; padding: 40px;">
+                <h2 style="color: #333; margin-bottom: 20px;">Authentication Required</h2>
+                <p style="color: #666; margin-bottom: 30px;">Please log in as a visitor to find matches.</p>
+                <a href="/login" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600;">Go to Login</a>
+            </div>
+        </div>
+        
+        <div class="content" id="mainContent">
             <form id="matchForm">
                 <div class="form-group">
                     <label for="visitorQuery">Tell us about yourself and what you're looking for:</label>
@@ -316,6 +330,56 @@
         const results = document.getElementById('results');
         const matchesContainer = document.getElementById('matchesContainer');
         const errorDiv = document.getElementById('error');
+        const authRequired = document.getElementById('authRequired');
+        const mainContent = document.getElementById('mainContent');
+        const userInfo = document.getElementById('userInfo');
+        const userName = document.getElementById('userName');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Check authentication on load
+        async function checkAuth() {
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/check', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (!data.authenticated || data.user.type !== 'visitor') {
+                    // Not authenticated or not a visitor
+                    mainContent.style.display = 'none';
+                    authRequired.style.display = 'block';
+                    return false;
+                } else {
+                    // Authenticated as visitor
+                    mainContent.style.display = 'block';
+                    authRequired.style.display = 'none';
+                    userName.textContent = `👤 ${data.user.name}`;
+                    userInfo.style.display = 'block';
+                    return true;
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                mainContent.style.display = 'none';
+                authRequired.style.display = 'block';
+                return false;
+            }
+        }
+
+        // Logout handler
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await fetch('http://localhost:5000/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        });
+
+        // Initialize auth check
+        checkAuth();
 
         // Set minimum date to today
         const today = new Date().toISOString().split('T')[0];
@@ -342,6 +406,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                    credentials: 'include',
                     body: JSON.stringify(formData)
                 });
                 
