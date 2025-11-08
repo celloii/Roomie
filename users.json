@@ -1,0 +1,42 @@
+{
+  "users": {
+    "beepbop@gmail.com": {
+      "email": "beepbop@gmail.com",
+      "password_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+      "name": "Beep Bop",
+      "roles": [
+        "host"
+      ]
+    },
+    "beeep@gmail.com": {
+      "email": "beeep@gmail.com",
+      "password_hash": "2c9529dfe986c093267a4b35fead139479e3b20860041f840b66be39ad0a4f8f",
+      "name": "beeep",
+      "roles": [
+        "host"
+      ]
+    },
+    "mntran724@gmail.com": {
+      "email": "mntran724@gmail.com",
+      "password_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+      "name": "Mai Tran",
+      "roles": [
+        "visitor"
+      ]
+    },
+    "cchen0866@gmail.com": {
+      "email": "cchen0866@gmail.com",
+      "password_hash": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225",
+      "name": "Chloe Chen",
+      "roles": [
+        "host"
+      ]
+    },
+    "dkjfkdaj@gmail.com": {
+      "email": "dkjfkdaj@gmail.com",
+      "password_hash": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+      "name": "Mai",
+      "roles": []
+    }
+  }
+}
