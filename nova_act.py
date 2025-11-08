@@ -267,4 +267,183 @@ Create a 2-3 sentence summary that highlights why students would want to attend 
         except Exception as e:
             print(f"Error generating event summary: {e}")
             return None
+    
+    async def get_combined_recommendations(
+        self,
+        user_preferences: str,
+        date_needed: Optional[str] = None,
+        max_hosts: int = 5,
+        max_events: int = 5
+    ) -> Dict:
+        """
+        Get AI-powered combined recommendations for both hosts and events based on user preferences.
+        
+        Args:
+            user_preferences: Description of user's preferences (e.g., "I need a quiet place to stay and love tech events")
+            date_needed: Date the user needs accommodation (YYYY-MM-DD)
+            max_hosts: Maximum number of host recommendations
+            max_events: Maximum number of event recommendations
+        
+        Returns:
+            Dictionary with recommended hosts and events with AI reasoning
+        """
+        # Get hosts from listings
+        from tools import load_listings
+        all_hosts = load_listings()
+        
+        # Filter hosts by date if provided
+        if date_needed:
+            available_hosts = [
+                h for h in all_hosts 
+                if date_needed in h.get("available_dates", [])
+            ]
+        else:
+            available_hosts = all_hosts
+        
+        # Get events
+        events = await self.get_events_from_dedalus()
+        
+        if not self.claude_client:
+            # Fallback: return all without AI
+            return {
+                "hosts": available_hosts[:max_hosts],
+                "events": events[:max_events],
+                "reasoning": "AI recommendations unavailable.",
+                "ai_enabled": False
+            }
+        
+        # Prepare data for Claude
+        hosts_summary = []
+        for host in available_hosts:
+            hosts_summary.append({
+                "id": host.get("id"),
+                "name": host.get("name"),
+                "description": host.get("description", ""),
+                "dorm_vibe": host.get("dorm_vibe", ""),
+                "interests": host.get("interests", ""),
+                "capacity": host.get("capacity", 1),
+                "available_dates": host.get("available_dates", [])
+            })
+        
+        events_summary = []
+        for event in events:
+            events_summary.append({
+                "id": event.get("id"),
+                "title": event.get("title"),
+                "description": event.get("description"),
+                "date": event.get("date"),
+                "time": event.get("time"),
+                "location": event.get("location"),
+                "category": event.get("category"),
+                "cost": event.get("cost", 0),
+                "tags": event.get("tags", [])
+            })
+        
+        prompt = f"""You are an AI assistant helping a student find the best accommodation and events on campus.
+
+User's Preferences: {user_preferences}
+Date Needed: {date_needed or "Not specified"}
+
+Available Hosts:
+{json.dumps(hosts_summary, indent=2)}
+
+Available Events:
+{json.dumps(events_summary, indent=2)}
+
+Please:
+1. Analyze which hosts best match the user's preferences (considering dorm_vibe, interests, and description)
+2. Analyze which events best match the user's interests
+3. Consider how hosts and events might complement each other (e.g., a host near event locations)
+4. Rank hosts and events separately from most relevant to least relevant
+5. Provide brief reasoning for each recommendation
+
+Return your response as a JSON object with this structure:
+{{
+    "hosts": [
+        {{
+            "host_id": <id>,
+            "relevance_score": <0.0-1.0>,
+            "reasoning": "<brief explanation>",
+            "highlights": ["<feature1>", "<feature2>"]
+        }}
+    ],
+    "events": [
+        {{
+            "event_id": <id>,
+            "relevance_score": <0.0-1.0>,
+            "reasoning": "<brief explanation>",
+            "highlights": ["<feature1>", "<feature2>"]
+        }}
+    ],
+    "combined_insights": "<overall insights about how hosts and events work together>"
+}}
+
+Focus on the top {max_hosts} hosts and top {max_events} events."""
+        
+        try:
+            message = self.claude_client.messages.create(
+                model=self.claude_model,
+                max_tokens=3000,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
+            )
+            
+            # Parse Claude's response
+            response_text = message.content[0].text
+            
+            # Try to extract JSON from response
+            import re
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if json_match:
+                ai_response = json.loads(json_match.group(0))
+            else:
+                ai_response = {"hosts": [], "events": [], "combined_insights": response_text}
+            
+            # Map recommendations back to full data
+            recommended_hosts = []
+            for rec in ai_response.get("hosts", [])[:max_hosts]:
+                host_id = rec.get("host_id")
+                host = next((h for h in available_hosts if h.get("id") == host_id), None)
+                if host:
+                    recommended_hosts.append({
+                        "host": host,
+                        "relevance_score": rec.get("relevance_score", 0.5),
+                        "reasoning": rec.get("reasoning", ""),
+                        "highlights": rec.get("highlights", [])
+                    })
+            
+            recommended_events = []
+            for rec in ai_response.get("events", [])[:max_events]:
+                event_id = rec.get("event_id")
+                event = next((e for e in events if e.get("id") == event_id), None)
+                if event:
+                    recommended_events.append({
+                        "event": event,
+                        "relevance_score": rec.get("relevance_score", 0.5),
+                        "reasoning": rec.get("reasoning", ""),
+                        "highlights": rec.get("highlights", [])
+                    })
+            
+            return {
+                "hosts": recommended_hosts,
+                "events": recommended_events,
+                "combined_insights": ai_response.get("combined_insights", ""),
+                "ai_enabled": True
+            }
+            
+        except Exception as e:
+            print(f"Error getting combined recommendations: {e}")
+            # Fallback
+            return {
+                "hosts": [{"host": h, "relevance_score": 0.5, "reasoning": "", "highlights": []} 
+                          for h in available_hosts[:max_hosts]],
+                "events": [{"event": e, "relevance_score": 0.5, "reasoning": "", "highlights": []} 
+                           for e in events[:max_events]],
+                "combined_insights": "AI recommendations temporarily unavailable.",
+                "ai_enabled": False
+            }
 

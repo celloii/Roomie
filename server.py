@@ -53,6 +53,13 @@ def dashboard():
 @app.route('/events')
 def events_page():
     """Serve the events page."""
+    from flask import Response
+    import os
+    file_path = os.path.join('.', 'events.html')
+    if os.path.exists(file_path):
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        return Response(content, mimetype='text/html')
     return send_from_directory('.', 'events.html')
 
 
@@ -649,6 +656,52 @@ def get_event(event_id):
         return jsonify({
             "success": False,
             "error": str(e)
+        }), 500
+
+@app.route('/api/combined/match', methods=['POST'])
+def get_combined_match():
+    """
+    Get AI-powered combined recommendations for hosts and events.
+    Uses Nova Act to find the best matches based on user preferences.
+    """
+    try:
+        from nova_act import NovaAct
+        import asyncio
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        user_preferences = data.get('preferences', '').strip()
+        if not user_preferences:
+            return jsonify({"error": "preferences field is required"}), 400
+        
+        date_needed = data.get('date_needed')
+        max_hosts = data.get('max_hosts', 5)
+        max_events = data.get('max_events', 5)
+        
+        nova_act = NovaAct()
+        result = asyncio.run(nova_act.get_combined_recommendations(
+            user_preferences=user_preferences,
+            date_needed=date_needed,
+            max_hosts=max_hosts,
+            max_events=max_events
+        ))
+        
+        return jsonify({
+            "success": True,
+            "hosts": result.get("hosts", []),
+            "events": result.get("events", []),
+            "combined_insights": result.get("combined_insights", ""),
+            "ai_enabled": result.get("ai_enabled", False)
+        }), 200
+        
+    except Exception as e:
+        import traceback
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "details": traceback.format_exc()
         }), 500
 
 if __name__ == '__main__':

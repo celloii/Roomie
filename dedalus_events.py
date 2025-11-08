@@ -168,6 +168,57 @@ def get_default_events() -> List[Dict]:
             "tags": ["academic", "study", "free", "social"],
             "image_url": None,
             "registration_url": None
+        },
+        {
+            "id": 6,
+            "title": "Tech Startup Networking Night",
+            "description": "Connect with entrepreneurs, investors, and fellow tech enthusiasts. Free pizza and drinks!",
+            "date": "2025-11-16",
+            "time": "18:00",
+            "location": "Engineering Quad",
+            "location_lat": 40.3470,
+            "location_lng": -74.6540,
+            "category": "social",
+            "cost": 0.0,
+            "organizer": "Entrepreneurship Club",
+            "capacity": 100,
+            "tags": ["networking", "technology", "free", "food", "career"],
+            "image_url": None,
+            "registration_url": None
+        },
+        {
+            "id": 7,
+            "title": "Yoga & Meditation Session",
+            "description": "Relax and recharge with a free yoga and meditation session. All levels welcome!",
+            "date": "2025-11-13",
+            "time": "17:30",
+            "location": "Dillon Gym",
+            "location_lat": 40.3440,
+            "location_lng": -74.6490,
+            "category": "social",
+            "cost": 0.0,
+            "organizer": "Wellness Center",
+            "capacity": 40,
+            "tags": ["wellness", "free", "health", "relaxation"],
+            "image_url": None,
+            "registration_url": None
+        },
+        {
+            "id": 8,
+            "title": "Classical Music Concert",
+            "description": "Enjoy an evening of classical music performed by the university orchestra. Free for students!",
+            "date": "2025-11-19",
+            "time": "19:30",
+            "location": "Richardson Auditorium",
+            "location_lat": 40.3510,
+            "location_lng": -74.6550,
+            "category": "arts",
+            "cost": 0.0,
+            "organizer": "Music Department",
+            "capacity": 500,
+            "tags": ["music", "arts", "free", "culture"],
+            "image_url": None,
+            "registration_url": None
         }
     ]
 

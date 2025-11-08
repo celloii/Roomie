@@ -340,19 +340,61 @@
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1000;
+            border: 2px solid #dc2626;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
         }
 
         .map-container {
             margin-top: 30px;
-            height: 400px;
+            height: 500px;
             border-radius: 12px;
             overflow: hidden;
             border: 2px solid #e0e0e0;
+            position: relative;
         }
 
-        #eventsMap {
+        #eventsMap, #combinedMap {
             width: 100%;
             height: 100%;
+        }
+
+        .map-legend {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-size: 0.9em;
+        }
+
+        .map-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .legend-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .host-marker {
+            background: #667eea;
+        }
+
+        .event-marker {
+            background: #10b981;
+        }
+
+        .recommended-marker {
+            background: #f59e0b;
         }
 
         .empty-state {
@@ -443,19 +485,51 @@
                 <div class="ai-recommendations" id="aiRecommendations"></div>
             </div>
 
+            <div class="ai-section" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                <h3>🗺️ Combined Map View - Hosts & Events</h3>
+                <p style="margin-bottom: 15px; color: #666;">Get AI-powered recommendations for both accommodation and events that match your preferences!</p>
+                <div class="filter-group" style="grid-template-columns: 1fr 1fr; margin-bottom: 15px;">
+                    <div class="filter-item">
+                        <label>Date Needed (Optional)</label>
+                        <input type="date" id="combinedDateNeeded">
+                    </div>
+                </div>
+                <div class="ai-input-group">
+                    <input type="text" id="combinedPreferences" placeholder="e.g., I need a quiet place to stay and love tech events, free food, and networking">
+                    <button onclick="getCombinedMatch()" id="combinedButton">Find Best Match</button>
+                </div>
+                <div class="ai-recommendations" id="combinedRecommendations" style="display: none;"></div>
+            </div>
+
             <div id="errorMessage"></div>
             <div id="loadingMessage" class="loading" style="display: none;">Loading events</div>
             <div id="eventsContainer"></div>
             <div class="map-container" id="mapContainer" style="display: none;">
                 <div id="eventsMap"></div>
             </div>
+            <div class="map-container" id="combinedMapContainer" style="display: none;">
+                <div class="map-legend">
+                    <div class="map-legend-item">
+                        <div class="legend-icon host-marker"></div>
+                        <span>Hosts</span>
+                    </div>
+                    <div class="map-legend-item">
+                        <div class="legend-icon event-marker"></div>
+                        <span>Events</span>
+                    </div>
+                    <div class="map-legend-item">
+                        <div class="legend-icon recommended-marker"></div>
+                        <span>Recommended</span>
+                    </div>
+                </div>
+                <div id="combinedMap"></div>
+            </div>
         </div>
     </div>
 
     <script>
         // Google Maps API - Replace with your API key or remove if not needed
-        // To use maps, uncomment the line below and add your Google Maps API key
-        // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+        // To use maps, add this script tag in the head section with your API key
         
         let map = null;
         let markers = [];
@@ -738,6 +812,257 @@
             console.log('Event details for:', eventId);
         }
 
+        // Combined map and matching
+        let combinedMap = null;
+        let combinedMarkers = [];
+        let recommendedHostIds = new Set();
+        let recommendedEventIdsCombined = new Set();
+
+        // Get combined AI recommendations
+        async function getCombinedMatch() {
+            const preferences = document.getElementById('combinedPreferences').value.trim();
+            const dateNeeded = document.getElementById('combinedDateNeeded').value;
+            
+            if (!preferences) {
+                alert('Please enter your preferences to find the best matches!');
+                return;
+            }
+
+            const button = document.getElementById('combinedButton');
+            button.disabled = true;
+            button.textContent = 'Finding Best Matches...';
+
+            const recommendationsDiv = document.getElementById('combinedRecommendations');
+            recommendationsDiv.innerHTML = '<div class="loading">Analyzing hosts and events</div>';
+            recommendationsDiv.style.display = 'block';
+
+            try {
+                const response = await fetch('/api/combined/match', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        preferences: preferences,
+                        date_needed: dateNeeded || null,
+                        max_hosts: 5,
+                        max_events: 5
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const hosts = data.hosts || [];
+                    const events = data.events || [];
+                    const insights = data.combined_insights || '';
+
+                    recommendedHostIds = new Set(hosts.map(h => h.host.id));
+                    recommendedEventIdsCombined = new Set(events.map(e => e.event.id));
+
+                    let html = '';
+                    if (insights) {
+                        html += `<div class="summary"><strong>AI Insights:</strong> ${insights}</div>`;
+                    }
+
+                    if (hosts.length > 0) {
+                        html += '<div style="margin-top: 15px;"><strong>Recommended Hosts:</strong></div>';
+                        hosts.forEach(rec => {
+                            const host = rec.host;
+                            html += `
+                                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 8px; border-left: 4px solid #667eea;">
+                                    <strong>${host.name}</strong>
+                                    ${rec.reasoning ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${rec.reasoning}</div>` : ''}
+                                    <div style="font-size: 0.85em; color: #555; margin-top: 5px;">
+                                        ${host.dorm_vibe ? `Vibe: ${host.dorm_vibe}<br>` : ''}
+                                        ${host.interests ? `Interests: ${host.interests}<br>` : ''}
+                                        Capacity: ${host.capacity}
+                                    </div>
+                                    ${rec.highlights && rec.highlights.length > 0 ? 
+                                        `<div style="margin-top: 5px;">
+                                            ${rec.highlights.map(h => `<span class="event-highlight">${h}</span>`).join('')}
+                                        </div>` : ''}
+                                </div>
+                            `;
+                        });
+                    }
+
+                    if (events.length > 0) {
+                        html += '<div style="margin-top: 15px;"><strong>Recommended Events:</strong></div>';
+                        events.forEach(rec => {
+                            const event = rec.event;
+                            html += `
+                                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 8px; border-left: 4px solid #10b981;">
+                                    <strong>${event.title}</strong>
+                                    ${rec.reasoning ? `<div style="font-size: 0.9em; color: #666; margin-top: 5px;">${rec.reasoning}</div>` : ''}
+                                    <div style="font-size: 0.85em; color: #555; margin-top: 5px;">
+                                        ${event.date} at ${event.time}<br>
+                                        ${event.location}<br>
+                                        ${event.cost === 0 ? 'Free' : `$${event.cost.toFixed(2)}`}
+                                    </div>
+                                    ${rec.highlights && rec.highlights.length > 0 ? 
+                                        `<div style="margin-top: 5px;">
+                                            ${rec.highlights.map(h => `<span class="event-highlight">${h}</span>`).join('')}
+                                        </div>` : ''}
+                                </div>
+                            `;
+                        });
+                    }
+
+                    recommendationsDiv.innerHTML = html;
+                    
+                    // Update combined map
+                    await updateCombinedMap(hosts, events);
+                } else {
+                    recommendationsDiv.innerHTML = `<div class="error">Error: ${data.error || 'Failed to get recommendations'}</div>`;
+                }
+            } catch (error) {
+                recommendationsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Find Best Match';
+            }
+        }
+
+        // Initialize combined map
+        function initCombinedMap() {
+            if (!mapsAvailable) {
+                console.log('Google Maps not available');
+                return;
+            }
+            
+            const princeton = { lat: 40.3480, lng: -74.6514 };
+            
+            combinedMap = new google.maps.Map(document.getElementById('combinedMap'), {
+                zoom: 15,
+                center: princeton,
+                mapTypeId: 'roadmap'
+            });
+        }
+
+        // Update combined map with hosts and events
+        async function updateCombinedMap(hosts, events) {
+            if (!mapsAvailable) {
+                document.getElementById('combinedMapContainer').style.display = 'none';
+                return;
+            }
+
+            if (!combinedMap) {
+                initCombinedMap();
+            }
+
+            // Clear existing markers
+            combinedMarkers.forEach(marker => marker.setMap(null));
+            combinedMarkers = [];
+
+            document.getElementById('combinedMapContainer').style.display = 'block';
+
+            const bounds = new google.maps.LatLngBounds();
+            
+            // Default host locations (since hosts don't have lat/lng, use approximate campus locations)
+            const hostLocations = [
+                { lat: 40.3485, lng: -74.6510 }, // Approximate location 1
+                { lat: 40.3475, lng: -74.6520 }, // Approximate location 2
+                { lat: 40.3495, lng: -74.6505 }  // Approximate location 3
+            ];
+
+            // Add host markers
+            hosts.forEach((rec, index) => {
+                const host = rec.host;
+                const isRecommended = recommendedHostIds.has(host.id);
+                const location = hostLocations[index % hostLocations.length];
+                
+                const marker = new google.maps.Marker({
+                    position: location,
+                    map: combinedMap,
+                    title: `${host.name} - Host`,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: isRecommended ? '#f59e0b' : '#667eea',
+                        fillOpacity: 1,
+                        strokeColor: '#fff',
+                        strokeWeight: 2
+                    },
+                    label: {
+                        text: 'H',
+                        color: 'white',
+                        fontSize: '10px'
+                    }
+                });
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="padding: 10px; min-width: 200px;">
+                            <h3 style="margin: 0 0 10px 0; color: #667eea;">${host.name} ${isRecommended ? '⭐' : ''}</h3>
+                            <p style="margin: 5px 0;"><strong>Vibe:</strong> ${host.dorm_vibe || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Interests:</strong> ${host.interests || 'N/A'}</p>
+                            <p style="margin: 5px 0;"><strong>Capacity:</strong> ${host.capacity}</p>
+                            ${rec.reasoning ? `<p style="margin: 5px 0; font-style: italic; color: #666;">${rec.reasoning}</p>` : ''}
+                        </div>
+                    `
+                });
+
+                marker.addListener('click', () => {
+                    infoWindow.open(combinedMap, marker);
+                });
+
+                combinedMarkers.push(marker);
+                bounds.extend(location);
+            });
+
+            // Add event markers
+            events.forEach(rec => {
+                const event = rec.event;
+                if (event.location_lat && event.location_lng) {
+                    const isRecommended = recommendedEventIdsCombined.has(event.id);
+                    const position = { lat: event.location_lat, lng: event.location_lng };
+
+                    const marker = new google.maps.Marker({
+                        position: position,
+                        map: combinedMap,
+                        title: `${event.title} - Event`,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 10,
+                            fillColor: isRecommended ? '#f59e0b' : '#10b981',
+                            fillOpacity: 1,
+                            strokeColor: '#fff',
+                            strokeWeight: 2
+                        },
+                        label: {
+                            text: 'E',
+                            color: 'white',
+                            fontSize: '10px'
+                        }
+                    });
+
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <div style="padding: 10px; min-width: 200px;">
+                                <h3 style="margin: 0 0 10px 0; color: #10b981;">${event.title} ${isRecommended ? '⭐' : ''}</h3>
+                                <p style="margin: 5px 0;"><strong>Date:</strong> ${event.date} at ${event.time}</p>
+                                <p style="margin: 5px 0;"><strong>Location:</strong> ${event.location}</p>
+                                <p style="margin: 5px 0;"><strong>Cost:</strong> ${event.cost === 0 ? 'Free' : `$${event.cost.toFixed(2)}`}</p>
+                                ${rec.reasoning ? `<p style="margin: 5px 0; font-style: italic; color: #666;">${rec.reasoning}</p>` : ''}
+                            </div>
+                        `
+                    });
+
+                    marker.addListener('click', () => {
+                        infoWindow.open(combinedMap, marker);
+                    });
+
+                    combinedMarkers.push(marker);
+                    bounds.extend(position);
+                }
+            });
+
+            if (combinedMarkers.length > 0) {
+                combinedMap.fitBounds(bounds);
+            }
+        }
+
         // Initialize on page load
         window.addEventListener('DOMContentLoaded', () => {
             checkAuth();
@@ -746,4 +1071,3 @@
     </script>
 </body>
 </html>
-
