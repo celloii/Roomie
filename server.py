@@ -638,7 +638,7 @@ def get_events():
             events = [e for e in events if e.get("date", "") <= date_to]
         
         if free_only:
-            events = [e for e in events if e.get("cost", 0) == 0.0]
+            events = [e for e in events if (e.get("cost", 0) == 0 or e.get("cost", 0) == 0.0 or e.get("cost") is None or e.get("cost") == "0" or e.get("cost") == "0.0")]
         
         if tags:
             tag_list = [t.strip().lower() for t in tags.split(",")]
@@ -712,7 +712,7 @@ def get_event_recommendations():
         if date_to:
             events = [e for e in events if e.get("date", "") <= date_to]
         if free_only:
-            events = [e for e in events if e.get("cost", 0) == 0.0]
+            events = [e for e in events if (e.get("cost", 0) == 0 or e.get("cost", 0) == 0.0 or e.get("cost") is None or e.get("cost") == "0" or e.get("cost") == "0.0")]
         
         # Use Nova Act for AI recommendations
         nova_act = NovaAct()
