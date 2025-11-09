@@ -12,7 +12,7 @@ if [ ! -f .env ]; then
     echo "# Events System Configuration" > .env
     echo "DEDALUS_BASE_URL=http://localhost:8000" >> .env
     echo "ANTHROPIC_API_KEY=your_claude_api_key_here" >> .env
-    echo "CLAUDE_MODEL=claude-3-5-sonnet-20241022" >> .env
+    echo "CLAUDE_MODEL=claude-3-haiku-20240307" >> .env
     echo ""
     echo "📝 Please edit .env file with your API keys before running."
     echo ""

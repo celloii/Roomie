@@ -18,7 +18,9 @@ class Knot:
     
     # Claude API configuration
     CLAUDE_API_KEY = os.getenv("ANTHROPIC_API_KEY", os.getenv("CLAUDE_API_KEY", None))
-    CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-3-5-sonnet-20241022")
+    # Using claude-3-haiku-20240307 as default (confirmed working)
+    # Alternative models: claude-3-opus-20240229, claude-3-sonnet-20240229 (if available)
+    CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-3-haiku-20240307")
     
     # Eventbrite API configuration
     EVENTBRITE_API_KEY = os.getenv("EVENTBRITE_API_KEY", None)

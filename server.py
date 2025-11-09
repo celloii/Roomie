@@ -79,6 +79,10 @@ def events_page():
         return Response(content, mimetype='text/html')
     return send_from_directory('.', 'events.html')
 
+@app.route('/chatbot.js')
+def chatbot_js():
+    """Serve the chatbot JavaScript file."""
+    return send_from_directory('.', 'chatbot.js', mimetype='application/javascript')
 
 @app.route('/api/auth/signup', methods=['POST'])
 def signup():
@@ -908,6 +912,209 @@ def get_combined_match():
             "success": False,
             "error": str(e),
             "details": traceback.format_exc()
+        }), 500
+
+# ===== Chatbot API Endpoint =====
+
+@app.route('/api/chatbot/status', methods=['GET'])
+def chatbot_status():
+    """Check chatbot configuration status."""
+    try:
+        from knot import Knot
+        knot = Knot()
+        claude_config = knot.get_claude_config()
+        return jsonify({
+            "success": True,
+            "configured": True,
+            "model": claude_config.get("model", "unknown"),
+            "api_key_set": bool(claude_config.get("api_key"))
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "configured": False,
+            "error": str(e)
+        }), 200
+
+@app.route('/api/chatbot', methods=['POST'])
+def chatbot():
+    """
+    Chatbot endpoint that uses Claude API to help users navigate the site.
+    Provides accommodation and event recommendations based on user queries.
+    """
+    try:
+        from knot import Knot
+        from anthropic import Anthropic
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        message = data.get('message', '').strip()
+        conversation_history = data.get('conversation_history', [])
+        
+        if not message:
+            return jsonify({"error": "message field is required"}), 400
+        
+        # Initialize Claude client
+        try:
+            knot = Knot()
+            claude_config = knot.get_claude_config()
+            claude_client = Anthropic(api_key=claude_config["api_key"])
+            claude_model = claude_config["model"]
+        except Exception as e:
+            return jsonify({
+                "success": False,
+                "error": f"Claude API not configured: {str(e)}"
+            }), 500
+        
+        # Load listings and events for context
+        listings = load_listings()
+        events = []
+        try:
+            import os
+            import json
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            events_file = os.path.join(base_dir, 'events_data', 'events.json')
+            if os.path.exists(events_file):
+                with open(events_file, 'r') as f:
+                    events = json.load(f)
+        except:
+            pass
+        
+        # Build system prompt based on user's requirements
+        system_prompt = """You are an AI assistant helping someone find appropriate accommodation options. You will be provided with a location and the user's preferences. Always ask the user about where are they going, how long do they plan to stay, what's their preference/what do they like, what's their personality to help analyze the best result. Ask for users permission is important too.
+
+<location>
+{location}
+</location>
+
+<user_preferences>
+{user_preferences}
+</user_preferences>
+
+<events>
+{events}
+</events>
+
+Important guidelines for this task:
+
+You should NOT help users find ways to crash in dormitories without permission, as this would involve trespassing on private property
+
+You should NOT facilitate unauthorized access to student housing or university facilities
+
+You should NOT provide information that could enable someone to illegally stay in places they don't have permission to be
+
+Instead, you should:
+
+Suggest legitimate accommodation options in the provided database
+
+Provide helpful, legal alternatives while being respectful and not judgmental
+
+Your response should acknowledge their location and preferences and then provide helpful legitimate dorm hosters info from the database.
+
+same with the events recommendation
+Use bullet points to list the options. Be concise and to the point.
+
+Only provide options available in the website, they are all student hosters who have descriptions listed, match the most suitable one. Same for events. For example, an out going student is looking for a place to crash, you have two available dorms for that date, one host is quiet and sleeps early, the other one is talktive and loves to go out,. You match the user with the second one.
+
+keep your answer precise and not too long. Use a vibe tone adjusting to the user's.
+
+Write your response inside <answer> tags.""".format(
+            location="Princeton",  # Default location, can be extracted from user query if needed
+            user_preferences="",  # Will be extracted from conversation if mentioned
+            events=json.dumps(events[:20], indent=2) if events else "[]",
+            listings=json.dumps(listings[:20], indent=2) if listings else "[]"
+        )
+        
+        # Add listings to the prompt after events section
+        system_prompt += f"""
+
+Available listings (student hosters):
+{json.dumps(listings[:20], indent=2) if listings else "[]"}
+"""
+        
+        # Build messages array with conversation history
+        messages = []
+        for msg in conversation_history[-10:]:  # Keep last 10 messages for context
+            messages.append({
+                "role": msg.get("role", "user"),
+                "content": msg.get("content", "")
+            })
+        
+        # Add current message
+        messages.append({
+            "role": "user",
+            "content": message
+        })
+        
+        # Call Claude API
+        try:
+            # Get temperature from environment or use default (0.7 = balanced, lower = more focused, higher = more creative)
+            import os
+            temperature = float(os.getenv('CLAUDE_TEMPERATURE', '0.7'))
+            
+            response = claude_client.messages.create(
+                model=claude_model,
+                max_tokens=200,  # Reduced for more concise responses
+                temperature=temperature,  # Adjust temperature here (0.0-1.0, default: 0.7)
+                system=system_prompt,
+                messages=messages
+            )
+            
+            # Extract response text safely
+            if not response or not hasattr(response, 'content') or not response.content:
+                raise ValueError("Invalid response structure from Claude API")
+            
+            response_text = ""
+            if isinstance(response.content, list) and len(response.content) > 0:
+                if hasattr(response.content[0], 'text'):
+                    response_text = response.content[0].text
+                elif isinstance(response.content[0], dict) and 'text' in response.content[0]:
+                    response_text = response.content[0]['text']
+                else:
+                    response_text = str(response.content[0])
+            else:
+                response_text = str(response.content)
+            
+            if not response_text:
+                raise ValueError("Empty response from Claude API")
+            
+            # Extract answer from <answer> tags if present
+            import re
+            answer_match = re.search(r'<answer>(.*?)</answer>', response_text, re.DOTALL)
+            if answer_match:
+                response_text = answer_match.group(1).strip()
+            
+            return jsonify({
+                "success": True,
+                "response": response_text
+            }), 200
+            
+        except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
+            error_msg = str(e)
+            print(f"Chatbot Claude API Error: {error_msg}")
+            print(f"Error details: {error_details}")
+            # Return error with details in debug mode, or simplified message in production
+            return jsonify({
+                "success": False,
+                "error": error_msg,
+                "details": error_details if app.debug else None
+            }), 500
+        
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        error_msg = str(e)
+        print(f"Chatbot Error: {error_msg}")
+        print(f"Error details: {error_details}")
+        # Return error with details in debug mode, or simplified message in production
+        return jsonify({
+            "success": False,
+            "error": error_msg,
+            "details": error_details if app.debug else None
         }), 500
 
 if __name__ == '__main__':
