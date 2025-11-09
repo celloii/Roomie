@@ -20,8 +20,8 @@
    - Connect your GitHub repository
    - Select the repository
    - Choose "Python 3" environment
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `gunicorn server:app`
+   - Build Command: `bash build.sh` (or `pip install --upgrade pip && pip install -r requirements.txt && pip install gunicorn`)
+   - Start Command: `python -m gunicorn server:app --bind 0.0.0.0:$PORT`
    - Environment: `Python 3`
 
 4. **Set Environment Variables** in Render dashboard:
@@ -30,9 +30,18 @@
    DEDALUS_API_KEY=your_key_here
    SECRET_KEY=generate_a_random_secret_key
    PORT=10000
+   ENVIRONMENT=production
    ```
 
 5. **Deploy!** Render will automatically build and deploy your app.
+
+### Troubleshooting:
+
+**If gunicorn is not found:**
+- Make sure `gunicorn>=21.2.0` is in `requirements.txt`
+- Use the build script: `bash build.sh`
+- Or explicitly install in build command: `pip install -r requirements.txt && pip install gunicorn`
+- Use `python -m gunicorn` instead of just `gunicorn` in start command
 
 ---
 
@@ -50,7 +59,8 @@
 3. Select your repo
 4. Railway auto-detects Python/Flask
 5. Add environment variables
-6. Deploy!
+6. Set start command: `python -m gunicorn server:app --bind 0.0.0.0:$PORT`
+7. Deploy!
 
 ---
 
@@ -66,6 +76,7 @@
 2. Run: `fly launch`
 3. Follow prompts
 4. Add environment variables: `fly secrets set ANTHROPIC_API_KEY=...`
+5. Set start command in `fly.toml`: `python -m gunicorn server:app`
 
 ---
 
@@ -81,11 +92,14 @@
 - `DEDALUS_API_KEY` - Dedalus Labs API key (optional)
 - `SECRET_KEY` - Flask session secret (generate random string)
 - `PORT` - Usually set automatically by platform
+- `ENVIRONMENT` - Set to `production` for HTTPS cookies
 
 ### Production Checklist:
-- [ ] Set `FLASK_DEBUG=False` or remove debug mode
+- [x] `gunicorn` in requirements.txt
+- [x] Build script ensures gunicorn is installed
+- [x] Start command uses `python -m gunicorn`
+- [ ] Set `ENVIRONMENT=production` for HTTPS cookies
 - [ ] Use strong `SECRET_KEY`
-- [ ] Set `SESSION_COOKIE_SECURE=True` for HTTPS
 - [ ] Configure CORS properly for your domain
 - [ ] Set up proper error logging
 
@@ -107,8 +121,9 @@ git commit -m "Prepare for deployment"
 git push
 
 # 3. Go to render.com and connect repo
-# 4. Deploy!
+# 4. Use build command: bash build.sh
+# 5. Use start command: python -m gunicorn server:app --bind 0.0.0.0:$PORT
+# 6. Deploy!
 ```
 
 Your app will be live at: `https://your-app-name.onrender.com`
-
