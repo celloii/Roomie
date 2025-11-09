@@ -2,13 +2,13 @@
 
 Find a couch, floor, or spare bed in another student's dorm when you're traveling for hackathons, conferences, or campus events — without blowing your budget.
 
-DormSwap makes it simple to host, swap, or find short-term stays with other students. Think "Airbnb for college students," but lightweight and AI-assisted.
+Roomie makes it simple to host, swap, or find short-term stays with other students. Think "Airbnb for college students," but lightweight and AI-assisted.
 
 ## Why this exists
 
 College students are constantly on the move — hackathons, case comps, auditions, interviews. Hotels are pricey and far from campus. Meanwhile, lots of dorm rooms have a spare mattress for a night or two.
 
-DormSwap simplifies the logistics: post availability, browse nearby hosts, and get AI-recommended matches based on vibe, schedule, and preferences.
+Roomie simplifies the logistics: post availability, browse nearby hosts, and get AI-recommended matches based on vibe, schedule, and preferences.
 
 ## What's in this MVP
 
