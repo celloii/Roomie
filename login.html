@@ -278,22 +278,27 @@
             });
         }
 
-        // Check if already logged in
-        fetch('/api/auth/check', {
-            credentials: 'include'
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.authenticated) {
-                window.location.href = '/dashboard';
-            } else if (data.guest) {
-                window.location.href = '/dashboard';
-            }
-        })
-        .catch(error => {
-            // Silently fail - user can still log in
-            console.error('Auth check failed:', error);
-        });
+        // Check if already logged in (with a small delay to allow logout to complete)
+        setTimeout(() => {
+            fetch('/api/auth/check', {
+                credentials: 'include'
+            })
+            .then(res => res.json())
+            .then(data => {
+                // Only redirect if authenticated, not if user just logged out
+                if (data.authenticated && !sessionStorage.getItem('just_logged_out')) {
+                    window.location.href = '/dashboard';
+                } else if (data.guest && !sessionStorage.getItem('just_logged_out')) {
+                    window.location.href = '/dashboard';
+                }
+                // Clear the flag after checking
+                sessionStorage.removeItem('just_logged_out');
+            })
+            .catch(error => {
+                // Silently fail - user can still log in
+                console.error('Auth check failed:', error);
+            });
+        }, 100);
     </script>
 </body>
 </html>

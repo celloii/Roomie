@@ -168,6 +168,21 @@ def check_auth():
     
     return jsonify({"authenticated": False, "guest": False}), 200
 
+@app.route('/api/auth/logout', methods=['POST'])
+def logout():
+    """Logout the current user by clearing the session."""
+    try:
+        session.clear()
+        return jsonify({
+            "success": True,
+            "message": "Logged out successfully"
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
 @app.route('/api/match', methods=['POST'])
 def match_visitor():
     """

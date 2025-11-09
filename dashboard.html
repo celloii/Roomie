@@ -1326,11 +1326,20 @@
 
         // Logout
         logoutBtn.addEventListener('click', async () => {
-            await fetch('/api/auth/logout', {
-                method: 'POST',
-                credentials: 'include'
-            });
-            window.location.href = '/login';
+            try {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                // Set flag to prevent immediate re-login
+                sessionStorage.setItem('just_logged_out', 'true');
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout error:', error);
+                // Still redirect even if logout fails
+                sessionStorage.setItem('just_logged_out', 'true');
+                window.location.href = '/';
+            }
         });
 
         // Set minimum dates
