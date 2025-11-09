@@ -1,4 +1,4 @@
-# DormSwap
+# Roomie
 
 Find a couch, floor, or spare bed in another student's dorm when you're traveling for hackathons, conferences, or campus events — without blowing your budget.
 
