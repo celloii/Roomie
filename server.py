@@ -307,6 +307,10 @@ def match_listings():
         # Call the existing Dedalus Labs agent
         result = asyncio.run(run_matching_agent(visitor_query, date_needed))
         
+        # Debug logging
+        print(f"AI Agent Result Type: {type(result)}")
+        print(f"AI Agent Result: {result}")
+        
         # Parse the result
         if isinstance(result, str):
             import re
@@ -321,20 +325,37 @@ def match_listings():
             
             try:
                 parsed_result = json.loads(json_str)
+                print(f"Parsed result: {parsed_result}")
+                # Ensure the response has the expected structure
+                if isinstance(parsed_result, dict) and 'ranked_matches' in parsed_result:
+                    return jsonify({
+                        "success": True,
+                        "matches": parsed_result
+                    }), 200
+                else:
+                    # If it's already the matches object, wrap it
+                    return jsonify({
+                        "success": True,
+                        "matches": parsed_result if isinstance(parsed_result, dict) else {"ranked_matches": []}
+                    }), 200
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {e}")
                 return jsonify({
                     "success": True,
-                    "matches": parsed_result
-                }), 200
-            except json.JSONDecodeError:
-                return jsonify({
-                    "success": True,
-                    "matches": {"raw_output": result}
+                    "matches": {"raw_output": result, "ranked_matches": []}
                 }), 200
         else:
-            return jsonify({
-                "success": True,
-                "matches": result
-            }), 200
+            # If result is already a dict
+            if isinstance(result, dict):
+                return jsonify({
+                    "success": True,
+                    "matches": result
+                }), 200
+            else:
+                return jsonify({
+                    "success": True,
+                    "matches": {"ranked_matches": []}
+                }), 200
         
     except Exception as e:
         import traceback

@@ -457,12 +457,28 @@
         .match-percentage {
             background: #00b4d8;
             color: white;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
             display: inline-block;
-            margin: 8px 16px 0;
+            margin: 8px 16px 12px;
+            box-shadow: 0 2px 4px rgba(0,180,216,0.3);
+        }
+
+        .match-percentage.high {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            box-shadow: 0 2px 6px rgba(17,153,142,0.4);
+        }
+
+        .match-percentage.medium {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 2px 6px rgba(240,147,251,0.4);
+        }
+
+        .match-percentage.low {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            box-shadow: 0 2px 6px rgba(250,112,154,0.4);
         }
 
         /* Event Card Styles */
@@ -1112,12 +1128,45 @@
                 const dateRangeText = formatDateRange(listing.available_dates);
                 const rating = listing.average_rating || 0;
                 const reviewCount = listing.review_count || 0;
-                const matchScore = matchScores[listing.id];
+                // Try both string and number keys (in case of type mismatch)
+                const listingIdNum = Number(listing.id);
+                const listingIdStr = String(listing.id);
+                const matchScore = matchScores[listing.id] || matchScores[listingIdNum] || matchScores[listingIdStr];
                 const listingLocation = getListingLocation(listing);
+                
+                // Debug logging
+                if (listing.id !== undefined) {
+                    console.log(`Listing ${listing.id} (type: ${typeof listing.id}):`);
+                    console.log(`  - matchScores[${listing.id}] = ${matchScores[listing.id]}`);
+                    console.log(`  - matchScores[${listingIdNum}] = ${matchScores[listingIdNum]}`);
+                    console.log(`  - matchScores[${listingIdStr}] = ${matchScores[listingIdStr]}`);
+                    console.log(`  - Final matchScore = ${matchScore}`);
+                    console.log(`  - matchScores object keys:`, Object.keys(matchScores));
+                }
+                
+                // Determine match score class based on percentage
+                let matchScoreClass = 'match-percentage';
+                let matchScoreDisplay = '';
+                
+                // Check if match score exists (including 0)
+                if (matchScore !== undefined && matchScore !== null && !isNaN(matchScore)) {
+                    const scorePercent = Math.round(matchScore * 100);
+                    if (scorePercent >= 75) {
+                        matchScoreClass += ' high';
+                    } else if (scorePercent >= 50) {
+                        matchScoreClass += ' medium';
+                    } else {
+                        matchScoreClass += ' low';
+                    }
+                    matchScoreDisplay = `<div class="${matchScoreClass}">⭐ ${scorePercent}% Match</div>`;
+                    console.log(`Displaying match score for listing ${listing.id}: ${scorePercent}%`);
+                } else {
+                    console.log(`No match score for listing ${listing.id} (value: ${matchScore}, type: ${typeof matchScore})`);
+                }
                 
                 card.innerHTML = `
                     <div class="listing-card-title">${escapeHtml(listing.name || 'Unnamed Listing')}</div>
-                    ${matchScore !== undefined ? `<div class="match-percentage">${Math.round(matchScore * 100)}% Match</div>` : ''}
+                    ${matchScoreDisplay}
                     <div class="listing-card-info">${escapeHtml(preview)}</div>
                     <div class="listing-card-info" style="font-size: 0.9em;">
                         <strong>Vibe:</strong> ${escapeHtml(listing.dorm_vibe || 'Not specified')}
@@ -1216,17 +1265,41 @@
                 
                 const matchData = await matchResponse.json();
                 
+                // Debug logging
+                console.log('Match API Response:', matchData);
+                
                 // Extract match scores - map host_id to listing.id
                 matchScores = {};
                 if (matchData.success && matchData.matches) {
                     const rankedMatches = matchData.matches.ranked_matches || [];
+                    console.log('Ranked matches:', rankedMatches);
+                    console.log('Date filtered listings:', dateFiltered.map(l => ({id: l.id, name: l.name})));
+                    
                     rankedMatches.forEach(match => {
                         // host_id from AI should correspond to listing.id
-                        if (match.host_id !== undefined) {
-                            matchScores[match.host_id] = match.compatibility_score || 0;
+                        if (match.host_id !== undefined && match.host_id !== null) {
+                            // Store with both number and string keys to handle type mismatches
+                            const hostIdNum = Number(match.host_id);
+                            const hostIdStr = String(match.host_id);
+                            const score = match.compatibility_score || 0;
+                            
+                            matchScores[match.host_id] = score;
+                            matchScores[hostIdNum] = score;
+                            matchScores[hostIdStr] = score;
+                            
+                            console.log(`Stored match score: listing ${match.host_id} (num: ${hostIdNum}, str: ${hostIdStr}) = ${score}`);
+                        } else {
+                            console.warn('Match has no host_id:', match);
                         }
                     });
+                } else {
+                    console.warn('No matches found in response:', matchData);
+                    console.warn('Response structure:', JSON.stringify(matchData, null, 2));
                 }
+                
+                console.log('Final matchScores object:', matchScores);
+                console.log('Match scores keys:', Object.keys(matchScores));
+                console.log('Date filtered listing IDs:', dateFiltered.map(l => l.id));
                 
                 // Display filtered and matched listings
                 displayAllListings(dateFiltered);

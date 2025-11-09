@@ -37,7 +37,9 @@
       "email": "fdjhfakd@aol.com",
       "password_hash": "593657b9f762fe82766c6a6db2a098ab43e94c55c34e6ec1a877900ba7e3fc5a",
       "name": "maia",
-      "roles": []
+      "roles": [
+        "host"
+      ]
     },
     "123456@gmail.com": {
       "email": "123456@gmail.com",
