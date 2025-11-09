@@ -26,10 +26,11 @@ from datetime import timedelta
 app.permanent_session_lifetime = timedelta(days=1)  # Sessions last 1 day
 
 # Configure session cookie settings for persistence
+# In production (HTTPS), set SESSION_COOKIE_SECURE=True
+is_production = os.environ.get('ENVIRONMENT') == 'production' or os.environ.get('FLASK_ENV') == 'production'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_SECURE'] = is_production  # True in production (HTTPS), False in development
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # This helps with cross-tab persistence
 
 # Before each request, mark session as permanent if it has any data
 @app.before_request
@@ -1150,5 +1151,6 @@ if __name__ == '__main__':
     print(f"📡 API available at: http://localhost:{port}")
     print(f"🌐 Frontend: http://localhost:{port}")
     print(f"🔗 API endpoint: http://localhost:{port}/api/match")
-    app.run(debug=True, port=port, host='127.0.0.1')
+    # Use 0.0.0.0 for production to accept connections from any interface
+    app.run(debug=os.environ.get('FLASK_DEBUG', 'False').lower() == 'true', port=port, host='0.0.0.0')
 

@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: roomie-app
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn server:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: PORT
+        value: 10000
+      - key: SECRET_KEY
+        generateValue: true
+    healthCheckPath: /api/health
+
