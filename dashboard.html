@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - DormMatch</title>
+    <title>Dashboard - Roomie</title>
     <style>
         * {
             margin: 0;
@@ -778,7 +778,10 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏠 DormMatch Dashboard</h1>
+            <h1 style="display: flex; align-items: center; gap: 10px;">
+                <img src="/logo.svg" alt="Roomie Logo" style="height: 32px; width: auto;">
+                <span>Roomie Dashboard</span>
+            </h1>
             <div class="nav-btns">
                 <span class="user-info" id="userInfo"></span>
                 <button class="nav-btn" id="logoutBtn">Logout</button>
@@ -786,9 +789,9 @@
         </div>
         
         <div class="tabs">
-            <div class="tab active" data-tab="home" id="homeTab">🏠 Home</div>
+            <div class="tab active" data-tab="home" id="homeTab">Home</div>
             <div class="tab" data-tab="visitor" id="visitorTab">🔍 Find Listings</div>
-            <div class="tab" data-tab="host" id="hostTab">🏠 My Listings</div>
+            <div class="tab" data-tab="host" id="hostTab">My Listings</div>
         </div>
         
         <div class="content">
@@ -1258,7 +1261,7 @@
                 if (listings.length === 0) {
                     listingsContainer.innerHTML = `
                         <div class="no-listings">
-                            <div style="font-size: 4em; margin-bottom: 20px;">🏠</div>
+                            <img src="/logo.svg" alt="Roomie Logo" style="height: 64px; width: auto; margin-bottom: 20px; opacity: 0.5;">
                             <h3 style="margin-bottom: 15px;">No listings yet</h3>
                             <p style="color: #666; margin-bottom: 30px;">Create your first listing to start hosting visitors!</p>
                             <button class="create-listing-btn" onclick="window.location.href='/host/dashboard'">Create Your First Listing</button>

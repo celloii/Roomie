@@ -84,6 +84,11 @@ def chatbot_js():
     """Serve the chatbot JavaScript file."""
     return send_from_directory('.', 'chatbot.js', mimetype='application/javascript')
 
+@app.route('/logo.svg')
+def logo_svg():
+    """Serve the Roomie logo SVG file."""
+    return send_from_directory('.', 'logo.svg', mimetype='image/svg+xml')
+
 @app.route('/api/auth/signup', methods=['POST'])
 def signup():
     """Sign up a new user (no type required - can be both host and visitor)."""
@@ -593,7 +598,7 @@ def uploaded_file(filename):
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint."""
-    return jsonify({"status": "healthy", "service": "Dorm Matching API"}), 200
+    return jsonify({"status": "healthy", "service": "Roomie API"}), 200
 
 # ===== Events API Endpoints (Nova Act Integration) =====
 
@@ -1120,7 +1125,7 @@ Available listings (student hosters):
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5000))
-    print("🚀 Starting Dorm Matching API Server...")
+    print("🚀 Starting Roomie API Server...")
     print(f"📡 API available at: http://localhost:{port}")
     print(f"🌐 Frontend: http://localhost:{port}")
     print(f"🔗 API endpoint: http://localhost:{port}/api/match")

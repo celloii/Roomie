@@ -130,5 +130,50 @@
       "/uploads/105_Screenshot_2024-03-15_at_2.50.45_PM.png"
     ],
     "reviews": []
+  },
+  {
+    "id": 106,
+    "email": "123456@gmail.com",
+    "name": "Gru",
+    "description": "A gothic, two-story black brick house with a purple roof.",
+    "available_dates": [
+      "2025-11-15",
+      "2025-11-16",
+      "2025-11-17",
+      "2025-11-18",
+      "2025-11-19",
+      "2025-11-20",
+      "2025-11-21",
+      "2025-11-22",
+      "2025-11-23",
+      "2025-11-24",
+      "2025-11-25",
+      "2025-11-26",
+      "2025-11-27",
+      "2025-11-28",
+      "2025-11-29"
+    ],
+    "capacity": 10,
+    "dorm_vibe": "Good space to lock in and do work. Underground laboratory to carry out any science projects and start up ideas.",
+    "interests": "Minions, crazy ideas",
+    "images": [
+      "/uploads/106_Screenshot_2025-11-08_at_8.10.37_PM.png"
+    ],
+    "reviews": [
+      {
+        "id": 1,
+        "reviewer_name": "Bob",
+        "rating": 5,
+        "comment": "Bello! Bello! Bello! Banananananananana!",
+        "date": "2025-11-08T19:57:35.230661"
+      },
+      {
+        "id": 2,
+        "reviewer_name": "Billy",
+        "rating": 3,
+        "comment": "Not very clean, saw some cockroaches and rats",
+        "date": "2025-11-08T20:11:28.124607"
+      }
+    ]
   }
 ]
